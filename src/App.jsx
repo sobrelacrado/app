@@ -20,6 +20,7 @@ export default function App() {
   const [lang, setLang] = useState(initialLang)
   const [user, setUser] = useState(undefined) // undefined = comprobando sesión
   const [loginError, setLoginError] = useState(false) // false | código del error
+  const [redirectDiag, setRedirectDiag] = useState('…')
   const [tab, setTab] = useState('runs')
   const [alertsOn, setAlertsOn] = useState(() => store.get('sl_alerts', 'off') === 'on')
   const ctx = useMemo(() => ({ lang, t: textsFor(lang) }), [lang])
@@ -30,7 +31,13 @@ export default function App() {
 
   useEffect(() => onAuthStateChanged(auth, setUser), [])
   // Al volver de Google (app instalada) se completa el acceso; si falla, se muestra el motivo.
-  useEffect(() => { getRedirectResult(auth).catch((e) => setLoginError(e?.code ?? 'error')) }, [])
+  useEffect(() => {
+    getRedirectResult(auth)
+      .then((r) => setRedirectDiag(r?.user ? `ok (${r.user.email})` : 'sin resultado'))
+      .catch((e) => { setLoginError(e?.code ?? 'error'); setRedirectDiag(e?.code ?? 'error') })
+  }, [])
+  // En la pantalla de acceso no hay nada que perder: si hay versión nueva, se aplica sola.
+  useEffect(() => { if (needRefresh && user === null) applyUpdate() }, [needRefresh, user])
   useEffect(() => { document.documentElement.lang = lang }, [lang])
 
   const chooseLang = (l) => {
@@ -38,11 +45,11 @@ export default function App() {
     store.set('sl_lang', l)
   }
 
-  const login = async () => {
+  const login = async (forcePopup = false) => {
     setLoginError(false)
     const provider = new GoogleAuthProvider()
     try {
-      if (isInstalledApp()) await signInWithRedirect(auth, provider)
+      if (isInstalledApp() && !forcePopup) await signInWithRedirect(auth, provider)
       else await signInWithPopup(auth, provider)
     } catch (e) {
       setLoginError(e?.code ?? 'error')
@@ -103,8 +110,12 @@ export default function App() {
             <img src="/sello-128.png" alt="Sobre Lacrado" />
             <h1>SOBRE LACRADO</h1>
             <p>{t.loginHelp}</p>
-            <button type="button" onClick={login}>{t.login}</button>
+            <button type="button" onClick={() => login()}>{t.login}</button>
+            {isInstalledApp() && (
+              <p><button type="button" className="suave" onClick={() => login(true)}>{t.loginAlt}</button></p>
+            )}
             {loginError && <p className="error">{t.loginError} ({loginError})</p>}
+            <p className="nota">v{__BUILD__} · {isInstalledApp() ? 'app' : 'navegador'} · {auth.config.authDomain} · redirección: {redirectDiag}</p>
           </div>
         )}
 

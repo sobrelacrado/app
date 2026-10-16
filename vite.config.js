@@ -4,6 +4,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // Dos páginas: el panel de Alberto (index.html, instalable) y la página del jugador (scan.html, sin instalar).
 export default defineConfig({
+  define: { __BUILD__: JSON.stringify(new Date().toISOString().slice(0, 16).replace('T', ' ')) },
   plugins: [
     react(),
     VitePWA({
