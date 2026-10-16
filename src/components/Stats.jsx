@@ -4,6 +4,7 @@ import { useStatsData } from '../lib/loadStats.js'
 import { download, runsCsv, scansCsv } from '../lib/csv.js'
 import { fmtClock, fmtDateTime, fmtDuration } from '../lib/runs.js'
 import { buildRows, filterRows, perDay, stuckBySteps, summaryByGame, weeklyMedian } from '../lib/stats.js'
+import { themeOf } from '../lib/themes.js'
 import { BarsPerDay, WeeklyLine } from './Charts.jsx'
 
 const PERIODS = [[7, 'days7'], [30, 'days30'], [90, 'days90'], [null, 'allTime']]
@@ -82,7 +83,7 @@ export default function Stats() {
         <>
           <h2>{t.summary}</h2>
           {summary.map((s) => (
-            <div className="ficha" key={s.gameId}>
+            <div className={`ficha tema-${themeOf(data.games[s.gameId])}`} key={s.gameId}>
               <span className="etq">{s.name}</span>
               <div className="cifras">
                 <div><b>{s.started}</b><small>{t.started2}</small></div>

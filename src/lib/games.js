@@ -1,4 +1,5 @@
 import { doc, serverTimestamp, writeBatch } from 'firebase/firestore'
+import { THEMES, DEFAULT_THEME } from './themes.js'
 
 export const PUBLIC_BASE = 'https://app-sobre-lacrado.web.app'
 export const STEP_TYPES = ['start', 'normal', 'clue', 'solution']
@@ -70,7 +71,7 @@ export function validateGame({ name, timeLimitMinutes, steps }) {
 // Guarda juego y pasos en un solo lote. Nunca borra: los pasos guardados se desactivan, no se eliminan.
 export async function saveGame(db, { id, isNew, name, timeLimitMinutes, active, theme, steps }) {
   const batch = writeBatch(db)
-  const game = { name: name.trim(), active, timeLimitMinutes: Number(timeLimitMinutes), theme }
+  const game = { name: name.trim(), active, timeLimitMinutes: Number(timeLimitMinutes), theme: THEMES.includes(theme) ? theme : DEFAULT_THEME }
   batch.set(doc(db, 'games', id), isNew ? { ...game, createdAt: serverTimestamp() } : game, { merge: true })
   steps.forEach((s, i) => {
     batch.set(

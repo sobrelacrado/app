@@ -31,7 +31,7 @@ function Frame({ ticks, yMax, fmt, children }) {
         const y = M.t + IH - (tk / yMax) * IH
         return (
           <g key={tk}>
-            <line x1={M.l} x2={W - M.r} y1={y} y2={y} style={{ stroke: '#cfc7b3', strokeWidth: 1 }} />
+            <line x1={M.l} x2={W - M.r} y1={y} y2={y} style={{ stroke: 'var(--regla)', strokeWidth: 1 }} />
             <text x={M.l - 6} y={y + 4} textAnchor="end" className="eje">{fmt(tk)}</text>
           </g>
         )

@@ -22,6 +22,7 @@ export default function App() {
   const [loginError, setLoginError] = useState(false) // false | código del error
   const [redirectDiag, setRedirectDiag] = useState('…')
   const [tab, setTab] = useState('runs')
+  const [modo, setModo] = useState(() => (store.get('sl_modo', 'claro') === 'oscuro' ? 'oscuro' : 'claro'))
   const [alertsOn, setAlertsOn] = useState(() => store.get('sl_alerts', 'off') === 'on')
   const ctx = useMemo(() => ({ lang, t: textsFor(lang) }), [lang])
   const { t } = ctx
@@ -39,6 +40,13 @@ export default function App() {
   // En la pantalla de acceso no hay nada que perder: si hay versión nueva, se aplica sola.
   useEffect(() => { if (needRefresh && user === null) applyUpdate() }, [needRefresh, user])
   useEffect(() => { document.documentElement.lang = lang }, [lang])
+  useEffect(() => { document.documentElement.dataset.modo = modo }, [modo])
+
+  const toggleModo = () => {
+    const next = modo === 'oscuro' ? 'claro' : 'oscuro'
+    setModo(next)
+    store.set('sl_modo', next)
+  }
 
   const chooseLang = (l) => {
     setLang(l)
@@ -94,6 +102,12 @@ export default function App() {
                 {alertsOn ? t.alertsOn : t.alertsOff}
               </button>
             )}
+            <button
+              type="button" className="suave" onClick={toggleModo}
+              title={modo === 'oscuro' ? t.modeToLight : t.modeToDark} aria-label={modo === 'oscuro' ? t.modeToLight : t.modeToDark}
+            >
+              {modo === 'oscuro' ? '☀' : '☾'}
+            </button>
             {LANGS.map((l) => (
               <button key={l} type="button" className={`suave ${l === lang ? 'activo' : ''}`} onClick={() => chooseLang(l)}>
                 {l.toUpperCase()}

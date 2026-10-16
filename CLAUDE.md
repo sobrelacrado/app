@@ -2,31 +2,31 @@
 
 ## Reglas de trabajo (obligatorias)
 
-- Responder siempre en **espaÃ±ol**.
-- **No subir cambios** (git push, firebase deploy, publicar nada) sin preguntar antes a Alberto y esperar su "sÃ­".
-- Alberto **no es programador**: explicar cada paso en lenguaje sencillo, sin jerga (o explicando el tÃ©rmino la primera vez). Decir quÃ© se hace, por quÃ© y quÃ© verÃ¡ Ã©l como resultado.
-- No escribir cÃ³digo de una fase hasta que Alberto haya aprobado el plan de esa fase.
-- Ante decisiones que le corresponden a Ã©l, dar una recomendaciÃ³n clara en vez de una lista de opciones.
+- Responder siempre en **español**.
+- **No subir cambios** (git push, firebase deploy, publicar nada) sin preguntar antes a Alberto y esperar su "sí".
+- Alberto **no es programador**: explicar cada paso en lenguaje sencillo, sin jerga (o explicando el término la primera vez). Decir qué se hace, por qué y qué verá él como resultado.
+- No escribir código de una fase hasta que Alberto haya aprobado el plan de esa fase.
+- Ante decisiones que le corresponden a él, dar una recomendación clara en vez de una lista de opciones.
 
-## QuÃ© es el proyecto
+## Qué es el proyecto
 
-App web instalable (PWA) para gestionar partidas de casos de misterio imprimibles de la marca **Sobre Lacrado**. Solo la usa Alberto (administrador). Los jugadores no instalan nada: escanean cÃ³digos QR con el mÃ³vil.
+App web instalable (PWA) para gestionar partidas de casos de misterio imprimibles de la marca **Sobre Lacrado**. Solo la usa Alberto (administrador). Los jugadores no instalan nada: escanean códigos QR con el móvil.
 
-## CÃ³mo funciona (plan aprobado)
+## Cómo funciona (plan aprobado)
 
-- Cada QR de un caso apunta a una pÃ¡gina nuestra alojada en **Firebase Hosting**. Esa pÃ¡gina registra el paso con su hora en **Firestore** y redirige al contenido real (YouTube, Drive, etc.).
-- La primera vez que alguien escanea el vÃ­deo de inicio (**V0**), se crea una partida en ese mÃ³vil. **Un mÃ³vil = un grupo.** Antes del vÃ­deo se pide un **alias opcional**.
+- Cada QR de un caso apunta a una página nuestra alojada en **Firebase Hosting**. Esa página registra el paso con su hora en **Firestore** y redirige al contenido real (YouTube, Drive, etc.).
+- La primera vez que alguien escanea el vídeo de inicio (**V0**), se crea una partida en ese móvil. **Un móvil = un grupo.** Antes del vídeo se pide un **alias opcional**.
 - Cada escaneo siguiente se asocia a esa partida. Los escaneos **no tienen orden obligatorio**. Un QR repetido se ignora. Escanear pistas se registra **sin penalizar**.
-- Al escanear la **soluciÃ³n**, el tiempo se para. Si una partida no termina, se **cierra automÃ¡ticamente a las 4 h**.
-- Alberto ve en la app: partidas en curso, avisos al mÃ³vil al empezar, tiempos por partida, resumen por caso, evoluciÃ³n por fecha, pasos donde se atascan, y exportaciÃ³n CSV.
+- Al escanear la **solución**, el tiempo se para. Si una partida no termina, se **cierra automáticamente a las 4 h**.
+- Alberto ve en la app: partidas en curso, avisos al móvil al empezar, tiempos por partida, resumen por caso, evolución por fecha, pasos donde se atascan, y exportación CSV.
 - Alberto puede **crear juegos nuevos desde la app**: nombre, pasos, destinos y tiempos. La app genera los QR imprimibles. Los PDF, fotos y audios se siguen haciendo fuera de la app.
-- Idiomas: **espaÃ±ol e inglÃ©s**. DiseÃ±o visual: se decide mÃ¡s adelante, **funcional primero**.
+- Idiomas: **español e inglés**. Diseño visual: se decide más adelante, **funcional primero**.
 
-## Restricciones tÃ©cnicas
+## Restricciones técnicas
 
-- **Sin coste**: plan gratuito **Spark** de Firebase. **No usar Cloud Functions** ni ningÃºn plan de pago.
+- **Sin coste**: plan gratuito **Spark** de Firebase. **No usar Cloud Functions** ni ningún plan de pago.
 - Proyecto Firebase: `app-sobre-lacrado`. Firestore ya creada en `europe-southwest1` (Madrid), con reglas que bloquean todo acceso (hay que abrirlas de forma controlada).
-- **Privacidad**: no guardar nada que identifique a los jugadores (ni IP, ni modelo de mÃ³vil, ni nombre real), salvo un alias opcional.
+- **Privacidad**: no guardar nada que identifique a los jugadores (ni IP, ni modelo de móvil, ni nombre real), salvo un alias opcional.
 
 ## Estado
 
@@ -49,3 +49,12 @@ App web instalable (PWA) para gestionar partidas de casos de misterio imprimible
 - Solución aplicada: `authDomain` siempre `app-sobre-lacrado.firebaseapp.com` y acceso por ventana emergente (`signInWithPopup`) también en la app instalada, con `prompt: 'select_account'` para que Google deje elegir cuenta. Funciona en el Android de Alberto.
 - La pantalla de acceso muestra una línea de diagnóstico (versión, modo app/navegador, dominio, resultado de redirección). Se puede quitar cuando se quiera.
 - El cambio de `web.app` solo haría falta si algún día se vuelve a la redirección: habría que añadir `https://app-sobre-lacrado.web.app/__/auth/handler` en Google Cloud → Auth Platform → Clientes.
+
+## Estado actual (16/10/2026) — manda sobre las líneas "Pendiente" de arriba
+- Fases 0–7 hechas, publicadas en Hosting y probadas en el Android de Alberto (instalación, login, avisos al empezar partida, modo sin conexión).
+- **Sin conexión**: Firestore usa caché local (`persistentLocalCache`) solo en el panel; la página del jugador (`/s/...`) usa `getFirestore` normal (ver `src/firebase.js`). No tocar eso sin probar el escaneo.
+- **Fase 7 (interfaz)**: tipografía de títulos **Cinzel**; tarjetas de partida con anillo de tiempo (`timeLeft` en `lib/runs.js`), sellos por paso y animaciones (respetan "reducir animaciones"); **tema visual por juego** (`theme` en `games/{id}`: `detective` por defecto = caso 2, `policial` = caso 1, `egipcio` = caso 3, `alien` = caso 4; lista en `lib/themes.js`, estilos `.tema-*` y variables `--t-*` en `styles/theme.css`, selector "Aspecto del juego" en `GameEditor.jsx`); fichas de Partidas, Juegos y Estadísticas usan el tema de su juego. **Modo oscuro** opcional (botón ☾/☀ en la cabecera, guardado en `localStorage` `sl_modo`, claro por defecto, solo en pantalla: al imprimir los QR siempre es claro).
+- Para añadir un tema nuevo: añadir su clave en `lib/themes.js`, un bloque `.tema-<clave>` (y su variante bajo `[data-modo='oscuro']`) en `theme.css`, y el nombre en `i18n.js` (`theme.<clave>`, es y en).
+- Pruebas: `npm test` (34 unitarias + 6 de la web compilada + 20 de reglas con emulador, requiere JDK 21). Sin extensión de Chrome conectada no se puede probar en navegador: se revisan capturas con Edge sin pantalla (`msedge --headless=new --screenshot`) y Alberto prueba en el móvil.
+- Recordatorios para Alberto: regenerar los PDF del caso 2 con los enlaces de la app (los actuales apuntan directo a YouTube/Drive y no registran); imprimir una hoja de QR de prueba; asignar tema a los juegos ya creados (Juegos → Editar → Aspecto → Guardar); el juego PRUEBA y sus 2 partidas de prueba se pueden desactivar/borrar desde la consola de Firebase.
+- Pendientes opcionales: avisos con la app cerrada (alternativa gratuita: ntfy.sh); quitar la línea de diagnóstico de la pantalla de acceso cuando ya no haga falta.
