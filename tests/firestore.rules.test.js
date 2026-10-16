@@ -1,3 +1,4 @@
+import assert from 'node:assert/strict'
 import { test, before, after, beforeEach } from 'node:test'
 import { readFileSync } from 'node:fs'
 import {
@@ -162,4 +163,56 @@ test('el jugador no puede cambiar otros campos de la partida', async () => {
   b.set(doc(db, 'runs/r1/scans/sol'), { scannedAt: serverTimestamp() })
   b.update(doc(db, 'runs/r1'), { endedAt: serverTimestamp(), endStepId: 'sol', alias: 'hack' })
   await assertFails(b.commit())
+})
+
+// ---------- Guardado de juegos desde el editor (src/lib/games.js) ----------
+import { saveGame } from '../src/lib/games.js'
+
+const draft = (over = {}) => ({
+  id: 'nuevo1', isNew: true, name: ' Caso nuevo ', timeLimitMinutes: '90', active: true,
+  steps: [
+    { id: 'aaaa2222', label: 'V0', type: 'start', url: 'https://youtube.com/shorts/a', active: true },
+    { id: 'bbbb3333', label: 'Solución', type: 'solution', url: 'https://drive.google.com/x', active: true },
+  ],
+  ...over,
+})
+
+test('el admin guarda un juego y un jugador puede abrir sus pasos por id (pero no listar)', async () => {
+  await saveGame(admin(), draft())
+  const g = await getDoc(doc(player(), 'games/nuevo1'))
+  assert.equal(g.data().name, 'Caso nuevo')
+  assert.equal(g.data().timeLimitMinutes, 90)
+  const s = await getDoc(doc(player(), 'games/nuevo1/steps/bbbb3333'))
+  assert.deepEqual([s.data().type, s.data().order, s.data().url], ['solution', 2, 'https://drive.google.com/x'])
+  await assertFails(getDocs(collection(player(), 'games/nuevo1/steps')))
+})
+
+test('un jugador no puede guardar juegos', async () => {
+  await assertFails(saveGame(player(), draft({ id: 'hack' })))
+  await assertFails(saveGame(other(), draft({ id: 'hack2' })))
+})
+
+test('editar no cambia los ids ni borra pasos: el destino se corrige y el orden se actualiza', async () => {
+  await saveGame(admin(), draft())
+  const steps = draft().steps.reverse() // cambia el orden
+  steps[1].url = 'https://youtube.com/shorts/corregido'
+  steps[0].active = false // desactivar, no borrar
+  await saveGame(admin(), draft({ isNew: false, steps }))
+  const a = await getDoc(doc(player(), 'games/nuevo1/steps/aaaa2222'))
+  const b = await getDoc(doc(player(), 'games/nuevo1/steps/bbbb3333'))
+  assert.equal(a.data().url, 'https://youtube.com/shorts/corregido')
+  assert.equal(a.data().order, 2)
+  assert.equal(b.data().active, false)
+  assert.equal(b.data().order, 1)
+})
+
+test('flujo completo: juego creado en el editor + partida de jugador cerrada con la solución', async () => {
+  await saveGame(admin(), draft())
+  const db = player()
+  await assertSucceeds(setDoc(doc(db, 'runs/rn'), { gameId: 'nuevo1', alias: '', startedAt: serverTimestamp(), endedAt: null }))
+  await assertSucceeds(setDoc(doc(db, 'runs/rn/scans/aaaa2222'), { scannedAt: serverTimestamp() }))
+  const b = writeBatch(db)
+  b.set(doc(db, 'runs/rn/scans/bbbb3333'), { scannedAt: serverTimestamp() })
+  b.update(doc(db, 'runs/rn'), { endedAt: serverTimestamp(), endStepId: 'bbbb3333' })
+  await assertSucceeds(b.commit())
 })

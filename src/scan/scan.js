@@ -33,6 +33,9 @@ async function main() {
   const game = gameSnap.data()
   const step = stepSnap.data()
 
+  // Juego desactivado: el QR sigue llevando al contenido, pero no se registra nada.
+  if (game.active === false) return redirect(step.url)
+
   // ¿Hay una partida en curso en este móvil?
   let runId = safeGet(RUN_KEY)
   let run = null

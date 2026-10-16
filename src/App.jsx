@@ -5,6 +5,7 @@ import { LANGS, LangContext, initialLang, textsFor } from './i18n.js'
 import { ADMIN_EMAIL } from './lib/runs.js'
 import Panel from './components/Panel.jsx'
 import Stats from './components/Stats.jsx'
+import Games from './components/Games.jsx'
 
 export default function App() {
   const [lang, setLang] = useState(initialLang)
@@ -73,8 +74,11 @@ export default function App() {
             <nav className="pestanas">
               <button type="button" className={tab === 'runs' ? 'activa' : ''} onClick={() => setTab('runs')}>{t.tabRuns}</button>
               <button type="button" className={tab === 'stats' ? 'activa' : ''} onClick={() => setTab('stats')}>{t.tabStats}</button>
+              <button type="button" className={tab === 'games' ? 'activa' : ''} onClick={() => setTab('games')}>{t.tabGames}</button>
             </nav>
-            {tab === 'runs' ? <Panel /> : <Stats />}
+            {tab === 'runs' && <Panel />}
+            {tab === 'stats' && <Stats />}
+            {tab === 'games' && <Games />}
           </>
         )}
       </div>

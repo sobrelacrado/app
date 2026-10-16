@@ -40,8 +40,8 @@ export function scansCsv(rows) {
   )
 }
 
-export function download(filename, text) {
-  const url = URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' }))
+export function download(filename, text, type = 'text/csv;charset=utf-8') {
+  const url = URL.createObjectURL(new Blob([text], { type }))
   const a = Object.assign(document.createElement('a'), { href: url, download: filename })
   document.body.appendChild(a)
   a.click()
