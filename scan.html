@@ -6,18 +6,22 @@
     <meta name="robots" content="noindex" />
     <title>Sobre Lacrado</title>
     <style>
-      body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
-        font-family: system-ui, sans-serif; background: #111; color: #eee; }
-      main { width: 100%; max-width: 360px; padding: 24px; text-align: center; }
-      h1 { font-size: 1.3rem; margin: 0 0 8px; }
-      p { color: #bbb; line-height: 1.4; }
-      input, button, a.btn { box-sizing: border-box; width: 100%; padding: 14px; margin-top: 12px; font-size: 1rem;
-        border-radius: 8px; border: 1px solid #555; background: #222; color: #eee; }
-      button, a.btn { display: block; background: #b8312f; border-color: #b8312f; color: #fff; text-decoration: none; cursor: pointer; }
+      body { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+      main.hoja { width: calc(100% - 32px); max-width: 380px; margin: 16px; padding: 28px 24px; text-align: center; }
+      main .logo { font-family: var(--titulo); letter-spacing: 5px; font-size: 18px;
+        border-bottom: 3px double var(--linea); padding-bottom: 8px; margin-bottom: 18px; }
+      main h1 { font-size: 1.15rem; letter-spacing: 2px; margin-bottom: 8px; }
+      main p { line-height: 1.4; }
+      input { width: 100%; padding: 12px; margin-top: 12px; font: inherit; font-size: 1rem;
+        background: #fff; border: 1px solid var(--linea); color: var(--tinta); }
+      main button, main a.btn { width: 100%; margin-top: 12px; padding: 14px; display: block; text-align: center;
+        text-decoration: none; }
+      main a.btn { font-family: var(--titulo); letter-spacing: 1.5px; text-transform: uppercase; font-size: 13px;
+        background: var(--rojo); color: var(--papel); border: 2px solid var(--rojo); }
     </style>
   </head>
   <body>
-    <main id="app"><p>…</p></main>
+    <main id="app" class="hoja"><p>…</p></main>
     <script type="module" src="/src/scan/scan.js"></script>
   </body>
 </html>

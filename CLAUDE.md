@@ -36,3 +36,5 @@ App web instalable (PWA) para gestionar partidas de casos de misterio imprimible
 - Fase 1 (modelo de datos + reglas de Firestore): hecha y reglas publicadas. Pruebas: `npm run test:rules` (16 OK, requiere JDK 21).
 - Fase 2 (página del jugador `/s/<juego>/<paso>`, `scan.html` + `src/scan/`): código hecho y probado en emulador local (`tests/seed.mjs` crea datos de prueba). Pendiente: publicar en Hosting (pedir permiso). Web app de Firebase registrada: `1:656901903049:web:060fcfb2b93c6da18cf318`.
 
+- Fase 3 (login Google + panel de partidas en directo, estilo expediente del caso 2 Duarte: papel `#f3eee2`, rojo lacre `#a31d1d`, Special Elite + Courier Prime): código escrito (`src/App.jsx`, `src/components/`, `src/lib/`, `src/i18n.js`, `src/styles/theme.css`). Pendiente: probar en navegador, activar Google en Authentication (lo hace Alberto), publicar y commit.
+- Estilo de referencia: `M:\Sobre Lacrado\Para_el_proyecto\02_Plantilla_expediente_IP-26-031.html` y logo `M:\Sobre Lacrado\Logo\sello.png`.

@@ -1,0 +1,105 @@
+/* Estilo "expediente" de Sobre Lacrado (basado en el caso 2, Agencia Duarte). */
+@import '@fontsource/special-elite/latin-400.css';
+@import '@fontsource/courier-prime/latin-400.css';
+@import '@fontsource/courier-prime/latin-700.css';
+
+:root {
+  --papel: #f3eee2;
+  --tinta: #1d1d1d;
+  --rojo: #a31d1d;
+  --verde: #1d6a3a;
+  --azul: #1f3f8f;
+  --manila: #d8b87e;
+  --linea: #1a1a1a;
+  --mesa: #8d8578;
+  --gris: #5a5448;
+  --titulo: 'Special Elite', monospace;
+  --texto: 'Courier Prime', 'Courier New', monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--mesa);
+  color: var(--tinta);
+  font-family: var(--texto);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+/* Hoja de papel */
+.hoja {
+  position: relative;
+  max-width: 880px;
+  margin: 20px auto;
+  padding: 22px 22px 28px;
+  background-color: var(--papel);
+  background-image:
+    radial-gradient(ellipse at 88% 8%, rgba(150, 120, 70, .16) 0 6%, transparent 15%),
+    radial-gradient(ellipse at 10% 90%, rgba(130, 100, 60, .14) 0 5%, transparent 14%),
+    radial-gradient(ellipse at 50% 50%, transparent 60%, rgba(120, 95, 55, .22) 100%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .4);
+}
+
+h1, h2, h3 { font-family: var(--titulo); font-weight: 400; text-transform: uppercase; margin: 0; }
+h2 { font-size: 15px; letter-spacing: 1.5px; border-bottom: 2px solid var(--linea); padding-bottom: 2px; margin: 24px 0 12px; }
+
+/* Membrete con doble línea */
+.membrete {
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  border-bottom: 3px double var(--linea); padding-bottom: 8px; margin-bottom: 14px;
+}
+.membrete .marca { display: flex; align-items: center; gap: 12px; }
+.membrete .marca img { width: 44px; height: 44px; }
+.membrete .logo { font-family: var(--titulo); font-size: 20px; letter-spacing: 5px; line-height: 1.1; }
+.membrete .logo small { display: block; font-size: 10px; letter-spacing: 2.5px; }
+.membrete .herramientas { display: flex; align-items: center; gap: 10px; font-size: 12px; flex-wrap: wrap; }
+
+/* Botones */
+button, .boton {
+  font-family: var(--titulo); letter-spacing: 1.5px; text-transform: uppercase; font-size: 13px;
+  background: var(--rojo); color: var(--papel); border: 2px solid var(--rojo);
+  padding: 10px 16px; cursor: pointer;
+}
+button:hover { filter: brightness(1.1); }
+button.suave { background: transparent; color: var(--tinta); border: 1px solid var(--linea); padding: 4px 10px; font-size: 11px; }
+button.suave.activo { background: var(--tinta); color: var(--papel); }
+button:disabled { opacity: .5; cursor: default; }
+
+/* Tarjeta de partida: un documento sobre la mesa */
+.tarjeta {
+  position: relative; background: #fbf7ec; border: 1px solid #bbb; box-shadow: 2px 3px 6px rgba(0, 0, 0, .2);
+  padding: 14px 16px 12px; margin: 22px 0 16px; width: 100%;
+  font: inherit; color: inherit; text-align: left; text-transform: none; letter-spacing: normal; display: block; cursor: pointer;
+}
+.tarjeta:hover { filter: none; box-shadow: 3px 5px 9px rgba(0, 0, 0, .28); }
+.etq {
+  position: absolute; top: -11px; left: -6px; background: var(--linea); color: var(--papel);
+  font-weight: 700; font-size: 11px; padding: 2px 8px; letter-spacing: 1px;
+}
+.tarjeta .fila { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.tarjeta .alias { font-family: var(--titulo); font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
+.tarjeta .tiempo { font-family: var(--titulo); font-size: 26px; letter-spacing: 1px; }
+.tarjeta .meta { font-size: 13px; color: var(--gris); }
+.tarjeta .aviso { color: var(--rojo); font-weight: 700; }
+
+/* Sello rotado */
+.sello {
+  display: inline-block; font-family: var(--titulo); font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+  border: 3px double currentColor; padding: 1px 8px; transform: rotate(-4deg); opacity: .85;
+}
+.sello.curso { color: var(--azul); }
+.sello.fin { color: var(--verde); }
+.sello.tiempo-agotado { color: var(--gris); }
+
+/* Detalle de pasos */
+.pasos { margin-top: 12px; border-top: 1px dashed #999; padding-top: 8px; font-size: 13px; }
+.pasos div { display: flex; justify-content: space-between; padding: 2px 0; }
+.pasos .pendiente { color: #999; }
+
+.vacio { color: var(--gris); text-align: center; padding: 24px 0; }
+.centro { text-align: center; padding: 40px 12px; }
+.centro img { width: 120px; height: 120px; }
+.centro h1 { font-size: 22px; letter-spacing: 4px; margin: 10px 0 6px; }
+.error { color: var(--rojo); font-weight: 700; }

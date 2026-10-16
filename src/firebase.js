@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app'
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore'
 
 // Estos datos son públicos por diseño: la seguridad la dan las reglas de Firestore.
-const app = initializeApp({
+export const app = initializeApp({
   apiKey: 'AIzaSyCksj_fxBiDwFaGiXHpSgVKI0gi6uV-Cj8',
   authDomain: 'app-sobre-lacrado.firebaseapp.com',
   projectId: 'app-sobre-lacrado',

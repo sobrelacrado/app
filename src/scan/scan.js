@@ -1,6 +1,7 @@
 import { doc, getDoc, setDoc, collection, serverTimestamp, writeBatch } from 'firebase/firestore'
 import { db } from '../firebase.js'
 import { t } from './texts.js'
+import '../styles/theme.css'
 
 const app = document.getElementById('app')
 const [, , gameId, stepId] = location.pathname.split('/') // /s/<juego>/<paso>
@@ -9,7 +10,7 @@ const RUN_KEY = `sl_run_${gameId}` // un móvil = un grupo: guardamos el id de s
 const safeGet = (k) => { try { return localStorage.getItem(k) } catch { return null } }
 const safeSet = (k, v) => { try { localStorage.setItem(k, v) } catch { /* sin almacenamiento */ } }
 
-function show(html) { app.innerHTML = html }
+function show(html) { app.innerHTML = `<div class="logo">SOBRE LACRADO</div>${html}` }
 function esc(s) { return String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`) }
 
 function redirect(url) {
