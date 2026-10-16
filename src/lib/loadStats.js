@@ -7,6 +7,7 @@ const toDate = (ts) => (ts && ts.toDate ? ts.toDate() : null)
 const MAX_RUNS = 1000
 const CHUNK = 25
 const cache = new Map() // periodo -> { data, at }: se lee una vez y se reutiliza al cambiar de pestaña
+export const clearStatsCache = () => cache.clear() // tras borrar juegos o partidas
 
 // Lectura única (sin escuchar en directo) de las partidas del periodo y sus escaneos.
 async function loadStats(days) {

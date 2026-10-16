@@ -5,7 +5,8 @@ import { useT } from '../i18n.js'
 import Ayuda from './Ayuda.jsx'
 import { newGameId, newStepId } from '../lib/ids.js'
 import { THEMES, DEFAULT_THEME, themeOf } from '../lib/themes.js'
-import { CASE2, CASE3, EXPEDIENTE_TEMPLATE, STEP_TYPES, saveGame, scanUrl, validateGame } from '../lib/games.js'
+import { CASE2, CASE3, EXPEDIENTE_TEMPLATE, STEP_TYPES, countGameRuns, deleteGame, saveGame, scanUrl, validateGame } from '../lib/games.js'
+import { clearStatsCache } from '../lib/loadStats.js'
 
 const TYPE_KEY = { start: 'typeStart', clue: 'typeClue', normal: 'typeNormal', solution: 'typeSolution' }
 const blankStep = () => ({ id: newStepId(), label: '', type: 'normal', url: '', active: true, saved: false })
@@ -33,6 +34,7 @@ export default function GameEditor({ gameId, onBack, onQr }) {
   const [errors, setErrors] = useState([])
   const [status, setStatus] = useState('idle') // idle | saving | saved | failed
   const [copied, setCopied] = useState('')
+  const [del, setDel] = useState(null) // null | { runs, sure, busy, failed }
 
   useEffect(() => {
     if (!gameId) return
@@ -89,14 +91,48 @@ export default function GameEditor({ gameId, onBack, onQr }) {
     }
   }
 
+  const askDelete = async () => {
+    setDel({ runs: undefined, sure: false, busy: false, failed: false })
+    const runs = await countGameRuns(db, id)
+    setDel((d) => d && { ...d, runs })
+  }
+  const confirmDelete = async () => {
+    setDel((d) => ({ ...d, busy: true, failed: false }))
+    try {
+      await deleteGame(db, id)
+      clearStatsCache()
+      onBack()
+    } catch {
+      setDel((d) => ({ ...d, busy: false, failed: true }))
+    }
+  }
+
+  const saveButton = (
+    <button type="button" onClick={submit} disabled={status === 'saving'}>
+      {status === 'saving' ? t.saving : t.save}
+    </button>
+  )
+  const saveStatus = (
+    <>
+      {status === 'saved' && <span className="ok">{t.savedOk}</span>}
+      {status === 'failed' && <span className="error">{t.saveError}</span>}
+    </>
+  )
+
   if (loading) return <p className="vacio">{t.loading}</p>
 
   return (
     <div onChange={touched}>
-      <div className="encabezado-grafico">
+      <div className="barra-editor">
         <button type="button" className="suave" onClick={onBack}>← {t.back}</button>
-        {!isNew && <button type="button" className="suave" onClick={() => onQr(id)}>{t.printQr}</button>}
+        <span className="barra-estado">{saveStatus}</span>
+        {saveButton}
       </div>
+      {!isNew && (
+        <div className="acciones fila-botones">
+          <button type="button" className="suave" onClick={() => onQr(id)}>{t.printQr}</button>
+        </div>
+      )}
 
       <label className="campo">
         {t.gName}
@@ -208,12 +244,33 @@ export default function GameEditor({ gameId, onBack, onQr }) {
       )}
 
       <div className="exportar">
-        <button type="button" onClick={submit} disabled={status === 'saving'}>
-          {status === 'saving' ? t.saving : t.save}
-        </button>
-        {status === 'saved' && <span className="ok">{t.savedOk}</span>}
-        {status === 'failed' && <span className="error">{t.saveError}</span>}
+        {saveButton}
+        <button type="button" className="suave" onClick={onBack}>← {t.back}</button>
+        {saveStatus}
       </div>
+
+      {!isNew && (
+        <div className="peligro">
+          <h2>{t.dangerZone}</h2>
+          {!del ? (
+            <button type="button" className="suave peligro-boton" onClick={askDelete}>{t.delGame}</button>
+          ) : (
+            <div className="peligro-confirmar">
+              <p className="error">{del.runs === undefined ? t.loading : t.delGameWarn(del.runs)}</p>
+              <label className="casilla">
+                <input type="checkbox" checked={del.sure} onChange={(e) => setDel((d) => ({ ...d, sure: e.target.checked }))} /> {t.delSure}
+              </label>
+              <div className="acciones">
+                <button type="button" className="suave" onClick={() => setDel(null)} disabled={del.busy}>{t.delCancel}</button>
+                <button type="button" onClick={confirmDelete} disabled={!del.sure || del.busy || del.runs === undefined}>
+                  {del.busy ? t.delDeleting : t.delForever}
+                </button>
+              </div>
+              {del.failed && <p className="error">{t.delError}</p>}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

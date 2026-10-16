@@ -166,7 +166,7 @@ test('el jugador no puede cambiar otros campos de la partida', async () => {
 })
 
 // ---------- Guardado de juegos desde el editor (src/lib/games.js) ----------
-import { saveGame } from '../src/lib/games.js'
+import { saveGame, deleteGame, deleteRun } from '../src/lib/games.js'
 
 const draft = (over = {}) => ({
   id: 'nuevo1', isNew: true, name: ' Caso nuevo ', timeLimitMinutes: '90', active: true,
@@ -215,4 +215,35 @@ test('flujo completo: juego creado en el editor + partida de jugador cerrada con
   b.set(doc(db, 'runs/rn/scans/bbbb3333'), { scannedAt: serverTimestamp() })
   b.update(doc(db, 'runs/rn'), { endedAt: serverTimestamp(), endStepId: 'bbbb3333' })
   await assertSucceeds(b.commit())
+})
+
+test('borrar un juego se lleva sus pasos, partidas y escaneos; un jugador no puede', async () => {
+  await saveGame(admin(), draft())
+  const db = player()
+  await setDoc(doc(db, 'runs/rd'), { gameId: 'nuevo1', alias: '', startedAt: serverTimestamp(), endedAt: null })
+  await setDoc(doc(db, 'runs/rd/scans/aaaa2222'), { scannedAt: serverTimestamp() })
+  await assertFails(deleteGame(player(), 'nuevo1'))
+  await assertFails(deleteGame(other(), 'nuevo1'))
+  assert.equal(await deleteGame(admin(), 'nuevo1'), 1)
+  const a = admin()
+  assert.equal((await getDoc(doc(a, 'games/nuevo1'))).exists(), false)
+  assert.equal((await getDoc(doc(a, 'games/nuevo1/steps/aaaa2222'))).exists(), false)
+  assert.equal((await getDoc(doc(a, 'runs/rd'))).exists(), false)
+  assert.equal((await getDoc(doc(a, 'runs/rd/scans/aaaa2222'))).exists(), false)
+  assert.equal((await getDoc(doc(a, 'games/g1'))).exists(), true) // otros juegos intactos
+})
+
+test('borrar una partida se lleva sus escaneos y deja las demás', async () => {
+  await saveGame(admin(), draft())
+  const db = player()
+  for (const id of ['borra1', 'borra2']) {
+    await setDoc(doc(db, 'runs/' + id), { gameId: 'nuevo1', alias: '', startedAt: serverTimestamp(), endedAt: null })
+    await setDoc(doc(db, 'runs/' + id + '/scans/aaaa2222'), { scannedAt: serverTimestamp() })
+  }
+  await assertFails(deleteRun(player(), 'borra1'))
+  await deleteRun(admin(), 'borra1')
+  const a = admin()
+  assert.equal((await getDoc(doc(a, 'runs/borra1'))).exists(), false)
+  assert.equal((await getDoc(doc(a, 'runs/borra1/scans/aaaa2222'))).exists(), false)
+  assert.equal((await getDoc(doc(a, 'runs/borra2'))).exists(), true)
 })

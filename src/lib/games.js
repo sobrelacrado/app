@@ -1,4 +1,4 @@
-import { doc, serverTimestamp, writeBatch } from 'firebase/firestore'
+import { collection, doc, getCountFromServer, getDocs, query, serverTimestamp, where, writeBatch } from 'firebase/firestore'
 import { THEMES, DEFAULT_THEME } from './themes.js'
 
 export const PUBLIC_BASE = 'https://app-sobre-lacrado.web.app'
@@ -83,6 +83,40 @@ export function validateGame({ name, timeLimitMinutes, steps }) {
   if (active.filter((s) => s.type === 'start').length !== 1) errors.push({ code: 'needStart' })
   if (!active.some((s) => s.type === 'solution')) errors.push({ code: 'needSolution' })
   return errors
+}
+
+// Borra documentos en lotes (Firestore admite 500 operaciones por lote).
+async function deleteRefs(db, refs) {
+  for (let i = 0; i < refs.length; i += 400) {
+    const batch = writeBatch(db)
+    refs.slice(i, i + 400).forEach((r) => batch.delete(r))
+    await batch.commit()
+  }
+}
+
+// Borra una partida y todos sus escaneos.
+export async function deleteRun(db, runId) {
+  const scans = await getDocs(collection(db, 'runs', runId, 'scans'))
+  await deleteRefs(db, [...scans.docs.map((d) => d.ref), doc(db, 'runs', runId)])
+}
+
+// Cuántas partidas tiene un juego (null si no se puede saber, por ejemplo sin conexión).
+export async function countGameRuns(db, gameId) {
+  try {
+    const snap = await getCountFromServer(query(collection(db, 'runs'), where('gameId', '==', gameId)))
+    return snap.data().count
+  } catch {
+    return null
+  }
+}
+
+// Borra un juego con sus pasos y todas sus partidas. El juego se borra el último: si algo falla a medias, se puede repetir.
+export async function deleteGame(db, gameId) {
+  const runs = await getDocs(query(collection(db, 'runs'), where('gameId', '==', gameId)))
+  for (const r of runs.docs) await deleteRun(db, r.id)
+  const steps = await getDocs(collection(db, 'games', gameId, 'steps'))
+  await deleteRefs(db, [...steps.docs.map((d) => d.ref), doc(db, 'games', gameId)])
+  return runs.size
 }
 
 // Guarda juego y pasos en un solo lote. Nunca borra: los pasos guardados se desactivan, no se eliminan.

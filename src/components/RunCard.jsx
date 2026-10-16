@@ -1,5 +1,8 @@
 import { useState } from 'react'
+import { db } from '../firebase.js'
 import { useT } from '../i18n.js'
+import { clearStatsCache } from '../lib/loadStats.js'
+import { deleteRun } from '../lib/games.js'
 import { themeOf } from '../lib/themes.js'
 import { IDLE_MIN, fmtClock, fmtDateTime, fmtDuration, runStatus, sortSteps, timeLeft } from '../lib/runs.js'
 
@@ -29,6 +32,7 @@ function Ring({ fraction, tone, label }) {
 export default function RunCard({ run, game, steps = [], scans = [], now, index = 0 }) {
   const { t, lang } = useT()
   const [open, setOpen] = useState(false)
+  const [del, setDel] = useState(null) // null | { sure, busy, failed }
 
   const status = runStatus(run, game, now)
   const ring = timeLeft(run, game, now)
@@ -43,9 +47,10 @@ export default function RunCard({ run, game, steps = [], scans = [], now, index 
   const stuck = status.kind === 'open' && idleMin >= IDLE_MIN
 
   return (
-    <button
-      type="button" className={`tarjeta ${status.kind} tema-${themeOf(game)}`} style={{ '--i': Math.min(index, 8) }}
+    <div
+      role="button" tabIndex={0} className={`tarjeta ${status.kind} tema-${themeOf(game)}`} style={{ '--i': Math.min(index, 8) }}
       onClick={() => setOpen((o) => !o)} aria-expanded={open}
+      onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); setOpen((o) => !o) } }}
     >
       <span className="etq">{game?.name ?? t.unknownGame}</span>
       <div className="cabecera">
@@ -93,8 +98,33 @@ export default function RunCard({ run, game, steps = [], scans = [], now, index 
               )
             })}
           </div>
+          <div className="peligro-fila" onClick={(e) => e.stopPropagation()}>
+            {!del ? (
+              <button type="button" className="suave peligro-boton" onClick={() => setDel({ sure: false, busy: false, failed: false })}>{t.delRun}</button>
+            ) : (
+              <div className="peligro-confirmar">
+                <p className="error">{t.delRunWarn}</p>
+                <label className="casilla">
+                  <input type="checkbox" checked={del.sure} onChange={(e) => setDel((d) => ({ ...d, sure: e.target.checked }))} /> {t.delSure}
+                </label>
+                <div className="acciones">
+                  <button type="button" className="suave" onClick={() => setDel(null)} disabled={del.busy}>{t.delCancel}</button>
+                  <button
+                    type="button" disabled={!del.sure || del.busy}
+                    onClick={async () => {
+                      setDel((d) => ({ ...d, busy: true, failed: false }))
+                      try { await deleteRun(db, run.id); clearStatsCache() } catch { setDel((d) => ({ ...d, busy: false, failed: true })) }
+                    }}
+                  >
+                    {del.busy ? t.delDeleting : t.delForever}
+                  </button>
+                </div>
+                {del.failed && <p className="error">{t.delError}</p>}
+              </div>
+            )}
+          </div>
         </div>
       )}
-    </button>
+    </div>
   )
 }
