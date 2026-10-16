@@ -160,8 +160,8 @@ select { font: inherit; padding: 4px 6px; background: var(--campo); border: 1px 
 .fila-campos { display: flex; gap: 18px; align-items: flex-end; flex-wrap: wrap; }
 .casilla { display: flex; align-items: center; gap: 6px; font-size: 13px; margin: 8px 0; }
 .plantillas { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 0; }
-.paso-fila { position: relative; display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 0 12px; min-width: 0; background: #fbf7ec; border: 1px solid #bbb;
-  box-shadow: 2px 3px 6px rgba(0, 0, 0, .15); padding: 8px 12px 10px 40px; margin: 12px 0; }
+.paso-fila { position: relative; display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 0 12px; min-width: 0; background: var(--t-papel); border: var(--t-borde);
+  box-shadow: var(--t-sombra); padding: 8px 12px 10px 40px; margin: 12px 0; }
 .paso-fila.inactivo { opacity: .6; }
 .paso-fila .ancho, .paso-fila .acciones { grid-column: 1 / -1; }
 .num-paso { position: absolute; left: 10px; top: 10px; font-family: var(--titulo); font-size: 18px; }

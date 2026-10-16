@@ -40,7 +40,11 @@ export default function App() {
   // En la pantalla de acceso no hay nada que perder: si hay versión nueva, se aplica sola.
   useEffect(() => { if (needRefresh && user === null) applyUpdate() }, [needRefresh, user])
   useEffect(() => { document.documentElement.lang = lang }, [lang])
-  useEffect(() => { document.documentElement.dataset.modo = modo }, [modo])
+  useEffect(() => {
+    document.documentElement.dataset.modo = modo
+    // La barra de estado del móvil (arriba) sigue el modo elegido.
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', modo === 'oscuro' ? '#14120f' : '#f3eee2')
+  }, [modo])
 
   const toggleModo = () => {
     const next = modo === 'oscuro' ? 'claro' : 'oscuro'
