@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
 import { useT } from '../i18n.js'
-import Ayuda from './Ayuda.jsx'
 import { useStatsData } from '../lib/loadStats.js'
 import { download, runsCsv, scansCsv } from '../lib/csv.js'
 import { fmtClock, fmtDateTime, fmtDuration } from '../lib/runs.js'
@@ -19,6 +18,7 @@ export default function Stats() {
   const [gameId, setGameId] = useState('')
   const [days, setDays] = useState(30)
   const [table, setTable] = useState({ bars: false, weekly: false })
+  const [moreFigures, setMoreFigures] = useState(false)
   const [sort, setSort] = useState({ key: 'startedAt', dir: -1 })
   const { data, at, loading, error, reload } = useStatsData(days)
 
@@ -89,20 +89,25 @@ export default function Stats() {
               <div className="cifras">
                 <div><b>{s.started}</b><small>{t.started2}</small></div>
                 <div><b>{s.finished}</b><small>{t.finished2}</small></div>
-                <div><b>{s.timeout}</b><small>{t.timedOut2}</small></div>
-                <div><b>{s.open}</b><small>{t.inProgress2}</small></div>
                 <div><b>{s.completionPct === null ? '—' : `${s.completionPct}%`}</b><small>{t.completion}</small></div>
-              </div>
-              <div className="cifras">
                 <div><b>{minutes(s.medianMs)}</b><small>{t.median}</small></div>
-                <div><b>{minutes(s.meanMs)}</b><small>{t.average}</small></div>
-                <div><b>{minutes(s.bestMs)}</b><small>{t.best}</small></div>
-                <div><b>{s.avgClues === null ? '—' : s.avgClues.toFixed(1)}</b><small>{t.cluesAvg}</small></div>
               </div>
+              {moreFigures && (
+                <div className="cifras">
+                  <div><b>{s.timeout}</b><small>{t.timedOut2}</small></div>
+                  <div><b>{s.open}</b><small>{t.inProgress2}</small></div>
+                  <div><b>{minutes(s.meanMs)}</b><small>{t.average}</small></div>
+                  <div><b>{minutes(s.bestMs)}</b><small>{t.best}</small></div>
+                  <div><b>{s.avgClues === null ? '—' : s.avgClues.toFixed(1)}</b><small>{t.cluesAvg}</small></div>
+                </div>
+              )}
+              <button type="button" className="suave" onClick={() => setMoreFigures((v) => !v)}>
+                {moreFigures ? t.showLess : t.showMore}
+              </button>
             </div>
           ))}
 
-          <h2>{t.evolution}</h2>
+          <details className="capa"><summary>{t.evolution}</summary><div className="capa-cuerpo">
           <div className="encabezado-grafico">
             <h3>{t.perDayTitle}</h3>
             <button type="button" className="suave" onClick={() => toggle('bars')}>{table.bars ? t.viewChart : t.viewTable}</button>
@@ -129,7 +134,9 @@ export default function Stats() {
             </>
           )}
 
-          <h2>{t.stuckTitle} <Ayuda>{t.stuckHelp}</Ayuda></h2>
+          </div></details>
+          <details className="capa"><summary>{t.stuckTitle}</summary><div className="capa-cuerpo">
+          <p className="nota">{t.stuckHelp}</p>
           <div className="tabla-scroll">
             <table className="tabla">
               <thead><tr>
@@ -148,7 +155,8 @@ export default function Stats() {
             </table>
           </div>
 
-          <h2>{t.runsTitle}</h2>
+          </div></details>
+          <details className="capa"><summary>{t.runsTitle}</summary><div className="capa-cuerpo">
           <div className="tabla-scroll">
             <table className="tabla">
               <thead><tr>
@@ -168,6 +176,7 @@ export default function Stats() {
             <button type="button" onClick={() => download(`partidas_${today}.csv`, runsCsv(sorted))}>{t.exportRuns}</button>
             <button type="button" onClick={() => download(`escaneos_${today}.csv`, scansCsv(sorted))}>{t.exportScans}</button>
           </div>
+          </div></details>
         </>
       )}
     </>

@@ -35,6 +35,7 @@ export default function GameEditor({ gameId, onBack, onQr }) {
   const [status, setStatus] = useState('idle') // idle | saving | saved | failed
   const [copied, setCopied] = useState('')
   const [del, setDel] = useState(null) // null | { runs, sure, busy, failed }
+  const [openIds, setOpenIds] = useState(() => new Set()) // pasos desplegados (los nuevos nacen desplegados)
 
   useEffect(() => {
     if (!gameId) return
@@ -67,6 +68,18 @@ export default function GameEditor({ gameId, onBack, onQr }) {
       return next
     })
   const remove = (i) => setSteps((list) => list.filter((_, k) => k !== i))
+  const toggleStep = (sid) =>
+    setOpenIds((o) => {
+      const next = new Set(o)
+      if (next.has(sid)) next.delete(sid)
+      else next.add(sid)
+      return next
+    })
+  const addStep = () => {
+    const s = blankStep()
+    setSteps((l) => [...l, s])
+    setOpenIds((o) => new Set(o).add(s.id))
+  }
   const touched = () => status !== 'idle' && setStatus('idle')
 
   const flash = async (key, text) => {
@@ -79,7 +92,11 @@ export default function GameEditor({ gameId, onBack, onQr }) {
   const submit = async () => {
     const found = validateGame({ name, timeLimitMinutes: limit, steps })
     setErrors(found)
-    if (found.length) return
+    if (found.length) {
+      // desplegar los pasos con fallos para que se vean
+      setOpenIds((o) => new Set([...o, ...found.filter((e) => e.step).map((e) => steps[e.step - 1]?.id).filter(Boolean)]))
+      return
+    }
     setStatus('saving')
     try {
       await saveGame(db, { id, isNew, name, timeLimitMinutes: limit, active, theme, steps })
@@ -191,9 +208,25 @@ export default function GameEditor({ gameId, onBack, onQr }) {
         </div>
       )}
 
-      {steps.map((s, i) => (
+      {steps.map((s, i) => {
+        const isOpen = openIds.has(s.id)
+        return (
         <div className={`paso-fila ${s.active ? '' : 'inactivo'}`} key={s.id}>
-          <span className="num-paso">{i + 1}</span>
+          <div className="paso-resumen">
+            <button type="button" className="paso-toggle" aria-expanded={isOpen} onClick={() => toggleStep(s.id)}>
+              <span className="num-paso">{i + 1}</span>
+              <span className="paso-texto">
+                <span className="paso-nombre">{s.label || t.stepLabel}</span>
+                <span className="paso-tipo">{t[TYPE_KEY[s.type]]}{s.active ? '' : ` · ${t.inactiveGame}`}</span>
+              </span>
+              <span aria-hidden="true">{isOpen ? '▴' : '▾'}</span>
+            </button>
+            <button type="button" className="suave" onClick={() => flash(s.id, scanUrl(id, s.id))}>
+              {copied === s.id ? t.copied : t.copyLink}
+            </button>
+          </div>
+          {isOpen && (
+          <div className="paso-detalle">
           <label className="campo">
             {t.stepLabel}
             <input value={s.label} maxLength={60} onChange={(e) => patch(i, { label: e.target.value })} />
@@ -214,16 +247,16 @@ export default function GameEditor({ gameId, onBack, onQr }) {
             </label>
             <button type="button" className="suave" onClick={() => move(i, -1)} disabled={i === 0} aria-label={t.moveUp}>▲</button>
             <button type="button" className="suave" onClick={() => move(i, 1)} disabled={i === steps.length - 1} aria-label={t.moveDown}>▼</button>
-            <button type="button" className="suave" onClick={() => flash(s.id, scanUrl(id, s.id))}>
-              {copied === s.id ? t.copied : t.copyLink}
-            </button>
             {!s.saved && <button type="button" className="suave" onClick={() => remove(i)}>{t.removeStep}</button>}
           </div>
+          </div>
+          )}
         </div>
-      ))}
+        )
+      })}
 
       <div className="acciones fila-botones">
-        <button type="button" className="suave" onClick={() => setSteps((l) => [...l, blankStep()])}>+ {t.addStep}</button>
+        <button type="button" className="suave" onClick={addStep}>+ {t.addStep}</button>
         {steps.length > 0 && (
           <button
             type="button" className="suave"

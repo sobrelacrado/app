@@ -480,3 +480,32 @@ button.suave.menu-boton { font-size: 24px; line-height: 1; padding: 2px 12px 6px
 .peligro-fila .error { margin: 4px 0; font-size: 13px; }
 button.suave.peligro-boton { color: var(--rojo); border-color: var(--rojo); }
 .peligro-confirmar { display: flex; flex-direction: column; gap: 6px; }
+
+/* ---------- Fase 8B: pasos plegados y estadísticas por capas ---------- */
+.paso-fila { display: block; padding: 0; }
+.paso-resumen { display: flex; align-items: center; gap: 8px; padding-right: 8px; }
+button.paso-toggle {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; background: transparent; color: var(--t-tinta); border: 0;
+  text-align: left; padding: 12px; text-transform: none; letter-spacing: normal; font-family: var(--texto); font-size: 15px;
+}
+button.paso-toggle:not(:disabled):hover, button.paso-toggle:not(:disabled):active { transform: none; filter: none; }
+.paso-toggle .num-paso { position: static; font-family: var(--titulo); font-size: 18px; min-width: 22px; }
+.paso-texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.paso-nombre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+.paso-tipo { font-size: 12px; color: var(--gris); }
+.paso-detalle {
+  display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 0 12px; padding: 0 12px 10px;
+  border-top: 1px dashed var(--regla); animation: aparecer .2s ease-out;
+}
+.paso-detalle .ancho, .paso-detalle .acciones { grid-column: 1 / -1; }
+@media (max-width: 420px) { .paso-detalle { grid-template-columns: minmax(0, 1fr); } }
+
+.capa { margin: 10px 0; border-bottom: 1px solid var(--regla); }
+.capa > summary {
+  list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--titulo); font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; font-size: 15px; padding: 14px 0;
+}
+.capa > summary::-webkit-details-marker { display: none; }
+.capa > summary::after { content: '+'; font-size: 22px; line-height: 1; }
+.capa[open] > summary::after { content: '\2212'; }
+.capa-cuerpo { padding-bottom: 14px; animation: aparecer .25s ease-out; }
