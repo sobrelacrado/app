@@ -51,9 +51,7 @@ export default function RunCard({ run, game, steps = [], scans = [], now, index 
       <div className="cabecera">
         <div className="datos">
           <span className="alias">{run.alias || t.noName}</span>
-          <span className="meta">
-            {t.started} {fmtDateTime(run.startedAt, lang)} · {scans.length}/{playable.length || '?'} {t.steps} · {clueCount} {t.clues}
-          </span>
+          <span className="meta">{scans.length}/{playable.length || '?'} {t.steps}</span>
         </div>
         <Ring fraction={ring.fraction} tone={ring.tone} label={fmtDuration(status.ms)} />
       </div>
@@ -67,29 +65,34 @@ export default function RunCard({ run, game, steps = [], scans = [], now, index 
           ))}
         </div>
       )}
-      <div className="fila meta">
-        <span className={`sello ${stampClass}`}>{t[stampKey]}</span>
-      </div>
-      {status.kind === 'open' && (
-        <div className={`meta ${stuck ? 'aviso' : ''}`}>
-          {lastLabel
-            ? `${t.lastStep}: ${lastLabel} · ${t.ago(idleMin)}`
-            : `${t.noScansYet} · ${t.ago(idleMin)}`}
-          {stuck && ` · ${t.idle}`}
+      {(status.kind !== 'open' || stuck) && (
+        <div className="fila meta">
+          {status.kind !== 'open' && <span className={`sello ${stampClass}`}>{t[stampKey]}</span>}
+          {stuck && <span className="aviso">{t.idle}</span>}
         </div>
       )}
       {status.kind === 'finished' && <span className="sello-grande" aria-hidden="true">{t.statusFinished}</span>}
       {open && (
-        <div className="pasos">
-          {playable.map((s) => {
-            const hit = scans.find((x) => x.stepId === s.id)
-            return (
-              <div key={s.id} className={hit ? '' : 'pendiente'}>
-                <span>{s.label}</span>
-                <span>{hit ? fmtClock(hit.at, lang) : '—'}</span>
-              </div>
-            )
-          })}
+        <div className="detalle">
+          <div className="meta">
+            {t.started} {fmtDateTime(run.startedAt, lang)} · {clueCount} {t.clues}
+          </div>
+          {status.kind === 'open' && (
+            <div className="meta">
+              {lastLabel ? `${t.lastStep}: ${lastLabel} · ${t.ago(idleMin)}` : `${t.noScansYet} · ${t.ago(idleMin)}`}
+            </div>
+          )}
+          <div className="pasos">
+            {playable.map((s) => {
+              const hit = scans.find((x) => x.stepId === s.id)
+              return (
+                <div key={s.id} className={hit ? '' : 'pendiente'}>
+                  <span>{s.label}</span>
+                  <span>{hit ? fmtClock(hit.at, lang) : '—'}</span>
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
     </button>

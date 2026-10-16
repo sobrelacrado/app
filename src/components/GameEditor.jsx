@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { collection, doc, getDoc, getDocs } from 'firebase/firestore'
 import { db } from '../firebase.js'
 import { useT } from '../i18n.js'
+import Ayuda from './Ayuda.jsx'
 import { newGameId, newStepId } from '../lib/ids.js'
 import { THEMES, DEFAULT_THEME, themeOf } from '../lib/themes.js'
 import { CASE2, CASE3, EXPEDIENTE_TEMPLATE, STEP_TYPES, saveGame, scanUrl, validateGame } from '../lib/games.js'
@@ -102,7 +103,7 @@ export default function GameEditor({ gameId, onBack, onQr }) {
         <input value={name} maxLength={80} onChange={(e) => setName(e.target.value)} />
       </label>
       <div className="campo">
-        {t.gTheme}
+        <span>{t.gTheme} <Ayuda>{t.gThemeHelp}</Ayuda></span>
         <div className="temas" role="radiogroup" aria-label={t.gTheme}>
           {THEMES.map((k) => (
             <button
@@ -115,21 +116,20 @@ export default function GameEditor({ gameId, onBack, onQr }) {
           ))}
         </div>
       </div>
-      <p className="nota">{t.gThemeHelp}</p>
       <div className="fila-campos">
         <label className="campo">
           {t.gLimit}
           <input type="number" inputMode="numeric" min="5" max="1440" value={limit} onChange={(e) => setLimit(e.target.value)} />
         </label>
-        <label className="casilla">
-          <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} /> {t.gActive}
-        </label>
+        <div className="casilla">
+          <label className="casilla">
+            <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} /> {t.gActive}
+          </label>
+          <Ayuda>{t.gActiveHelp} {t.changeWarn}</Ayuda>
+        </div>
       </div>
-      <p className="nota">{t.gActiveHelp}</p>
-      <p className="nota">{t.changeWarn}</p>
 
-      <h2>{t.gSteps}</h2>
-      <p className="nota">{t.gStepsHelp}</p>
+      <h2>{t.gSteps} <Ayuda>{t.gStepsHelp}</Ayuda></h2>
 
       {!steps.length && (
         <div className="plantillas">
@@ -196,8 +196,8 @@ export default function GameEditor({ gameId, onBack, onQr }) {
             {copied === 'all' ? t.copied : t.copyAll}
           </button>
         )}
+        <Ayuda>{t.linksWork}</Ayuda>
       </div>
-      <p className="nota">{t.linksWork}</p>
 
       {errors.length > 0 && (
         <ul className="error lista-errores">

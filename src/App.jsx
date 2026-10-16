@@ -5,6 +5,7 @@ import { LANGS, LangContext, initialLang, textsFor } from './i18n.js'
 import { ADMIN_EMAIL } from './lib/runs.js'
 import { applyUpdate, promptInstall, useCanInstall, useNeedRefresh, useOnline } from './lib/pwa.js'
 import AlertWatcher from './components/AlertWatcher.jsx'
+import Menu from './components/Menu.jsx'
 import Games from './components/Games.jsx'
 import Panel from './components/Panel.jsx'
 import Stats from './components/Stats.jsx'
@@ -99,26 +100,25 @@ export default function App() {
             <img src="/sello-128.png" alt="" />
             <div className="logo">SOBRE LACRADO<small>{t.panel.toUpperCase()}</small></div>
           </div>
-          <div className="herramientas">
-            {canInstall && <button type="button" className="suave" onClick={promptInstall}>{t.install}</button>}
+          <Menu label={t.menu}>
             {allowed && (
-              <button type="button" className={`suave ${alertsOn ? 'activo' : ''}`} onClick={toggleAlerts} aria-pressed={alertsOn}>
+              <button type="button" role="menuitem" onClick={toggleAlerts} aria-pressed={alertsOn}>
                 {alertsOn ? t.alertsOn : t.alertsOff}
               </button>
             )}
-            <button
-              type="button" className="suave" onClick={toggleModo}
-              title={modo === 'oscuro' ? t.modeToLight : t.modeToDark} aria-label={modo === 'oscuro' ? t.modeToLight : t.modeToDark}
-            >
-              {modo === 'oscuro' ? '☀' : '☾'}
+            <button type="button" role="menuitem" onClick={toggleModo}>
+              {modo === 'oscuro' ? '☀ ' + t.modeToLight : '☾ ' + t.modeToDark}
             </button>
-            {LANGS.map((l) => (
-              <button key={l} type="button" className={`suave ${l === lang ? 'activo' : ''}`} onClick={() => chooseLang(l)}>
-                {l.toUpperCase()}
-              </button>
-            ))}
-            {user && <button type="button" className="suave" onClick={() => signOut(auth)}>{t.logout}</button>}
-          </div>
+            <div className="menu-idiomas">
+              {LANGS.map((l) => (
+                <button key={l} type="button" role="menuitem" className={l === lang ? 'activo' : ''} onClick={() => chooseLang(l)}>
+                  {l.toUpperCase()}
+                </button>
+              ))}
+            </div>
+            {canInstall && <button type="button" role="menuitem" onClick={promptInstall}>{t.install}</button>}
+            {user && <button type="button" role="menuitem" onClick={() => signOut(auth)}>{t.logout}</button>}
+          </Menu>
         </header>
 
         {blocked && <p className="nota">{t.alertsBlocked}</p>}

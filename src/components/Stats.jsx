@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useT } from '../i18n.js'
+import Ayuda from './Ayuda.jsx'
 import { useStatsData } from '../lib/loadStats.js'
 import { download, runsCsv, scansCsv } from '../lib/csv.js'
 import { fmtClock, fmtDateTime, fmtDuration } from '../lib/runs.js'
@@ -128,8 +129,7 @@ export default function Stats() {
             </>
           )}
 
-          <h2>{t.stuckTitle}</h2>
-          <p className="nota">{t.stuckHelp}</p>
+          <h2>{t.stuckTitle} <Ayuda>{t.stuckHelp}</Ayuda></h2>
           <div className="tabla-scroll">
             <table className="tabla">
               <thead><tr>

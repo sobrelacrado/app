@@ -58,14 +58,13 @@ h2 { font-size: 15px; letter-spacing: 1.5px; border-bottom: 2px solid var(--line
 
 /* Membrete con doble línea */
 .membrete {
-  display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap;
-  border-bottom: 3px double var(--linea); padding-bottom: 8px; margin-bottom: 14px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  border-bottom: 1px solid var(--linea); padding-bottom: 8px; margin-bottom: 14px;
 }
 .membrete .marca { display: flex; align-items: center; gap: 12px; }
 .membrete .marca img { width: 44px; height: 44px; }
 .membrete .logo { font-family: var(--titulo); font-weight: 700; font-size: 20px; letter-spacing: 5px; line-height: 1.1; }
 .membrete .logo small { display: block; font-size: 10px; letter-spacing: 2.5px; }
-.membrete .herramientas { display: flex; align-items: center; gap: 10px; font-size: 12px; flex-wrap: wrap; }
 
 /* Botones */
 button, .boton {
@@ -93,6 +92,7 @@ button:disabled { opacity: .5; cursor: default; }
 .tarjeta .fila { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .tarjeta .alias, .fila-juego .alias { font-family: var(--t-titulo); font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
 .tarjeta .meta { font-size: 13px; color: var(--gris); }
+.tarjeta .detalle { margin-top: 10px; display: flex; flex-direction: column; gap: 3px; animation: aparecer .25s ease-out; }
 .tarjeta .aviso { color: var(--rojo); font-weight: 700; }
 
 /* Sello rotado */
@@ -106,7 +106,7 @@ button:disabled { opacity: .5; cursor: default; }
 .sello.tiempo-agotado { color: var(--gris); }
 
 /* Detalle de pasos */
-.pasos { margin-top: 12px; border-top: 1px dashed #999; padding-top: 8px; font-size: 13px; }
+.pasos { margin-top: 8px; border-top: 1px dashed #999; padding-top: 8px; font-size: 13px; }
 .pasos div { display: flex; justify-content: space-between; padding: 2px 0; }
 .pasos .pendiente { color: #999; }
 
@@ -315,7 +315,7 @@ h2.en-directo::after {
   --t-textura: none;
   --t-borde: 1px solid #bbb;
   --t-radio: 0;
-  --t-sombra: 2px 3px 6px rgba(0, 0, 0, .2);
+  --t-sombra: 1px 2px 5px rgba(0, 0, 0, .16);
   --t-tinta: var(--tinta);
   --t-titulo: 'Special Elite', monospace;
   --t-texto: 'Courier Prime', 'Courier New', monospace;
@@ -447,3 +447,22 @@ h2.en-directo::after {
   [data-modo='oscuro'] .tema-alien .punto { border-color: #8fb3c7; }
   [data-modo='oscuro'] .tema-alien .punto.hecho { border-color: var(--t-marca-borde); }
 }
+
+/* ---------- Fase 8A: menos ruido ---------- */
+.menu { position: relative; flex: none; }
+button.suave.menu-boton { font-size: 24px; line-height: 1; padding: 2px 12px 6px; border-color: transparent; letter-spacing: 0; }
+.menu-panel {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; min-width: 230px; display: flex; flex-direction: column;
+  background: var(--papel); border: 1px solid var(--linea); box-shadow: 0 8px 22px rgba(0, 0, 0, .35); padding: 4px;
+  animation: aparecer .15s ease-out;
+}
+.menu-panel button { background: transparent; color: var(--tinta); border: 0; text-align: left; padding: 12px; font-family: var(--texto); font-weight: 700; font-size: 14px; letter-spacing: .2px; text-transform: none; }
+.menu-panel button:hover { background: rgba(127, 127, 127, .15); filter: none; }
+.menu-panel button[aria-pressed='true'] { box-shadow: inset 3px 0 0 var(--rojo); }
+.menu-idiomas { display: flex; border-top: 1px solid var(--regla); border-bottom: 1px solid var(--regla); margin: 2px 0; }
+.menu-idiomas button { flex: 1; text-align: center; }
+.menu-idiomas button.activo { background: var(--tinta); color: var(--papel); }
+.ayuda { display: inline; }
+.ayuda-boton { padding: 0 7px; margin-left: 6px; border-radius: 50%; font-size: 11px; line-height: 1.6; vertical-align: 1px; text-transform: none; }
+.ayuda-texto { display: block; margin: 6px 0 4px; text-transform: none; letter-spacing: normal; font-family: var(--texto); font-weight: 400; animation: aparecer .2s ease-out; }
+.casilla { flex-wrap: wrap; }
