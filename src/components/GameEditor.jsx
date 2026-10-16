@@ -3,6 +3,7 @@ import { collection, doc, getDoc, getDocs } from 'firebase/firestore'
 import { db } from '../firebase.js'
 import { useT } from '../i18n.js'
 import { newGameId, newStepId } from '../lib/ids.js'
+import { THEMES, DEFAULT_THEME, themeOf } from '../lib/themes.js'
 import { CASE2, EXPEDIENTE_TEMPLATE, STEP_TYPES, saveGame, scanUrl, validateGame } from '../lib/games.js'
 
 const TYPE_KEY = { start: 'typeStart', clue: 'typeClue', normal: 'typeNormal', solution: 'typeSolution' }
@@ -26,6 +27,7 @@ export default function GameEditor({ gameId, onBack, onQr }) {
   const [name, setName] = useState('')
   const [limit, setLimit] = useState('240')
   const [active, setActive] = useState(true)
+  const [theme, setTheme] = useState(DEFAULT_THEME)
   const [steps, setSteps] = useState([])
   const [errors, setErrors] = useState([])
   const [status, setStatus] = useState('idle') // idle | saving | saved | failed
@@ -41,6 +43,7 @@ export default function GameEditor({ gameId, onBack, onQr }) {
       setName(data.name ?? '')
       setLimit(String(data.timeLimitMinutes ?? 240))
       setActive(data.active !== false)
+      setTheme(themeOf(data))
       setSteps(
         s.docs
           .map((d) => ({ id: d.id, ...d.data(), saved: true }))
@@ -76,7 +79,7 @@ export default function GameEditor({ gameId, onBack, onQr }) {
     if (found.length) return
     setStatus('saving')
     try {
-      await saveGame(db, { id, isNew, name, timeLimitMinutes: limit, active, steps })
+      await saveGame(db, { id, isNew, name, timeLimitMinutes: limit, active, theme, steps })
       setSteps((list) => list.map((s) => ({ ...s, saved: true })))
       setIsNew(false)
       setStatus('saved')
@@ -98,6 +101,21 @@ export default function GameEditor({ gameId, onBack, onQr }) {
         {t.gName}
         <input value={name} maxLength={80} onChange={(e) => setName(e.target.value)} />
       </label>
+      <div className="campo">
+        {t.gTheme}
+        <div className="temas" role="radiogroup" aria-label={t.gTheme}>
+          {THEMES.map((k) => (
+            <button
+              key={k} type="button" role="radio" aria-checked={theme === k}
+              className={`muestra-tema tema-${k} ${theme === k ? 'elegido' : ''}`}
+              onClick={() => { setTheme(k); touched() }}
+            >
+              {t.theme[k]}
+            </button>
+          ))}
+        </div>
+      </div>
+      <p className="nota">{t.gThemeHelp}</p>
       <div className="fila-campos">
         <label className="campo">
           {t.gLimit}

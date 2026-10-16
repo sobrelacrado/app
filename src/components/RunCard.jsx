@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useT } from '../i18n.js'
+import { themeOf } from '../lib/themes.js'
 import { IDLE_MIN, fmtClock, fmtDateTime, fmtDuration, runStatus, sortSteps, timeLeft } from '../lib/runs.js'
 
 const STAMP = {
@@ -43,7 +44,7 @@ export default function RunCard({ run, game, steps = [], scans = [], now, index 
 
   return (
     <button
-      type="button" className={`tarjeta ${status.kind}`} style={{ '--i': Math.min(index, 8) }}
+      type="button" className={`tarjeta ${status.kind} tema-${themeOf(game)}`} style={{ '--i': Math.min(index, 8) }}
       onClick={() => setOpen((o) => !o)} aria-expanded={open}
     >
       <span className="etq">{game?.name ?? t.unknownGame}</span>

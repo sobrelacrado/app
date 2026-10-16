@@ -68,9 +68,9 @@ export function validateGame({ name, timeLimitMinutes, steps }) {
 }
 
 // Guarda juego y pasos en un solo lote. Nunca borra: los pasos guardados se desactivan, no se eliminan.
-export async function saveGame(db, { id, isNew, name, timeLimitMinutes, active, steps }) {
+export async function saveGame(db, { id, isNew, name, timeLimitMinutes, active, theme, steps }) {
   const batch = writeBatch(db)
-  const game = { name: name.trim(), active, timeLimitMinutes: Number(timeLimitMinutes) }
+  const game = { name: name.trim(), active, timeLimitMinutes: Number(timeLimitMinutes), theme }
   batch.set(doc(db, 'games', id), isNew ? { ...game, createdAt: serverTimestamp() } : game, { merge: true })
   steps.forEach((s, i) => {
     batch.set(

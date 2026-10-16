@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../firebase.js'
 import { useT } from '../i18n.js'
+import { themeOf } from '../lib/themes.js'
 import GameEditor from './GameEditor.jsx'
 import QrSheet from './QrSheet.jsx'
 
@@ -56,7 +57,7 @@ function GameList({ onNew, onEdit, onQr }) {
       {state.error && <p className="vacio error">{t.loadError}</p>}
       {!state.loading && !state.error && !state.games.length && <p className="vacio">{t.noGames}</p>}
       {state.games.map((g) => (
-        <div className="ficha" key={g.id}>
+        <div className={`ficha tema-${themeOf(g)}`} key={g.id}>
           <span className="etq">{g.active === false ? t.inactiveGame : t.activeGame}</span>
           <div className="fila-juego">
             <div>
