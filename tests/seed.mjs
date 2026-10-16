@@ -31,6 +31,21 @@ await env.withSecurityRulesDisabled(async (ctx) => {
     // Sin terminar, pasadas las 4 h
     { id: 'agotada', alias: 'Los Lentos', start: 300, endedAgo: null, scans: { v0: 300, v1: 280 } },
   ]
+  // Histórico de ~5 semanas para ver las estadísticas (generado de forma repetible, sin azar).
+  const alias = ['Los Sabuesos', 'Equipo Rojo', '', 'Lupa y Café', '=SUMA(1+1)', 'Trío Fantástico']
+  for (let i = 0; i < 24; i++) {
+    const start = 1440 * (1 + Math.floor(i * 1.4)) + (i % 5) * 70 + 400
+    const speed = 50 + ((i * 17) % 60) // minutos totales de las que terminan
+    const finishes = i % 4 !== 3
+    const scans = { v0: start, v1: start - Math.round(speed * 0.2), p1: start - Math.round(speed * 0.5) }
+    if (i % 3 === 0) scans.p2 = start - Math.round(speed * 0.7)
+    if (finishes) scans.sol = start - speed
+    else delete scans.p1 // las que no terminan se quedan atascadas pronto
+    runs.push({
+      id: `hist${i}`, alias: alias[i % alias.length], start,
+      endedAgo: finishes ? start - speed : null, scans, ...(finishes ? { endStepId: 'sol' } : {}),
+    })
+  }
   for (const r of runs) {
     await setDoc(doc(db, 'runs', r.id), {
       gameId: 'demo', alias: r.alias, startedAt: ago(r.start),

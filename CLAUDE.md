@@ -36,5 +36,7 @@ App web instalable (PWA) para gestionar partidas de casos de misterio imprimible
 - Fase 1 (modelo de datos + reglas de Firestore): hecha y reglas publicadas. Pruebas: `npm run test:rules` (16 OK, requiere JDK 21).
 - Fase 2 (página del jugador `/s/<juego>/<paso>`, `scan.html` + `src/scan/`): código hecho y probado en emulador local (`tests/seed.mjs` crea datos de prueba). Pendiente: publicar en Hosting (pedir permiso). Web app de Firebase registrada: `1:656901903049:web:060fcfb2b93c6da18cf318`.
 
-- Fase 3 (login Google + panel de partidas en directo, estilo expediente del caso 2 Duarte: papel `#f3eee2`, rojo lacre `#a31d1d`, Special Elite + Courier Prime): código escrito (`src/App.jsx`, `src/components/`, `src/lib/`, `src/i18n.js`, `src/styles/theme.css`). Pendiente: probar en navegador, activar Google en Authentication (lo hace Alberto), publicar y commit.
+- Fase 3 (login Google + panel de partidas en directo, estilo expediente del caso 2 Duarte): hecha y publicada.
 - Estilo de referencia: `M:\Sobre Lacrado\Para_el_proyecto\02_Plantilla_expediente_IP-26-031.html` y logo `M:\Sobre Lacrado\Logo\sello.png`.
+- Fase 4 (estadísticas + CSV): código escrito y probado (`npm test` = 11 pruebas de cálculos `tests/stats.test.js` + 16 de reglas). Cálculos en `src/lib/stats.js`, CSV en `src/lib/csv.js`, lectura única en `src/lib/loadStats.js`, pantallas `src/components/Stats.jsx` y `Charts.jsx`. Pendiente: que Alberto lo revise con el emulador (`http://localhost:5000`), publicar y commit.
+- Decisiones Fase 4: periodo por defecto 30 días; mediana como cifra principal; atasco = más de 20 min sin escanear tras un paso; CSV con `;`, BOM UTF-8, alias incluido y neutralizado contra fórmulas de Excel.

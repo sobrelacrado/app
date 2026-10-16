@@ -4,11 +4,13 @@ import { auth } from './auth.js'
 import { LANGS, LangContext, initialLang, textsFor } from './i18n.js'
 import { ADMIN_EMAIL } from './lib/runs.js'
 import Panel from './components/Panel.jsx'
+import Stats from './components/Stats.jsx'
 
 export default function App() {
   const [lang, setLang] = useState(initialLang)
   const [user, setUser] = useState(undefined) // undefined = comprobando sesión
   const [loginError, setLoginError] = useState(false)
+  const [tab, setTab] = useState('runs')
   const ctx = useMemo(() => ({ lang, t: textsFor(lang) }), [lang])
   const { t } = ctx
 
@@ -66,7 +68,15 @@ export default function App() {
           </div>
         )}
 
-        {allowed && <Panel />}
+        {allowed && (
+          <>
+            <nav className="pestanas">
+              <button type="button" className={tab === 'runs' ? 'activa' : ''} onClick={() => setTab('runs')}>{t.tabRuns}</button>
+              <button type="button" className={tab === 'stats' ? 'activa' : ''} onClick={() => setTab('stats')}>{t.tabStats}</button>
+            </nav>
+            {tab === 'runs' ? <Panel /> : <Stats />}
+          </>
+        )}
       </div>
     </LangContext.Provider>
   )

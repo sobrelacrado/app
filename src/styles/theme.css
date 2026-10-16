@@ -103,3 +103,37 @@ button:disabled { opacity: .5; cursor: default; }
 .centro img { width: 120px; height: 120px; }
 .centro h1 { font-size: 22px; letter-spacing: 4px; margin: 10px 0 6px; }
 .error { color: var(--rojo); font-weight: 700; }
+
+/* Pestañas */
+.pestanas { display: flex; gap: 6px; margin: 4px 0 6px; }
+.pestanas button { background: transparent; color: var(--tinta); border: 1px solid var(--linea); padding: 6px 14px; font-size: 12px; }
+.pestanas button.activa { background: var(--tinta); color: var(--papel); }
+
+/* Estadísticas */
+.filtros { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; font-size: 13px; margin: 10px 0 4px; }
+.filtros .grupo { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+select { font: inherit; padding: 4px 6px; background: #fff; border: 1px solid var(--linea); color: var(--tinta); }
+.ficha { position: relative; background: #fbf7ec; border: 1px solid #bbb; box-shadow: 2px 3px 6px rgba(0, 0, 0, .2); padding: 18px 16px 10px; margin: 22px 0 16px; }
+.cifras { display: flex; flex-wrap: wrap; gap: 8px 26px; margin-bottom: 8px; }
+.cifras div { display: flex; flex-direction: column; min-width: 70px; }
+.cifras b { font-family: var(--titulo); font-weight: 400; font-size: 24px; }
+.cifras small { color: var(--gris); font-size: 12px; }
+.nota { font-size: 13px; color: var(--gris); margin: 0 0 8px; }
+.tabla-scroll { overflow-x: auto; }
+.tabla { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tabla th, .tabla td { text-align: left; padding: 5px 8px; border-bottom: 1px solid #cfc7b3; white-space: nowrap; }
+.tabla th { font-family: var(--titulo); font-weight: 400; text-transform: uppercase; letter-spacing: 1px; font-size: 11px; padding: 4px 8px; }
+.tabla th button.suave { border: none; padding: 0; letter-spacing: 1px; }
+.tabla td.aviso { color: var(--rojo); font-weight: 700; }
+.encabezado-grafico { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 14px 0 4px; }
+.encabezado-grafico h3 { font-size: 13px; letter-spacing: 1px; }
+.grafico { position: relative; }
+.grafico svg { width: 100%; height: auto; display: block; }
+.grafico .eje { font-family: var(--texto); font-size: 11px; fill: var(--gris); }
+.grafico .valor { font-family: var(--texto); font-size: 12px; font-weight: 700; fill: var(--tinta); }
+.grafico .tip { position: absolute; top: 4px; transform: translateX(-50%); background: var(--tinta); color: var(--papel);
+  font-size: 12px; padding: 6px 9px; pointer-events: none; white-space: nowrap; z-index: 2; }
+.leyenda { display: flex; gap: 16px; font-size: 12px; margin-top: 4px; }
+.muestra { display: inline-block; width: 12px; height: 12px; vertical-align: -1px; margin-right: 4px; }
+.muestra.rayada { background: repeating-linear-gradient(45deg, #b8ae98 0 3px, #8d8064 3px 5px); }
+.exportar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
