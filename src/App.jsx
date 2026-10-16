@@ -48,6 +48,7 @@ export default function App() {
   const login = async (forcePopup = false) => {
     setLoginError(false)
     const provider = new GoogleAuthProvider()
+    provider.setCustomParameters({ prompt: 'select_account' }) // que Google siempre deje elegir la cuenta
     try {
       if (isInstalledApp() && !forcePopup) await signInWithRedirect(auth, provider)
       else await signInWithPopup(auth, provider)
