@@ -2,7 +2,7 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// Dos páginas: el panel de Alberto (index.html, instalable) y la página del jugador (scan.html, sin instalar).
+// Tres páginas: el panel de Alberto (index.html, instalable), la del jugador (scan.html) y el Diario público (diario.html); las dos últimas, sin instalar.
 export default defineConfig({
   define: { __BUILD__: JSON.stringify(new Date().toISOString().slice(0, 16).replace('T', ' ')) },
   plugins: [
@@ -14,9 +14,9 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,woff2,png,svg,webmanifest}'],
         // La página del jugador y las rutas de acceso de Firebase nunca pasan por el service worker.
-        globIgnores: ['scan.html', 'assets/scan-*'],
+        globIgnores: ['scan.html', 'assets/scan-*', 'diario.html', 'assets/diario-*'],
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/s\//, /^\/__\//],
+        navigateFallbackDenylist: [/^\/s\//, /^\/diario/, /^\/__\//],
         importScripts: ['sw-extra.js'],
         cleanupOutdatedCaches: true,
       },
@@ -24,7 +24,7 @@ export default defineConfig({
   ],
   build: {
     rollupOptions: {
-      input: { main: 'index.html', scan: 'scan.html' },
+      input: { main: 'index.html', scan: 'scan.html', diario: 'diario.html' },
     },
   },
 })

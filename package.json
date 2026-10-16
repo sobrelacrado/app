@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "test:rules": "firebase emulators:exec --only firestore --project demo-sobre-lacrado \"node --test tests/firestore.rules.test.js\"",
     "test": "npm run test:unit && npm run test:build && npm run test:rules",
-    "test:unit": "node --test tests/stats.test.js tests/games.test.js tests/alerts.test.js tests/i18n.test.js tests/runs.test.js",
+    "test:unit": "node --test tests/stats.test.js tests/games.test.js tests/alerts.test.js tests/i18n.test.js tests/runs.test.js tests/diario.test.js",
     "test:build": "vite build && node --test tests/pwa.test.js"
   },
   "dependencies": {

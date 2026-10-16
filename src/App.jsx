@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import { GoogleAuthProvider, getRedirectResult, onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut } from 'firebase/auth'
 import { auth } from './auth.js'
 import { LANGS, LangContext, initialLang, textsFor } from './i18n.js'
@@ -9,6 +9,9 @@ import Menu from './components/Menu.jsx'
 import Games from './components/Games.jsx'
 import Panel from './components/Panel.jsx'
 import Stats from './components/Stats.jsx'
+
+// El Diario público se carga solo cuando Alberto lo abre desde el menú (así el panel no pesa más).
+const Diario = lazy(() => import('./diario/Diario.jsx'))
 
 const store = {
   get: (k, d) => { try { return localStorage.getItem(k) ?? d } catch { return d } },
@@ -23,6 +26,7 @@ export default function App() {
   const [loginError, setLoginError] = useState(false) // false | código del error
   const [redirectDiag, setRedirectDiag] = useState('…')
   const [tab, setTab] = useState('runs')
+  const [vista, setVista] = useState('panel') // 'panel' | 'diario' (el panel sigue vivo debajo, con sus avisos)
   const [modo, setModo] = useState(() => (store.get('sl_modo', 'claro') === 'oscuro' ? 'oscuro' : 'claro'))
   const [alertsOn, setAlertsOn] = useState(() => store.get('sl_alerts', 'off') === 'on')
   const ctx = useMemo(() => ({ lang, t: textsFor(lang) }), [lang])
@@ -94,13 +98,21 @@ export default function App() {
           <button type="button" className="suave" onClick={() => applyUpdate()}>{t.update}</button>
         </div>
       )}
-      <div className="hoja">
+      {allowed && vista === 'diario' && (
+        <Suspense fallback={<p className="vacio">{t.loading}</p>}>
+          <Diario onExit={() => setVista('panel')} />
+        </Suspense>
+      )}
+      <div className="hoja" hidden={allowed && vista === 'diario'}>
         <header className="membrete">
           <div className="marca">
             <img src="/sello-128.png" alt="" />
             <div className="logo">SOBRE LACRADO<small>{t.panel.toUpperCase()}</small></div>
           </div>
           <Menu label={t.menu}>
+            {allowed && (
+              <button type="button" role="menuitem" onClick={() => setVista('diario')}>🔓 {t.diaryOpen}</button>
+            )}
             {allowed && (
               <button type="button" role="menuitem" onClick={toggleAlerts} aria-pressed={alertsOn}>
                 {alertsOn ? t.alertsOn : t.alertsOff}

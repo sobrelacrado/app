@@ -12,13 +12,17 @@
         "destination": "/scan.html"
       },
       {
+        "source": "/diario{,/**}",
+        "destination": "/diario.html"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
     ],
     "headers": [
       {
-        "source": "{/,/index.html,/scan.html,/s/**}",
+        "source": "{/,/index.html,/scan.html,/diario.html,/diario,/s/**}",
         "headers": [
           {
             "key": "Cache-Control",

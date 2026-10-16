@@ -61,3 +61,16 @@ test('firebase.json: el service worker y el manifiesto no se guardan en caché',
   assert.ok(rule && rule.source.includes('manifest.webmanifest'))
   assert.equal(rule.headers[0].value, 'no-cache')
 })
+
+test('el Diario es una página pública aparte: sin manifiesto, fuera del service worker y con su ruta en Firebase', () => {
+  assert.ok(existsSync(dist('diario.html')))
+  assert.doesNotMatch(readFileSync(dist('diario.html'), 'utf8'), /rel="manifest"/)
+  const sw = readFileSync(dist('sw.js'), 'utf8')
+  assert.ok((sw.match(/denylist:\[([^\]]*)\]/) ?? [])[1]?.includes('\/diario'), 'no excluye /diario')
+  const precached = [...sw.matchAll(/url:"([^"]+)"/g)].map((m) => m[1])
+  assert.ok(!precached.some((u) => /diario/.test(u)), 'no debe precargar nada del Diario')
+  const hosting = JSON.parse(readFileSync('firebase.json', 'utf8')).hosting
+  const i = hosting.rewrites.findIndex((r) => r.destination === '/diario.html')
+  assert.ok(i >= 0 && i < hosting.rewrites.findIndex((r) => r.source === '**'), 'la ruta /diario debe ir antes del comodín')
+  assert.ok(hosting.headers.some((h) => h.source.includes('/diario.html') && h.headers.some((x) => x.value === 'no-cache')))
+})
