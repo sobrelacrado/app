@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { dateKey, dayIndex, fmtTime, isCorrect, levelStars, nextKey, puzzleFor, shareText, streakOf } from './ciphers.js'
 import { GAMES, HOWTO, TYPE_NAME } from './games.jsx'
+import './diario.css'
 import PUZZLES from './puzzles.js'
 
 const SITE_URL = 'https://app-sobre-lacrado.web.app/diario'
@@ -105,6 +106,7 @@ export default function Diario({ onExit }) {
           <p>{HOWTO[puzzle.type]}</p>
         </details>
 
+        <section className="dr-juego">
         {day.done ? (
           <div className="dr-resuelto" role="status">
             <div className="dr-sello">Resuelto</div>
@@ -134,6 +136,7 @@ export default function Diario({ onExit }) {
             </div>
           </>
         )}
+        </section>
       </article>
 
       <footer className="dr-pie">
