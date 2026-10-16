@@ -4,7 +4,7 @@ import { db } from '../firebase.js'
 import { useT } from '../i18n.js'
 import { newGameId, newStepId } from '../lib/ids.js'
 import { THEMES, DEFAULT_THEME, themeOf } from '../lib/themes.js'
-import { CASE2, EXPEDIENTE_TEMPLATE, STEP_TYPES, saveGame, scanUrl, validateGame } from '../lib/games.js'
+import { CASE2, CASE3, EXPEDIENTE_TEMPLATE, STEP_TYPES, saveGame, scanUrl, validateGame } from '../lib/games.js'
 
 const TYPE_KEY = { start: 'typeStart', clue: 'typeClue', normal: 'typeNormal', solution: 'typeSolution' }
 const blankStep = () => ({ id: newStepId(), label: '', type: 'normal', url: '', active: true, saved: false })
@@ -135,6 +135,15 @@ export default function GameEditor({ gameId, onBack, onQr }) {
         <div className="plantillas">
           <b>{t.gTemplates}</b>
           <button type="button" className="suave" onClick={() => setSteps(fromTemplate(EXPEDIENTE_TEMPLATE))}>{t.tplExpediente}</button>
+          <button
+            type="button" className="suave"
+            onClick={() => {
+              if (isNew) setName(CASE3.name)
+              setLimit(String(CASE3.timeLimitMinutes)); setTheme(CASE3.theme); setSteps(fromTemplate(CASE3.steps))
+            }}
+          >
+            {t.tplCase3}
+          </button>
           {isNew && (
             <button
               type="button" className="suave"

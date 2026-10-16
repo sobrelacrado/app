@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import jsQR from 'jsqr'
 import { ALPHABET, newGameId, newStepId } from '../src/lib/ids.js'
-import { CASE2, EXPEDIENTE_TEMPLATE, scanUrl, validateGame } from '../src/lib/games.js'
+import { CASE2, CASE3, EXPEDIENTE_TEMPLATE, scanUrl, validateGame } from '../src/lib/games.js'
 import { qrMatrix, qrSvgString } from '../src/lib/qr.js'
 
 test('identificadores: longitud, alfabeto sin letras ambiguas y sin repetidos', () => {
@@ -125,4 +125,12 @@ test('SVG del QR: bien formado, con fondo blanco y margen', () => {
   assert.match(svg, /^<svg [^>]*viewBox="0 0 \d+ \d+"/)
   assert.ok(svg.includes('fill="#fff"') && svg.includes('fill="#000"'))
   assert.ok(!/NaN|undefined/.test(svg))
+})
+
+test('la precarga del caso 3 es válida: 6 pasos, destinos https en sobrelacrado.github.io y tema egipcio', () => {
+  const steps = CASE3.steps.map((s) => ({ ...s, active: true }))
+  assert.deepEqual(validateGame({ name: CASE3.name, timeLimitMinutes: CASE3.timeLimitMinutes, steps }), [])
+  assert.equal(CASE3.steps.length, 6)
+  assert.ok(CASE3.steps.every((s) => s.url.startsWith('https://sobrelacrado.github.io/')))
+  assert.equal(CASE3.theme, 'egipcio')
 })

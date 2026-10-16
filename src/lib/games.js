@@ -35,6 +35,23 @@ export const CASE2 = {
   ],
 }
 
+// Caso 3 (23-M-014, La caja 14). El contenido está alojado en sobrelacrado.github.io: el QR pasa por la app
+// (para registrar la partida) y la app redirige allí.
+const C3 = 'https://sobrelacrado.github.io'
+export const CASE3 = {
+  name: 'Caso 3 · La caja 14 (23-M-014)',
+  timeLimitMinutes: 240,
+  theme: 'egipcio',
+  steps: [
+    { label: 'V0 · Película de presentación', type: 'start', url: `${C3}/videos/caja14-v0/` },
+    { label: 'V1 · Cilindro de la Srta. Coll', type: 'normal', url: `${C3}/caja14-v1/` },
+    { label: 'V2 · Cilindro del Sr. Varela', type: 'normal', url: `${C3}/caja14-v2/` },
+    { label: 'ESCENA · Placas del agente', type: 'normal', url: `${C3}/escenas/caja14/` },
+    { label: 'Pistas', type: 'clue', url: `${C3}/docs/caja14/pistas.pdf` },
+    { label: 'Solución', type: 'solution', url: `${C3}/docs/caja14/solucion.pdf` },
+  ],
+}
+
 export function isHttps(url) {
   try {
     return new URL(String(url).trim()).protocol === 'https:'
