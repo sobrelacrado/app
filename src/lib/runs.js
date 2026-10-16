@@ -27,3 +27,14 @@ export const fmtDateTime = (d, lang) =>
 export function sortSteps(steps) {
   return [...steps].sort((a, b) => (a.order ?? 999) - (b.order ?? 999) || String(a.label).localeCompare(b.label))
 }
+
+// Tiempo que queda de la partida para el anillo de la tarjeta: fracción (1 = recién empezada, 0 = agotado)
+// y tono de color. Las terminadas se ven completas y en verde; las agotadas, vacías y en gris.
+export function timeLeft(run, game, now) {
+  const status = runStatus(run, game, now)
+  if (status.kind === 'finished') return { fraction: 1, tone: 'ok' }
+  if (status.kind === 'timeout') return { fraction: 0, tone: 'off' }
+  const limit = (game?.timeLimitMinutes ?? DEFAULT_LIMIT_MIN) * 60000
+  const fraction = Math.min(1, Math.max(0, 1 - status.ms / limit))
+  return { fraction, tone: fraction > 0.5 ? 'ok' : fraction > 0.2 ? 'warn' : 'crit' }
+}

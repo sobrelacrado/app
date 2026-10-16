@@ -108,8 +108,8 @@ export default function App() {
         {user === undefined && <p className="vacio">{t.loading}</p>}
 
         {user === null && (
-          <div className="centro">
-            <img src="/sello-128.png" alt="Sobre Lacrado" />
+          <div className="centro acceso">
+            <span className="sello-acceso"><img src="/sello-128.png" alt="Sobre Lacrado" /></span>
             <h1>SOBRE LACRADO</h1>
             <p>{t.loginHelp}</p>
             <button type="button" onClick={() => login()}>{t.login}</button>
@@ -133,9 +133,11 @@ export default function App() {
               <button type="button" className={tab === 'stats' ? 'activa' : ''} onClick={() => setTab('stats')}>{t.tabStats}</button>
               <button type="button" className={tab === 'games' ? 'activa' : ''} onClick={() => setTab('games')}>{t.tabGames}</button>
             </nav>
-            {tab === 'runs' && <Panel />}
-            {tab === 'stats' && <Stats />}
-            {tab === 'games' && <Games />}
+            <div className="vista" key={tab}>
+              {tab === 'runs' && <Panel />}
+              {tab === 'stats' && <Stats />}
+              {tab === 'games' && <Games />}
+            </div>
             <AlertWatcher enabled={alertsOn} onOpen={() => setTab('runs')} />
           </>
         )}

@@ -80,7 +80,6 @@ button:disabled { opacity: .5; cursor: default; }
 }
 .tarjeta .fila { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .tarjeta .alias { font-family: var(--titulo); font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
-.tarjeta .tiempo { font-family: var(--titulo); font-size: 26px; letter-spacing: 1px; }
 .tarjeta .meta { font-size: 13px; color: var(--gris); }
 .tarjeta .aviso { color: var(--rojo); font-weight: 700; }
 
@@ -144,11 +143,12 @@ select { font: inherit; padding: 4px 6px; background: #fff; border: 1px solid va
 .fila-juego .meta { font-size: 13px; color: var(--gris); }
 .acciones { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .campo { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--gris); margin: 8px 0; }
-.campo input, .campo select, input[type=number] { font: inherit; font-size: 15px; padding: 7px 8px; background: #fff; border: 1px solid var(--linea); color: var(--tinta); }
+.campo { min-width: 0; }
+.campo input, .campo select, input[type=number] { width: 100%; min-width: 0; font: inherit; font-size: 15px; padding: 7px 8px; background: #fff; border: 1px solid var(--linea); color: var(--tinta); }
 .fila-campos { display: flex; gap: 18px; align-items: flex-end; flex-wrap: wrap; }
 .casilla { display: flex; align-items: center; gap: 6px; font-size: 13px; margin: 8px 0; }
 .plantillas { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 0; }
-.paso-fila { position: relative; display: grid; grid-template-columns: 2fr 1fr; gap: 0 12px; background: #fbf7ec; border: 1px solid #bbb;
+.paso-fila { position: relative; display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 0 12px; min-width: 0; background: #fbf7ec; border: 1px solid #bbb;
   box-shadow: 2px 3px 6px rgba(0, 0, 0, .15); padding: 8px 12px 10px 40px; margin: 12px 0; }
 .paso-fila.inactivo { opacity: .6; }
 .paso-fila .ancho, .paso-fila .acciones { grid-column: 1 / -1; }
@@ -172,6 +172,8 @@ select { font: inherit; padding: 4px 6px; background: #fff; border: 1px solid va
   html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body { background: #fff; }
   .no-imprimir, .membrete, .pestanas { display: none !important; }
+  body { background-image: none; }
+  .hoja, .vista { animation: none; }
   .hoja { max-width: none; margin: 0; padding: 0; box-shadow: none; background: #fff; }
   .pagina-qr { margin: 0; width: 210mm; height: 297mm; padding: 12mm; break-after: page; page-break-after: always; overflow: hidden; }
   .pagina-qr:last-child { break-after: auto; page-break-after: auto; }
@@ -189,3 +191,106 @@ select { font: inherit; padding: 4px 6px; background: #fff; border: 1px solid va
 .avisos { position: fixed; top: 10px; left: 10px; right: 10px; z-index: 20; display: flex; flex-direction: column; gap: 8px; max-width: 460px; margin: 0 auto; }
 .aviso-flotante { display: flex; justify-content: space-between; align-items: center; gap: 12px; background: var(--papel);
   border: 2px solid var(--rojo); box-shadow: 0 6px 18px rgba(0, 0, 0, .45); padding: 10px 12px; font-size: 14px; }
+
+/* ---------- Fase 7A: más vida (mesa, animaciones, tarjetas) ---------- */
+body {
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, .14), transparent 60%),
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, .035) 0 2px, transparent 2px 7px),
+    radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(0, 0, 0, .3) 100%);
+  background-attachment: fixed;
+}
+.hoja { animation: entrar .55s ease-out backwards; }
+.vista { animation: aparecer .35s ease-out backwards; }
+@keyframes entrar { from { opacity: 0; transform: translateY(14px); } }
+@keyframes aparecer { from { opacity: 0; transform: translateY(6px); } }
+
+/* Botones con respuesta al tocar */
+button, .boton { transition: transform .12s, box-shadow .12s, filter .12s, background-color .2s; }
+button:not(.tarjeta):not(:disabled):hover { transform: translateY(-1px); }
+button:not(.tarjeta):not(:disabled):active { transform: translateY(1px) scale(.98); filter: brightness(.95); }
+.pestanas button.activa { box-shadow: inset 0 -3px 0 var(--rojo); }
+
+/* Pantalla de acceso: el sello se estampa sobre la hoja */
+.acceso h1, .acceso p, .acceso button { animation: subir .6s ease-out backwards; }
+.acceso h1 { animation-delay: .5s; }
+.acceso p { animation-delay: .65s; }
+.acceso button { animation-delay: .8s; }
+.sello-acceso { position: relative; display: inline-block; width: 120px; height: 120px; }
+.sello-acceso img { animation: estampar .8s cubic-bezier(.2, .8, .3, 1.1) backwards; transform: rotate(-3deg); filter: drop-shadow(0 4px 6px rgba(70, 10, 10, .35)); }
+.sello-acceso::after {
+  content: ''; position: absolute; inset: 6px; border-radius: 50%; border: 3px solid var(--rojo);
+  animation: onda .9s ease-out .45s backwards; opacity: 0;
+}
+@keyframes estampar {
+  from { opacity: 0; transform: scale(2.4) rotate(-20deg); }
+  60% { opacity: 1; transform: scale(.93) rotate(-2deg); }
+}
+@keyframes onda { from { opacity: .7; transform: scale(.9); } to { opacity: 0; transform: scale(1.8); } }
+@keyframes subir { from { opacity: 0; transform: translateY(10px); } }
+
+/* Partidas en directo: fichas clavadas en la mesa */
+h2.en-directo::after {
+  content: ''; display: inline-block; width: 9px; height: 9px; margin-left: 10px; border-radius: 50%;
+  background: var(--rojo); vertical-align: 1px; animation: latido 1.4s ease-in-out infinite;
+}
+@keyframes latido { 0%, 100% { box-shadow: 0 0 0 0 rgba(163, 29, 29, .55); } 50% { box-shadow: 0 0 0 7px rgba(163, 29, 29, 0); } }
+
+.tarjeta { --rot: -.5deg; transform: rotate(var(--rot)); transition: transform .2s, box-shadow .2s; overflow: visible;
+  animation: caer .55s cubic-bezier(.2, .8, .3, 1) backwards; animation-delay: calc(var(--i, 0) * 70ms); }
+.tarjeta:nth-of-type(even) { --rot: .6deg; }
+.tarjeta:hover { transform: rotate(0deg) translateY(-2px); }
+.tarjeta::before {
+  content: ''; position: absolute; top: -9px; right: 22px; width: 14px; height: 14px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #d35b5b, var(--rojo) 55%, #5e0f0f); box-shadow: 1px 3px 4px rgba(0, 0, 0, .4);
+}
+@keyframes caer {
+  from { opacity: 0; transform: translateY(-22px) rotate(calc(var(--rot) - 3deg)) scale(1.04); }
+}
+.tarjeta.open { border-left: 5px solid var(--azul); }
+.tarjeta.finished { border-left: 5px solid var(--verde); }
+.tarjeta.timeout { border-left: 5px solid var(--gris); }
+.tarjeta .cabecera { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.tarjeta .datos { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.tarjeta .alias { overflow-wrap: anywhere; }
+
+.anillo { flex: none; width: 72px; height: 72px; }
+.anillo circle { fill: none; stroke-width: 6; }
+.anillo .pista { stroke: #d9d1bd; }
+.anillo .progreso { stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 1s linear, stroke .4s; }
+.anillo.ok .progreso { stroke: var(--verde); }
+.anillo.warn .progreso { stroke: #c27a14; }
+.anillo.crit .progreso { stroke: var(--rojo); }
+.anillo.off .progreso { stroke: var(--gris); }
+.anillo text { font-family: var(--titulo); font-size: 11.5px; fill: var(--tinta); }
+.anillo.crit text { fill: var(--rojo); }
+
+/* Un sello por cada paso: se estampa al escanearse */
+.rastro { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; }
+.punto { width: 16px; height: 16px; border-radius: 50%; border: 2px dashed #a79d86; }
+.punto.clue { border-radius: 3px; transform: rotate(45deg) scale(.85); }
+.punto.start, .punto.solution { width: 18px; height: 18px; border-style: solid; }
+.punto.hecho {
+  border: 2px solid #5e0f0f; background: radial-gradient(circle at 35% 30%, #c94646, var(--rojo) 60%);
+  animation: sellar .45s cubic-bezier(.2, .8, .3, 1.3) backwards; animation-delay: calc(var(--k, 0) * 45ms + .25s);
+}
+.punto.clue.hecho { transform: rotate(45deg) scale(.85); }
+@keyframes sellar { from { opacity: 0; transform: scale(2.2); } }
+.tarjeta .fila.meta { margin: 8px 0 10px; }
+
+/* Partida terminada: sello grande de fondo */
+.sello-grande {
+  position: absolute; right: 14px; bottom: 10px; font-family: var(--titulo); font-size: 26px; letter-spacing: 5px; text-transform: uppercase;
+  color: var(--verde); border: 4px double var(--verde); padding: 2px 12px; opacity: .22; transform: rotate(-9deg); pointer-events: none;
+  animation: sello-grande .6s cubic-bezier(.2, .8, .3, 1) .3s backwards;
+}
+@keyframes sello-grande { from { opacity: 0; transform: rotate(-9deg) scale(2); } }
+
+@media (max-width: 420px) {
+  .paso-fila { grid-template-columns: minmax(0, 1fr); padding-left: 34px; }
+  .anillo { width: 64px; height: 64px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

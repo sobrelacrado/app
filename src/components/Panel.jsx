@@ -17,13 +17,13 @@ export default function Panel() {
   const running = runs.filter(isOpen)
   const recent = runs.filter((r) => !isOpen(r))
 
-  const render = (r) => (
-    <RunCard key={r.id} run={r} game={games[r.gameId]} steps={steps[r.gameId]} scans={scans[r.id]} now={now} />
+  const render = (r, i) => (
+    <RunCard key={r.id} index={i} run={r} game={games[r.gameId]} steps={steps[r.gameId]} scans={scans[r.id]} now={now} />
   )
 
   return (
     <>
-      <h2>{t.running} ({running.length})</h2>
+      <h2 className={running.length ? 'en-directo' : ''}>{t.running} ({running.length})</h2>
       {running.length ? running.map(render) : <p className="vacio">{t.noRunning}</p>}
       <h2>{t.recent}</h2>
       {recent.length ? recent.map(render) : <p className="vacio">{t.noRecent}</p>}
