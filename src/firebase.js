@@ -19,8 +19,8 @@ export const app = initializeApp({
 })
 
 // El panel guarda una copia en el móvil para poder enseñar lo último cargado sin conexión.
-// La página del jugador (/s/...) no la usa: se queda tal cual, sin copia ni escrituras pendientes.
-const isPlayerPage = location.pathname.startsWith('/s/')
+// La página del jugador (/s/...) y el Diario público no la usan: se queda tal cual, sin copia ni escrituras pendientes.
+const isPlayerPage = location.pathname.startsWith('/s/') || location.pathname.startsWith('/diario')
 export const db = isPlayerPage
   ? getFirestore(app)
   : initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) })

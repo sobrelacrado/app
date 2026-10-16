@@ -6,6 +6,7 @@ import {
   lockCandidates, lockFeedback, morseDecode, morseEncode, nextKey, normalize, pigpenGlyph, pigpenLetters, pigpenStore, puzzleFor,
   shareText, shuffled, streakOf,
 } from '../src/diario/ciphers.js'
+import { bestStreak, calendar, diarioStats, mergeDays } from '../src/diario/stats.js'
 import PUZZLES from '../src/diario/puzzles.js'
 // El archivo con las soluciones en claro NO está en GitHub (el repositorio es público): solo en el PC de Alberto.
 const SRC = await import('../src/diario/puzzles.src.mjs').then((m) => m.default).catch(() => null)
@@ -129,4 +130,61 @@ test('texto para compartir: no revela la solución y resume intentos, pista y ti
   assert.match(t, /2:14/)
   assert.match(t, /https:\/\/x\.test\/diario/)
   assert.equal(fmtTime(65000), '1:05')
+})
+
+// ---------- Estadísticas personales y mezcla con la nube ----------
+const hecho = (extra = {}) => ({ done: true, tries: 0, hint: false, ms: 60000, ...extra })
+
+test('mejor racha: cuenta el tramo más largo de días seguidos del historial', () => {
+  const d = { '2026-10-01': hecho(), '2026-10-02': hecho(), '2026-10-03': hecho(), '2026-10-05': hecho(), '2026-10-06': hecho(), '2026-10-07': { done: false } }
+  assert.equal(bestStreak(d), 3)
+  assert.equal(bestStreak({}), 0)
+})
+
+test('calendario: 4 semanas de lunes a domingo que acaban en la semana de hoy', () => {
+  const hoy = '2026-10-16' // viernes
+  const cal = calendar({ '2026-10-15': hecho(), '2026-10-14': { done: false } }, hoy)
+  assert.equal(cal.length, 28)
+  assert.equal(cal[0].key, '2026-09-21') // lunes de hace 3 semanas
+  assert.equal(cal[27].key, '2026-10-18') // domingo de esta semana
+  assert.equal(cal.find((c) => c.key === '2026-10-15').state, 'done')
+  assert.equal(cal.find((c) => c.key === '2026-10-14').state, 'miss')
+  assert.equal(cal.find((c) => c.key === hoy).state, 'today')
+  assert.equal(cal.find((c) => c.key === '2026-10-17').state, 'future')
+})
+
+test('estadísticas: totales, porcentajes y tiempo medio por tipo (aunque falte el tipo guardado)', () => {
+  const dias = {
+    '2026-10-14': hecho({ ms: 120000, tries: 2, type: 'cesar' }),
+    '2026-10-15': hecho({ ms: 60000, hint: true }), // sin tipo guardado: se deduce de la fecha (día 4 de la lista = cesar)
+    '2026-10-16': hecho({ ms: 90000, type: 'morse' }),
+    '2026-10-13': { done: false, tries: 3, hint: false, ms: 5000 },
+  }
+  const s = diarioStats(dias, '2026-10-16', PUZZLES)
+  assert.equal(s.solved, 3)
+  assert.equal(s.streak, 3)
+  assert.equal(s.avgMs, 90000)
+  assert.equal(s.firstTryPct, 67)
+  assert.equal(s.noHintPct, 67)
+  assert.deepEqual(s.types.map((t) => [t.type, t.count]), [['cesar', 2], ['morse', 1]])
+  assert.equal(s.types[0].avgMs, 90000)
+  assert.equal(diarioStats({}, '2026-10-16', PUZZLES).avgMs, null)
+})
+
+test('mezcla móvil + nube: un día resuelto gana, lo que solo está en el móvil se sube y nada se pierde', () => {
+  const local = { a: hecho({ ms: 50000 }), b: { done: false, tries: 1, hint: false, ms: 1 }, solo: hecho() }
+  const remote = { a: hecho({ ms: 99000 }), b: hecho({ ms: 70000 }), nube: hecho() }
+  const { merged, upload } = mergeDays(local, remote)
+  assert.equal(merged.a.ms, 99000) // ambos resueltos: se queda el de la nube
+  assert.equal(merged.b.done, true)
+  assert.ok(merged.solo && merged.nube)
+  assert.deepEqual(upload.sort(), ['solo'])
+  // móvil resuelto y nube sin resolver: se sube el del móvil
+  const m2 = mergeDays({ x: hecho() }, { x: { done: false, tries: 2, hint: true, ms: 1 } })
+  assert.equal(m2.merged.x.done, true)
+  assert.deepEqual(m2.upload, ['x'])
+  // la pista y los fallos nunca se pierden
+  const m3 = mergeDays({ y: { done: false, tries: 4, hint: true, ms: 1 } }, { y: { done: false, tries: 1, hint: false, ms: 1 } })
+  assert.equal(m3.merged.y.tries, 4)
+  assert.equal(m3.merged.y.hint, true)
 })

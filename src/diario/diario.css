@@ -114,3 +114,30 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-carta button.dr-ficha.dr-sel { background: var(--t-etq-bg); color: var(--t-etq-color); border-color: var(--t-etq-bg); }
 .dr-nota { margin: 4px 0 0; font-size: 12px; opacity: .75; text-align: center; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* ---------- Pestañas y pantalla Mi progreso ---------- */
+.dr-tabs { display: flex; gap: 8px; margin: 0 0 14px; }
+.dr-tabs button { flex: 1; min-height: 42px; background: transparent; color: #f3eee2; border: 1px solid rgba(243, 238, 226, .55); border-radius: 999px; font-size: 12px; }
+.dr-tabs button.activa { background: #f3eee2; color: #1d1d1d; border-color: #f3eee2; }
+.dr-cifras-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 6px 0 4px; }
+.dr-cifra { background: rgba(0, 0, 0, .06); padding: 12px 6px 10px; text-align: center; border-radius: 6px; }
+.dr-cifra b { display: block; font: 700 22px 'Space Mono', monospace; line-height: 1.2; }
+.dr-cifra small { display: block; margin-top: 4px; font-size: 11px; letter-spacing: .5px; opacity: .8; }
+.dr-sub { margin: 24px 0 10px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid currentColor; padding-bottom: 4px; font-family: var(--t-titulo); }
+.dr-cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+.dr-dia-sem { text-align: center; font-size: 11px; opacity: .65; }
+.dr-dia { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-weight: 700; font-size: 14px; background: rgba(0, 0, 0, .07); }
+.dr-dia.done { background: #1d6a3a; color: #fff; }
+.dr-dia.miss { background: rgba(163, 29, 29, .16); }
+.dr-dia.today { outline: 2px solid var(--t-etq-bg); background: transparent; }
+.dr-dia.future { opacity: .35; background: transparent; border: 1px dashed currentColor; }
+.dr-tipos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.dr-tipos li { display: grid; grid-template-columns: 1fr 70px 38px; gap: 8px; align-items: center; font-size: 13px; }
+.dr-tipos small { opacity: .7; }
+.dr-barra { display: block; height: 8px; background: rgba(0, 0, 0, .1); border-radius: 4px; overflow: hidden; }
+.dr-barra i { display: block; height: 100%; background: var(--t-etq-bg); }
+.dr-tipos b { font-family: 'Space Mono', monospace; text-align: right; }
+.dr-cuenta p { margin: 0 0 6px; line-height: 1.5; font-size: 14px; }
+.dr-cuenta .suave { margin: 6px 8px 0 0; }
+.dr-borrar { margin-top: 10px; padding: 10px 12px; background: rgba(163, 29, 29, .1); border-radius: 6px; }
+.dr-cuenta button + .dr-nota { margin-top: 14px; }

@@ -77,5 +77,28 @@ service cloud.firestore {
         }
       }
     }
+
+    // ---------- Progreso personal del Diario ----------
+    // Cada persona (sesión de Google) lee y escribe solo lo suyo; el administrador puede leerlo.
+    match /users/{uid}/diario/{day} {
+      allow read: if (request.auth != null && request.auth.uid == uid) || isAdmin();
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && day.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
+        && isValidDiaryDay(request.resource.data);
+      allow delete: if request.auth != null && request.auth.uid == uid;
+
+      function isValidDiaryDay(d) {
+        return d.keys().hasOnly(['done', 'tries', 'hint', 'ms', 'type', 'level', 'n', 'at'])
+          && d.keys().hasAll(['done', 'tries', 'hint', 'ms', 'type', 'level', 'at'])
+          && d.done is bool
+          && d.hint is bool
+          && d.tries is int && d.tries >= 0 && d.tries <= 999
+          && d.ms is int && d.ms >= 0 && d.ms <= 86400000
+          && d.type in ['cesar', 'morse', 'teclado', 'cerradura', 'anagrama', 'acrostico', 'simbolos', 'espejo']
+          && d.level is int && d.level >= 1 && d.level <= 5
+          && (!('n' in d) || d.n is int)
+          && d.at == request.time;
+      }
+    }
   }
 }

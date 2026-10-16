@@ -3,13 +3,18 @@ import { dateKey, dayIndex, fmtTime, isCorrect, levelStars, nextKey, puzzleFor, 
 import { GAMES, HOWTO, TYPE_NAME } from './games.jsx'
 import './diario.css'
 import PUZZLES from './puzzles.js'
+import Progreso from './Progreso.jsx'
+import { mergeDays } from './stats.js'
 
 const SITE_URL = 'https://app-sobre-lacrado.web.app/diario'
 const BRAND_URL = 'https://www.instagram.com/sobrelacrado/' // enlace al terminar (de momento Instagram); si está vacío no se muestra
 const STORE = 'sl_diario'
+const LOGIN_FLAG = 'sl_diario_login' // recuerda que esta persona entró con Google (así la cuenta se carga sola al abrir)
 
 const load = () => { try { return JSON.parse(localStorage.getItem(STORE)) ?? {} } catch { return {} } }
 const save = (v) => { try { localStorage.setItem(STORE, JSON.stringify(v)) } catch { /* sin almacenamiento */ } }
+const flag = (v) => { try { if (v) localStorage.setItem(LOGIN_FLAG, '1'); else localStorage.removeItem(LOGIN_FLAG) } catch { /* sin almacenamiento */ } }
+const hasFlag = () => { try { return localStorage.getItem(LOGIN_FLAG) === '1' } catch { return false } }
 
 // onExit: cuando el Diario se abre desde dentro del panel de administración, botón para volver a él.
 export default function Diario({ onExit }) {
@@ -18,6 +23,10 @@ export default function Diario({ onExit }) {
   const [wrong, setWrong] = useState(0) // fallos de esta visita, para animar el aviso
   const [copied, setCopied] = useState(false)
   const [now, setNow] = useState(Date.now)
+  const [vista, setVista] = useState('hoy') // 'hoy' | 'progreso'
+  const [user, setUser] = useState(null) // cuenta de Google (null = sin sesión)
+  const [status, setStatus] = useState('') // '' | 'entrando' | 'sincronizando' | 'error'
+  const cloud = useRef(null) // módulo de la nube, se carga solo cuando hace falta
   const storeRef = useRef(store)
   storeRef.current = store
 
@@ -26,13 +35,51 @@ export default function Diario({ onExit }) {
   const days = store.days ?? {}
   const day = days[key] ?? { tries: 0, hint: false, done: false, ms: 0 }
 
-  const update = (patch) => {
+  // sync = false para el reloj (cada segundo): lo demás (pista, fallo, resuelto) se guarda también en la cuenta.
+  const update = (patch, sync = true) => {
     const cur = storeRef.current
-    const d = { tries: 0, hint: false, done: false, ms: 0, ...(cur.days ?? {})[key], ...patch }
+    const d = { tries: 0, hint: false, done: false, ms: 0, type: puzzle.type, level: puzzle.level, ...(cur.days ?? {})[key], ...patch }
     const next = { ...cur, days: { ...(cur.days ?? {}), [key]: d } }
     storeRef.current = next
     setStore(next)
     save(next)
+    if (sync && userRef.current && cloud.current) cloud.current.pushDay(userRef.current.uid, key, d).catch(() => setStatus('error'))
+  }
+
+  // Cuenta: se carga al abrir si ya había entrado antes (o si el Diario va dentro del panel); al detectar sesión se mezcla el progreso.
+  const userRef = useRef(null)
+  const loadCloud = async () => {
+    if (cloud.current) return cloud.current
+    cloud.current = await import('./cloud.js')
+    cloud.current.watchUser(async (u) => {
+      userRef.current = u
+      setUser(u)
+      if (!u) return
+      flag(true)
+      setStatus('sincronizando')
+      try {
+        const remote = await cloud.current.pullDays(u.uid)
+        const cur = storeRef.current
+        const { merged, upload } = mergeDays(cur.days ?? {}, remote)
+        const next = { ...cur, days: merged }
+        storeRef.current = next
+        setStore(next)
+        save(next)
+        await Promise.all(upload.map((k) => cloud.current.pushDay(u.uid, k, { type: puzzleFor(PUZZLES, k).type, level: puzzleFor(PUZZLES, k).level, ...merged[k] })))
+        setStatus('')
+      } catch { setStatus('error') }
+    })
+    return cloud.current
+  }
+  useEffect(() => { if (onExit || hasFlag()) loadCloud().catch(() => {}) }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  const doLogin = async () => {
+    setStatus('entrando')
+    try { await (await loadCloud()).login(); setStatus('') } catch { setStatus('error') }
+  }
+  const doLogout = async () => { await cloud.current?.logout(); flag(false); setUser(null); userRef.current = null; setStatus('') }
+  const doDelete = async () => {
+    setStatus('sincronizando')
+    try { await cloud.current.deleteAll(userRef.current.uid); setStatus('') } catch { setStatus('error') }
   }
 
   // Reloj: suma tiempo solo con la pantalla visible y mientras no esté resuelto; pasada la medianoche cambia de día.
@@ -42,7 +89,7 @@ export default function Diario({ onExit }) {
       const k = dateKey()
       if (k !== key) { setKey(k); return }
       const d = (storeRef.current.days ?? {})[key]
-      if (document.visibilityState === 'visible' && !d?.done) update({ ms: (d?.ms ?? 0) + 1000 })
+      if (document.visibilityState === 'visible' && !d?.done) update({ ms: (d?.ms ?? 0) + 1000 }, false)
     }, 1000)
     return () => clearInterval(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -92,6 +139,18 @@ export default function Diario({ onExit }) {
         <div className="dr-racha" title="Días seguidos resueltos">🔥 {streak}</div>
       </header>
 
+      <nav className="dr-tabs" aria-label="Secciones">
+        <button type="button" className={vista === 'hoy' ? 'activa' : ''} onClick={() => setVista('hoy')}>Hoy</button>
+        <button type="button" className={vista === 'progreso' ? 'activa' : ''} onClick={() => setVista('progreso')}>
+          Mi progreso{user ? ' ✓' : ''}
+        </button>
+      </nav>
+
+      {vista === 'progreso' && (
+        <Progreso days={days} todayKey={key} user={user} status={status} onLogin={doLogin} onLogout={doLogout} onDelete={doDelete} />
+      )}
+
+      {vista === 'hoy' && (
       <article className={`dr-carta tema-${puzzle.theme}`}>
         <div className="dr-meta">
           <span>Diario nº {n}</span>
@@ -138,6 +197,7 @@ export default function Diario({ onExit }) {
         )}
         </section>
       </article>
+      )}
 
       <footer className="dr-pie">
         <p>Un código nuevo cada día · Resueltos: {solvedTotal}</p>

@@ -247,3 +247,47 @@ test('borrar una partida se lleva sus escaneos y deja las demás', async () => {
   assert.equal((await getDoc(doc(a, 'runs/borra1/scans/aaaa2222'))).exists(), false)
   assert.equal((await getDoc(doc(a, 'runs/borra2'))).exists(), true)
 })
+
+// ---------- Progreso personal del Diario ----------
+const persona = (uid) => env.authenticatedContext(uid, { email: uid + '@gmail.com', email_verified: true }).firestore()
+const dia = (extra = {}) => ({ done: true, tries: 1, hint: false, ms: 95000, type: 'morse', level: 2, n: 5, at: serverTimestamp(), ...extra })
+
+test('Diario: cada persona guarda, lee y borra solo su progreso', async () => {
+  const ana = persona('ana')
+  await assertSucceeds(setDoc(doc(ana, 'users/ana/diario/2026-10-16'), dia()))
+  assert.equal((await getDoc(doc(ana, 'users/ana/diario/2026-10-16'))).data().ms, 95000)
+  assert.equal((await getDocs(collection(ana, 'users/ana/diario'))).size, 1)
+  await assertSucceeds(setDoc(doc(ana, 'users/ana/diario/2026-10-16'), dia({ tries: 2 }))) // se puede actualizar
+  await assertFails(setDoc(doc(persona('beto'), 'users/ana/diario/2026-10-17'), dia())) // no escribe en la cuenta de otra
+  await assertFails(getDoc(doc(persona('beto'), 'users/ana/diario/2026-10-16'))) // ni la lee
+  await assertFails(getDocs(collection(persona('beto'), 'users/ana/diario')))
+  await assertFails(getDoc(doc(player(), 'users/ana/diario/2026-10-16'))) // sin sesión, nada
+  await assertFails(setDoc(doc(player(), 'users/ana/diario/2026-10-17'), dia()))
+  await assertFails(deleteDoc(doc(persona('beto'), 'users/ana/diario/2026-10-16')))
+  await assertSucceeds(deleteDoc(doc(ana, 'users/ana/diario/2026-10-16')))
+})
+
+test('Diario: el administrador puede leer el progreso de todos pero no escribirlo por ellos', async () => {
+  await assertSucceeds(setDoc(doc(persona('ana'), 'users/ana/diario/2026-10-16'), dia()))
+  await assertSucceeds(getDoc(doc(admin(), 'users/ana/diario/2026-10-16')))
+  await assertSucceeds(getDocs(collection(admin(), 'users/ana/diario')))
+  await assertFails(setDoc(doc(admin(), 'users/ana/diario/2026-10-17'), dia()))
+})
+
+test('Diario: se rechazan datos con forma incorrecta', async () => {
+  const ana = persona('ana')
+  const ruta = (d) => doc(ana, 'users/ana/diario/' + d)
+  await assertFails(setDoc(ruta('hoy'), dia())) // el id debe ser una fecha AAAA-MM-DD
+  await assertFails(setDoc(ruta('2026-10-16'), dia({ extra: 1 }))) // campo no permitido
+  await assertFails(setDoc(ruta('2026-10-16'), dia({ type: 'otro' })))
+  await assertFails(setDoc(ruta('2026-10-16'), dia({ level: 9 })))
+  await assertFails(setDoc(ruta('2026-10-16'), dia({ ms: -5 })))
+  await assertFails(setDoc(ruta('2026-10-16'), dia({ ms: 999999999 })))
+  await assertFails(setDoc(ruta('2026-10-16'), dia({ tries: 5000 })))
+  await assertFails(setDoc(ruta('2026-10-16'), dia({ done: 'si' })))
+  await assertFails(setDoc(ruta('2026-10-16'), dia({ at: Timestamp.fromMillis(0) }))) // la hora la pone el servidor
+  const sin = dia(); delete sin.level
+  await assertFails(setDoc(ruta('2026-10-16'), sin))
+  await assertFails(setDoc(doc(ana, 'users/ana/otra/2026-10-16'), dia())) // solo existe la carpeta "diario"
+  await assertFails(setDoc(doc(ana, 'users/ana'), { x: 1 }))
+})
