@@ -1,45 +1,88 @@
 import { useEffect, useMemo, useState } from 'react'
-import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
+import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut } from 'firebase/auth'
 import { auth } from './auth.js'
 import { LANGS, LangContext, initialLang, textsFor } from './i18n.js'
 import { ADMIN_EMAIL } from './lib/runs.js'
+import { applyUpdate, promptInstall, useCanInstall, useNeedRefresh, useOnline } from './lib/pwa.js'
+import AlertWatcher from './components/AlertWatcher.jsx'
+import Games from './components/Games.jsx'
 import Panel from './components/Panel.jsx'
 import Stats from './components/Stats.jsx'
-import Games from './components/Games.jsx'
+
+const store = {
+  get: (k, d) => { try { return localStorage.getItem(k) ?? d } catch { return d } },
+  set: (k, v) => { try { localStorage.setItem(k, v) } catch { /* sin almacenamiento */ } },
+}
+// En la app instalada, la ventana emergente de Google falla en algunos móviles: se usa redirección.
+const isInstalledApp = () => window.matchMedia?.('(display-mode: standalone)').matches
 
 export default function App() {
   const [lang, setLang] = useState(initialLang)
   const [user, setUser] = useState(undefined) // undefined = comprobando sesión
   const [loginError, setLoginError] = useState(false)
   const [tab, setTab] = useState('runs')
+  const [alertsOn, setAlertsOn] = useState(() => store.get('sl_alerts', 'off') === 'on')
   const ctx = useMemo(() => ({ lang, t: textsFor(lang) }), [lang])
   const { t } = ctx
+  const needRefresh = useNeedRefresh()
+  const canInstall = useCanInstall()
+  const online = useOnline()
 
   useEffect(() => onAuthStateChanged(auth, setUser), [])
   useEffect(() => { document.documentElement.lang = lang }, [lang])
 
   const chooseLang = (l) => {
     setLang(l)
-    try { localStorage.setItem('sl_lang', l) } catch { /* sin almacenamiento */ }
+    store.set('sl_lang', l)
   }
 
   const login = async () => {
     setLoginError(false)
-    try { await signInWithPopup(auth, new GoogleAuthProvider()) } catch { setLoginError(true) }
+    const provider = new GoogleAuthProvider()
+    try {
+      if (isInstalledApp()) await signInWithRedirect(auth, provider)
+      else await signInWithPopup(auth, provider)
+    } catch {
+      setLoginError(true)
+    }
+  }
+
+  // Activar los avisos pide permiso al navegador (solo la primera vez, y hace falta un toque del usuario).
+  const toggleAlerts = async () => {
+    const next = !alertsOn
+    if (next && 'Notification' in window && Notification.permission === 'default') {
+      try { await Notification.requestPermission() } catch { /* sin soporte */ }
+    }
+    setAlertsOn(next)
+    store.set('sl_alerts', next ? 'on' : 'off')
   }
 
   // Orientativo: quien no sea Alberto no puede leer nada aunque llegara aquí (lo impiden las reglas).
   const allowed = user && user.email === ADMIN_EMAIL
+  const blocked = alertsOn && 'Notification' in window && Notification.permission === 'denied'
 
   return (
     <LangContext.Provider value={ctx}>
+      {!online && <div className="banda">{t.offline}</div>}
+      {needRefresh && (
+        <div className="banda banda-version">
+          {t.updateAvailable}{' '}
+          <button type="button" className="suave" onClick={() => applyUpdate()}>{t.update}</button>
+        </div>
+      )}
       <div className="hoja">
         <header className="membrete">
           <div className="marca">
-            <img src="/sello.png" alt="" />
+            <img src="/sello-128.png" alt="" />
             <div className="logo">SOBRE LACRADO<small>{t.panel.toUpperCase()}</small></div>
           </div>
           <div className="herramientas">
+            {canInstall && <button type="button" className="suave" onClick={promptInstall}>{t.install}</button>}
+            {allowed && (
+              <button type="button" className={`suave ${alertsOn ? 'activo' : ''}`} onClick={toggleAlerts} aria-pressed={alertsOn}>
+                {alertsOn ? t.alertsOn : t.alertsOff}
+              </button>
+            )}
             {LANGS.map((l) => (
               <button key={l} type="button" className={`suave ${l === lang ? 'activo' : ''}`} onClick={() => chooseLang(l)}>
                 {l.toUpperCase()}
@@ -49,11 +92,13 @@ export default function App() {
           </div>
         </header>
 
+        {blocked && <p className="nota">{t.alertsBlocked}</p>}
+
         {user === undefined && <p className="vacio">{t.loading}</p>}
 
         {user === null && (
           <div className="centro">
-            <img src="/sello.png" alt="Sobre Lacrado" />
+            <img src="/sello-128.png" alt="Sobre Lacrado" />
             <h1>SOBRE LACRADO</h1>
             <p>{t.loginHelp}</p>
             <button type="button" onClick={login}>{t.login}</button>
@@ -79,6 +124,7 @@ export default function App() {
             {tab === 'runs' && <Panel />}
             {tab === 'stats' && <Stats />}
             {tab === 'games' && <Games />}
+            <AlertWatcher enabled={alertsOn} onOpen={() => setTab('runs')} />
           </>
         )}
       </div>

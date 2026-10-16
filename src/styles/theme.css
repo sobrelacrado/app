@@ -181,3 +181,11 @@ select { font: inherit; padding: 4px 6px; background: #fff; border: 1px solid va
   .tarjeta-qr figcaption b { font-size: 13pt; }
   .tarjeta-qr figcaption small { font-size: 7pt; }
 }
+
+/* App instalable: bandas de estado y avisos */
+.banda { background: var(--tinta); color: var(--papel); text-align: center; font-size: 13px; padding: 6px 12px; }
+.banda-version { background: var(--azul); }
+.banda button.suave { color: var(--papel); border-color: var(--papel); margin-left: 8px; }
+.avisos { position: fixed; top: 10px; left: 10px; right: 10px; z-index: 20; display: flex; flex-direction: column; gap: 8px; max-width: 460px; margin: 0 auto; }
+.aviso-flotante { display: flex; justify-content: space-between; align-items: center; gap: 12px; background: var(--papel);
+  border: 2px solid var(--rojo); box-shadow: 0 6px 18px rgba(0, 0, 0, .45); padding: 10px 12px; font-size: 14px; }

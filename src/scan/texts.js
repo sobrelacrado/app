@@ -1,4 +1,4 @@
-const TEXTS = {
+export const TEXTS = {
   es: {
     welcome: 'Bienvenidos al caso',
     aliasHelp: 'Pongan un nombre a su grupo (opcional). Empieza a contar el tiempo al pulsar.',

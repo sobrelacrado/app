@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 
-const TEXTS = {
+export const TEXTS = {
   es: {
     panel: 'Panel de casos',
     login: 'Entrar con Google',
@@ -130,6 +130,16 @@ const TEXTS = {
     downloadSvg: 'Descargar SVG',
     sheetN: 'Hoja',
     noActiveSteps: 'Este juego no tiene pasos activos.',
+    install: 'Instalar app',
+    updateAvailable: 'Hay una versión nueva del panel.',
+    update: 'Actualizar',
+    offline: 'Sin conexión: se muestra lo último cargado y no se actualizará hasta que vuelva la red.',
+    alertsOn: 'Avisos: sí',
+    alertsOff: 'Avisos: no',
+    alertsBlocked: 'El navegador tiene bloqueadas las notificaciones: solo verás los avisos dentro de la app. Puedes permitirlas en los ajustes del sitio.',
+    newRunTitle: 'Nueva partida',
+    view: 'Ver',
+    close: 'Cerrar',
   },
   en: {
     panel: 'Case dashboard',
@@ -260,6 +270,16 @@ const TEXTS = {
     downloadSvg: 'Download SVG',
     sheetN: 'Sheet',
     noActiveSteps: 'This case has no active steps.',
+    install: 'Install app',
+    updateAvailable: 'A new version of the dashboard is available.',
+    update: 'Update',
+    offline: 'Offline: showing what was last loaded; it will not update until the connection is back.',
+    alertsOn: 'Alerts: on',
+    alertsOff: 'Alerts: off',
+    alertsBlocked: 'The browser has notifications blocked: you will only see alerts inside the app. You can allow them in the site settings.',
+    newRunTitle: 'New game',
+    view: 'View',
+    close: 'Close',
   },
 }
 
