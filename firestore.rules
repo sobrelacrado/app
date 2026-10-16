@@ -1,0 +1,81 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Solo la cuenta de Alberto (Google, con correo verificado).
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email == 'sobrelacradojuegos@gmail.com'
+        && request.auth.token.email_verified == true;
+    }
+
+    // ---------- Juegos ----------
+    // Un jugador puede abrir un juego si conoce su id, pero no listarlos.
+    match /games/{gameId} {
+      allow get: if true;
+      allow list, write: if isAdmin();
+
+      // Pasos: el id aleatorio va dentro del QR. No se pueden listar.
+      match /steps/{stepId} {
+        allow get: if true;
+        allow list, write: if isAdmin();
+      }
+    }
+
+    // ---------- Partidas ----------
+    match /runs/{runId} {
+      // Se puede leer una partida solo conociendo su id (lo guarda el móvil del grupo).
+      allow get: if true;
+      allow list, delete: if isAdmin();
+      allow update: if isAdmin() || isRunClosing(runId);
+
+      allow create: if isAdmin() || (
+        request.resource.data.keys().hasOnly(['gameId', 'alias', 'startedAt', 'endedAt'])
+        && request.resource.data.gameId is string
+        && request.resource.data.alias is string
+        && request.resource.data.alias.size() <= 30
+        && request.resource.data.startedAt == request.time
+        && request.resource.data.endedAt == null
+        && get(/databases/$(database)/documents/games/$(request.resource.data.gameId)).data.active == true
+      );
+
+      // El jugador solo puede cerrar su partida, una vez, escaneando una solución.
+      function isRunClosing(runId) {
+        let run = resource.data;
+        let game = get(/databases/$(database)/documents/games/$(run.gameId)).data;
+        let endStep = request.resource.data.endStepId;
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['endedAt', 'endStepId'])
+          && run.endedAt == null
+          && request.resource.data.endedAt == request.time
+          && request.time < run.startedAt + duration.value(game.timeLimitMinutes, 'm')
+          && endStep is string
+          && get(/databases/$(database)/documents/games/$(run.gameId)/steps/$(endStep)).data.type == 'solution'
+          && existsAfter(/databases/$(database)/documents/runs/$(runId)/scans/$(endStep));
+      }
+
+      // ---------- Escaneos ----------
+      // El id del documento es el id del paso: un QR repetido se rechaza solo.
+      match /scans/{stepId} {
+        allow get: if true;
+        allow list, delete: if isAdmin();
+        allow update: if isAdmin();
+
+        allow create: if isAdmin() || (
+          request.resource.data.keys().hasOnly(['scannedAt'])
+          && request.resource.data.scannedAt == request.time
+          && isScanAllowed(runId, stepId)
+        );
+
+        function isScanAllowed(runId, stepId) {
+          let run = get(/databases/$(database)/documents/runs/$(runId)).data;
+          let game = get(/databases/$(database)/documents/games/$(run.gameId)).data;
+          let step = get(/databases/$(database)/documents/games/$(run.gameId)/steps/$(stepId)).data;
+          return run.endedAt == null
+            && step.active == true
+            && request.time < run.startedAt + duration.value(game.timeLimitMinutes, 'm');
+        }
+      }
+    }
+  }
+}
