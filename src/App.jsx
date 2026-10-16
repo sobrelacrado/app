@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut } from 'firebase/auth'
+import { GoogleAuthProvider, getRedirectResult, onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut } from 'firebase/auth'
 import { auth } from './auth.js'
 import { LANGS, LangContext, initialLang, textsFor } from './i18n.js'
 import { ADMIN_EMAIL } from './lib/runs.js'
@@ -19,7 +19,7 @@ const isInstalledApp = () => window.matchMedia?.('(display-mode: standalone)').m
 export default function App() {
   const [lang, setLang] = useState(initialLang)
   const [user, setUser] = useState(undefined) // undefined = comprobando sesión
-  const [loginError, setLoginError] = useState(false)
+  const [loginError, setLoginError] = useState(false) // false | código del error
   const [tab, setTab] = useState('runs')
   const [alertsOn, setAlertsOn] = useState(() => store.get('sl_alerts', 'off') === 'on')
   const ctx = useMemo(() => ({ lang, t: textsFor(lang) }), [lang])
@@ -29,6 +29,8 @@ export default function App() {
   const online = useOnline()
 
   useEffect(() => onAuthStateChanged(auth, setUser), [])
+  // Al volver de Google (app instalada) se completa el acceso; si falla, se muestra el motivo.
+  useEffect(() => { getRedirectResult(auth).catch((e) => setLoginError(e?.code ?? 'error')) }, [])
   useEffect(() => { document.documentElement.lang = lang }, [lang])
 
   const chooseLang = (l) => {
@@ -42,8 +44,8 @@ export default function App() {
     try {
       if (isInstalledApp()) await signInWithRedirect(auth, provider)
       else await signInWithPopup(auth, provider)
-    } catch {
-      setLoginError(true)
+    } catch (e) {
+      setLoginError(e?.code ?? 'error')
     }
   }
 
@@ -102,7 +104,7 @@ export default function App() {
             <h1>SOBRE LACRADO</h1>
             <p>{t.loginHelp}</p>
             <button type="button" onClick={login}>{t.login}</button>
-            {loginError && <p className="error">{t.loginError}</p>}
+            {loginError && <p className="error">{t.loginError} ({loginError})</p>}
           </div>
         )}
 
