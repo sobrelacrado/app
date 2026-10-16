@@ -66,7 +66,8 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-solucion { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 18px; letter-spacing: 2px; margin: 14px 0 4px; word-break: break-word; }
 .dr-datos { margin: 0 0 8px; opacity: .8; }
 .dr-proximo { margin: 14px 0 0; font-size: 14px; }
-.dr-cta { display: block; margin-top: 14px; text-align: center; text-decoration: none; padding: 12px; }
+.dr-cta { display: block; margin-top: 14px; text-align: center; text-decoration: none; padding: 12px; line-height: 1.3; }
+.dr-carta a.dr-cta { background: transparent; color: var(--t-tinta); border: 2px solid var(--t-etq-bg); font-family: var(--t-titulo); text-transform: none; letter-spacing: .5px; }
 .dr-pie { text-align: center; margin-top: 16px; color: var(--papel); font-size: 13px; opacity: .85; }
 .dr-pie p { margin: 0; }
 .dr-volver { color: var(--papel) !important; border-color: var(--papel) !important; }

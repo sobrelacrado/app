@@ -4,7 +4,7 @@ import { GAMES, HOWTO, TYPE_NAME } from './games.jsx'
 import PUZZLES from './puzzles.js'
 
 const SITE_URL = 'https://app-sobre-lacrado.web.app/diario'
-const BRAND_URL = '' // enlace a los casos de Sobre Lacrado (pendiente de indicar); si está vacío no se muestra
+const BRAND_URL = 'https://www.instagram.com/sobrelacrado/' // enlace al terminar (de momento Instagram); si está vacío no se muestra
 const STORE = 'sl_diario'
 
 const load = () => { try { return JSON.parse(localStorage.getItem(STORE)) ?? {} } catch { return {} } }
@@ -114,7 +114,11 @@ export default function Diario({ onExit }) {
             </p>
             <button type="button" onClick={share}>{copied ? '¡Copiado!' : 'Compartir resultado'}</button>
             <p className="dr-proximo">Próximo acertijo en <b>{countdown}</b></p>
-            {BRAND_URL && <a className="boton dr-cta" href={BRAND_URL}>Descubre los casos de Sobre Lacrado</a>}
+            {BRAND_URL && (
+              <a className="boton dr-cta" href={BRAND_URL} target="_blank" rel="noopener noreferrer">
+                ¿Te gusta descifrar? Síguenos en Instagram @sobrelacrado
+              </a>
+            )}
           </div>
         ) : (
           <>
