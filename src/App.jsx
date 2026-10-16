@@ -50,7 +50,8 @@ export default function App() {
     const provider = new GoogleAuthProvider()
     provider.setCustomParameters({ prompt: 'select_account' }) // que Google siempre deje elegir la cuenta
     try {
-      if (isInstalledApp() && !forcePopup) await signInWithRedirect(auth, provider)
+      // Con la redirección, Google exigiría autorizar web.app en Google Cloud: se usa siempre la ventana emergente.
+      if (forcePopup === 'redirect') await signInWithRedirect(auth, provider)
       else await signInWithPopup(auth, provider)
     } catch (e) {
       setLoginError(e?.code ?? 'error')
@@ -112,9 +113,6 @@ export default function App() {
             <h1>SOBRE LACRADO</h1>
             <p>{t.loginHelp}</p>
             <button type="button" onClick={() => login()}>{t.login}</button>
-            {isInstalledApp() && (
-              <p><button type="button" className="suave" onClick={() => login(true)}>{t.loginAlt}</button></p>
-            )}
             {loginError && <p className="error">{t.loginError} ({loginError})</p>}
             <p className="nota">v{__BUILD__} · {isInstalledApp() ? 'app' : 'navegador'} · {auth.config.authDomain} · redirección: {redirectDiag}</p>
           </div>

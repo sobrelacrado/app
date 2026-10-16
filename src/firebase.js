@@ -9,7 +9,7 @@ const installed = typeof window !== 'undefined' && window.matchMedia?.('(display
 // Estos datos son públicos por diseño: la seguridad la dan las reglas de Firestore.
 export const app = initializeApp({
   apiKey: 'AIzaSyCksj_fxBiDwFaGiXHpSgVKI0gi6uV-Cj8',
-  authDomain: installed ? 'app-sobre-lacrado.web.app' : 'app-sobre-lacrado.firebaseapp.com',
+  authDomain: 'app-sobre-lacrado.firebaseapp.com',
   projectId: 'app-sobre-lacrado',
   storageBucket: 'app-sobre-lacrado.firebasestorage.app',
   messagingSenderId: '656901903049',
