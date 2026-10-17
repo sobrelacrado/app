@@ -42,7 +42,14 @@ export function readServiceAccount(raw) {
   const bad = [...new Set(body.replace(/[A-Za-z0-9+/=]/g, ''))]
   if (bad.length) throw new Error(`La private_key tiene caracteres que no deberían estar (códigos: ${bad.map((c) => c.charCodeAt(0)).join(', ')}). Largo del cuerpo: ${body.length}.`)
   if (body.length < 1000) throw new Error(`La private_key parece cortada: el cuerpo mide ${body.length} caracteres y debería pasar de 1000.`)
-  acc.private_key = `${H}\n${body.match(/.{1,64}/g).join('\n')}\n${F}\n` // se reconstruye en líneas de 64
+  const pem = (b) => `${H}\n${b.match(/.{1,64}/g).join('\n')}\n${F}\n` // se reconstruye en líneas de 64
+  // Si al pegar quedó algún carácter suelto (por ejemplo una "n" de un salto de línea), se prueba a quitarlo.
+  const pad = body.lastIndexOf('=')
+  const candidates = [body, body.slice(0, -1), body.slice(1), ...(pad >= 0 ? [body.slice(0, pad + 1)] : [])]
+  for (const c of candidates) {
+    try { createPrivateKey(pem(c)); acc.private_key = pem(c); return acc } catch { /* siguiente */ }
+  }
+  acc.private_key = pem(body)
   try { createPrivateKey(acc.private_key) } catch {
     // Diagnóstico sin enseñar la clave: una clave PKCS#8 empieza por 0x30 y declara su propio largo.
     const der = Buffer.from(body, 'base64')
