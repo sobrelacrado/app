@@ -133,7 +133,7 @@ service cloud.firestore {
           && d.hint is bool
           && d.tries is int && d.tries >= 0 && d.tries <= 999
           && d.ms is int && d.ms >= 0 && d.ms <= 86400000
-          && d.type in ['cesar', 'morse', 'teclado', 'cerradura', 'anagrama', 'acrostico', 'simbolos', 'espejo', 'criptico', 'vigenere']
+          && d.type in ['cesar', 'morse', 'teclado', 'cerradura', 'anagrama', 'acrostico', 'simbolos', 'espejo', 'criptico', 'vigenere', 'golpes', 'interrogatorio']
           && d.level is int && d.level >= 1 && d.level <= 5
           && (!('n' in d) || d.n is int)
           && (!('late' in d) || d.late is bool)

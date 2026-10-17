@@ -6,6 +6,7 @@ import {
   lockCandidates, lockFeedback, morseDecode, morseEncode, nextKey, normalize, pigpenGlyph, pigpenLetters, pigpenStore, puzzleFor,
   shareText, shuffled, streakOf, vigenereDecode, vigenereEncode, vigenereKeyFor, vigenereLetter,
 } from '../src/diario/ciphers.js'
+import { golpesDecode } from '../src/diario/golpes.js'
 import { bestStreak, calendar, diarioStats, mergeDays } from '../src/diario/stats.js'
 import PUZZLES from '../src/diario/puzzles.js'
 // El archivo con las soluciones en claro NO está en GitHub (el repositorio es público): solo en el PC de Alberto.
@@ -63,6 +64,16 @@ test('cada acertijo se resuelve con su solución (necesita el archivo fuente)', 
       else assert.equal(p.data.key, undefined, 'la clave secreta no viaja en claro')
       assert.equal(p.level, 5)
       assert.equal(i % 7, 6, 'solo los domingos')
+    }
+    if (s.type === 'golpes') {
+      assert.ok(isCorrect(p, golpesDecode(p.data)))
+      assert.ok(!s.text.includes('K'))
+      assert.ok(i % 7 === 1 || i % 7 === 2, 'golpes entre semana temprano (niveles 1-2)')
+    }
+    if (s.type === 'interrogatorio') {
+      assert.ok(isCorrect(p, s.text), 'la huella es la del culpable')
+      assert.ok(p.data.statements.every((st) => Object.keys(st).sort().join() === 'by,says'), 'la lógica no viaja en la web')
+      assert.ok(i % 7 === 3 || i % 7 === 4, 'jueves o viernes (niveles 2-3)')
     }
     if (s.type === 'morse') assert.ok(isCorrect(p, morseDecode(p.data)))
     if (s.type === 'teclado') assert.ok(isCorrect(p, keypadDecode(p.data)))
@@ -448,4 +459,88 @@ test('Vigenère: solo hay acertijos en domingo, con nivel 5, y la clave secreta 
     if (p.data.key) assert.equal(p.data.key.length, p.data.len) // clave visible: solo en los de aprender
   }
   assert.ok(V.filter((p) => p.data.key).length <= 6, 'la mayoría no enseña la clave')
+})
+
+// ---------- Golpes en la pared ----------
+test('Golpes: cada letra son fila y columna, la K se escribe con la C, y se deshace', async () => {
+  const { golpesEncode, golpesDecode, golpesOf, SQUARE } = await import('../src/diario/golpes.js')
+  assert.equal(golpesEncode('HOLA ME'), '23 34 31 11 / 32 15')
+  assert.equal(golpesDecode('23 34 31 11 / 32 15'), 'HOLA ME')
+  assert.equal(golpesEncode('KILO'), golpesEncode('CILO')) // sin K
+  assert.deepEqual(golpesOf('h'), [2, 3])
+  assert.deepEqual(golpesOf('Z'), [5, 5])
+  assert.equal(SQUARE.join('').length, 25)
+  assert.equal(new Set(SQUARE.join('')).size, 25)
+  const texto = 'EL PLAN SE ACTIVA EN TRES DIAS'
+  assert.equal(golpesDecode(golpesEncode(texto)), texto)
+})
+
+test('Golpes: los golpes y las pausas del sonido tienen los tiempos esperados', async () => {
+  const { golpesSignals, golpesEncode } = await import('../src/diario/golpes.js')
+  const u = 100
+  // letra B = fila 1, columna 2: 1 golpe, pausa de 3, 2 golpes (pausa de 1 entre ellos)
+  assert.deepEqual(golpesSignals('12', u).map((s) => [s.on, s.ms / u]), [[true, 1], [false, 3], [true, 1], [false, 1], [true, 1]])
+  // dos letras: pausa de 6; dos palabras: pausa de 10
+  assert.equal(golpesSignals('11 11', u).map((s) => s.ms / u).join(','), '1,3,1,6,1,3,1')
+  assert.equal(golpesSignals('11 / 11', u).map((s) => s.ms / u).join(','), '1,3,1,10,1,3,1')
+  const sig = golpesSignals(golpesEncode('HOLA'), u)
+  assert.ok(sig[0].on && sig.every((x, i) => x.on === (i % 2 === 0)), 'alterna sonido y silencio')
+  assert.equal(golpesSignals('', u).length, 0)
+})
+
+// ---------- El interrogatorio ----------
+test('Interrogatorio: cuándo es verdad una declaración y quién encaja con la regla', async () => {
+  const { holds, consistentCulprits, kindOf } = await import('../src/diario/interrogatorio.js')
+  assert.equal(holds({ by: 'A', is: 'B' }, 'B'), true)
+  assert.equal(holds({ by: 'A', is: 'B' }, 'C'), false)
+  assert.equal(holds({ by: 'A', not: 'B' }, 'C'), true)
+  assert.equal(holds({ by: 'A', not: 'B' }, 'B'), false)
+  assert.equal(holds({ by: 'A', oneof: ['B', 'C'] }, 'C'), true)
+  assert.equal(holds({ by: 'A', oneof: ['B', 'C'] }, 'A'), false)
+  assert.equal(holds({ by: 'A', notoneof: ['B', 'C'] }, 'A'), true)
+  assert.equal(holds({ by: 'A', notoneof: ['B', 'C'] }, 'B'), false)
+  assert.equal(kindOf({ by: 'A', oneof: [] }), 'oneof')
+  const S = ['Marta', 'Luis', 'Ana']
+  // Marta: "Fue Luis"; Luis: "Fui yo o fue Marta"; Ana: "No fue Luis". Solo el culpable miente -> Marta.
+  const st = [{ by: 'Marta', is: 'Luis' }, { by: 'Luis', oneof: ['Luis', 'Marta'] }, { by: 'Ana', not: 'Luis' }]
+  assert.deepEqual(consistentCulprits(S, st, 'culpableMiente'), ['Marta'])
+  // con "exactamente uno miente" encajan dos (Marta y Luis): ese caso sería ambiguo
+  assert.deepEqual(consistentCulprits(S, st, 'unoMiente'), ['Marta', 'Luis'])
+  assert.throws(() => consistentCulprits(S, st, 'inventada'))
+})
+
+test('Interrogatorio: la comprobación exige una sola solución y declaraciones bien escritas', async () => {
+  const { validateCase, sayFor } = await import('../src/diario/interrogatorio.js')
+  const base = () => ({
+    text: 'MARTA', rule: 'culpableMiente', suspects: ['Marta', 'Luis', 'Ana'],
+    statements: [{ by: 'Marta', is: 'Luis', says: 'Fue Luis.' }, { by: 'Luis', oneof: ['Luis', 'Marta'], says: 'Fui yo o fue Marta.' }, { by: 'Ana', not: 'Luis', says: 'No fue Luis.' }],
+  })
+  assert.deepEqual(validateCase(base()), [])
+  const malCulpable = { ...base(), text: 'LUIS' }
+  assert.match(validateCase(malCulpable).join('|'), /culpable según la lógica es Marta/)
+  const ambiguo = { ...base(), rule: 'unoMiente' }
+  assert.match(validateCase(ambiguo).join('|'), /una sola solución y hay 2/)
+  const sinTexto = base(); sinTexto.statements[2].says = ''
+  assert.match(validateCase(sinTexto).join('|'), /Falta el texto/)
+  const sinNombre = base(); sinNombre.statements[0].says = 'Fue otro.'
+  assert.match(validateCase(sinNombre).join('|'), /no nombra a Luis/)
+  const ajeno = base(); ajeno.statements[2].not = 'Pepe'
+  assert.match(validateCase(ajeno).join('|'), /no es sospechoso/)
+  const pocos = { ...base(), suspects: ['Marta', 'Luis'] }
+  assert.match(validateCase(pocos).join('|'), /3 a 5/)
+  const repetida = base(); repetida.statements[2].by = 'Luis'
+  assert.match(validateCase(repetida).join('|'), /declarar una sola vez/)
+  assert.equal(sayFor({ by: 'Ana', not: 'Ana' }), 'Yo no fui.')
+  assert.equal(sayFor({ by: 'Ana', oneof: ['Ana', 'Luis'] }), 'Fui yo o fue Luis.')
+  assert.equal(sayFor({ by: 'Ana', notoneof: ['Marta', 'Ana'] }), 'Ni yo ni Marta fuimos.')
+  assert.equal(sayFor({ by: 'Ana', is: 'Luis' }, 0), 'Fue Luis.')
+})
+
+test('Interrogatorio: todos los casos de la lista tienen una sola solución (necesita los archivos fuente)', async (t) => {
+  const IN = await import('../src/diario/interrogatorios.src.mjs').then((m) => m.default).catch(() => null)
+  if (!IN) return t.skip('no está interrogatorios.src.mjs')
+  const { validateCase } = await import('../src/diario/interrogatorio.js')
+  assert.ok(IN.length >= 8)
+  for (const c of IN) assert.deepEqual(validateCase(c), [], c.title)
+  assert.equal(PUZZLES.filter((p) => p.type === 'interrogatorio').length, IN.length, 'todos están en la lista')
 })

@@ -2,12 +2,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { KEYPAD, MORSE, atbash, caesarDecode, hashAnswer, keypadWords, normalize, pigpenGlyph, pigpenLetters, vigenereKeyFor } from './ciphers.js'
 import { KIND_HELP, KIND_NAME } from './criptico.js'
-import { SPEEDS, canVibrate, playMorse } from './morseSound.js'
+import { GOLPES_SPEEDS, SQUARE, golpesSignals } from './golpes.js'
+import { RULES } from './interrogatorio.js'
+import { SPEEDS, canVibrate, playMorse, playSignals } from './morseSound.js'
 
 export const TYPE_NAME = {
   cesar: 'Rueda de César', morse: 'Código Morse', teclado: 'Teclado antiguo', cerradura: 'Cerradura de 3 cifras',
   anagrama: 'Anagrama', acrostico: 'Mensaje escondido', simbolos: 'Alfabeto de símbolos', espejo: 'Alfabeto en espejo', criptico: 'Críptico',
-  vigenere: 'Cifrado Vigenère',
+  vigenere: 'Cifrado Vigenère', golpes: 'Golpes en la pared', interrogatorio: 'El interrogatorio',
 }
 export const HOWTO = {
   cesar: 'Cada letra del mensaje se ha movido varios puestos en el alfabeto. Gira la rueda: la fila de dentro te dice qué letra es cada una. Cuando el texto se lea con sentido, pulsa "Es esta".',
@@ -18,6 +20,8 @@ export const HOWTO = {
   acrostico: 'Lo importante no es lo que dice el texto, sino cómo está escrito. Descubre el mensaje que esconde y escríbelo.',
   simbolos: 'Cada letra se ha cambiado por un dibujo. Usa la clave de abajo para saber qué letra es cada dibujo y rellena las casillas.',
   criptico: 'Una sola pista que dice la respuesta DOS veces: una definición (siempre al principio o al final) y un juego con las letras, con un aviso que te dice qué hacer (mezclar, leer al revés, pegar, meter una pieza dentro de otra). Ejemplo: «Plato caliente: paso revuelto (4)». «Plato caliente» es la definición; «revuelto» es el aviso de que hay que mezclar las letras de «paso»; y la respuesta, de 4 letras, es SOPA. El número entre paréntesis son las letras de la respuesta. Las tildes no cuentan. Si te atascas, cada pista te da un poco más.',
+  golpes: 'Cada letra son dos números: la fila y la columna de la tabla (la K se escribe con la C). Con 2·3 vas a la fila 2 y la columna 3: es la H. Los presos lo golpeaban en la pared: primero los golpes de la fila, una pausa, y los de la columna. Pulsa "Escuchar" para oírlo (o notarlo vibrar) y escribe el mensaje.',
+  interrogatorio: 'Cada sospechoso hace una declaración, y la regla de arriba dice quién miente y quién dice la verdad. Prueba con cada uno: "¿y si él fuera el culpable?" ¿Cuadran las declaraciones con la regla? Solo uno encaja. Puedes apuntar quién crees que miente. Cuando lo sepas, toca al culpable y acúsalo.',
   vigenere: 'Es como el cifrado de César, pero el desplazamiento cambia en cada letra. Una palabra clave se repite debajo del mensaje (los espacios se saltan) y cada letra de la clave mueve la de arriba: la A no la mueve, la B la mueve 1 puesto, la C 2... Para descifrar hay que retroceder esos puestos. Toca el par de letras de una casilla y la tabla te dice qué letra real es. Ejemplo con la clave SOL: la H se cifra como Z (la S mueve 18 puestos). Si la clave no se da, la historia te describe la palabra: adivínala y escríbela para activar la ayuda.',
   espejo: 'Aquí el alfabeto está del revés: la A es la Z, la B es la Y... Cada letra del mensaje es su "reflejo". Usa la tabla y escribe el mensaje.',
 }
@@ -416,6 +420,86 @@ function Vigenere({ puzzle, onCheck }) {
   )
 }
 
+/* ---------- Golpes en la pared (cuadrado de Polibio) ---------- */
+function Golpes({ puzzle, onCheck }) {
+  const [tabla, setTabla] = useState(false)
+  const [sonando, setSonando] = useState(false)
+  const [rapido, setRapido] = useState(false)
+  const [vibrar, setVibrar] = useState(false)
+  const stop = useRef(null)
+  useEffect(() => () => stop.current?.(), []) // al salir de la pantalla se calla
+  const words = puzzle.data.split('/').map((w) => w.trim().split(/\s+/))
+  const escuchar = () => {
+    if (sonando) { stop.current?.(); return }
+    setSonando(true)
+    stop.current = playSignals(golpesSignals(puzzle.data, rapido ? GOLPES_SPEEDS.normal : GOLPES_SPEEDS.lento), { freq: 170, wave: 'triangle', vibrate: vibrar, onEnd: () => setSonando(false) })
+  }
+  return (
+    <>
+      <div className="dr-morse" aria-label="Mensaje en golpes">
+        {words.map((w, i) => (
+          <div className="dr-palabra" key={i}>
+            {w.map((g, j) => <span className="dr-grupo" key={j}>{g[0]}·{g[1]}</span>)}
+          </div>
+        ))}
+      </div>
+      <div className="dr-audio">
+        <button type="button" onClick={escuchar} aria-pressed={sonando}>{sonando ? '⏹ Parar' : '🔊 Escuchar'}</button>
+        <button type="button" className="suave" onClick={() => setRapido((v) => !v)} disabled={sonando} aria-pressed={rapido}>Velocidad: {rapido ? 'normal' : 'lento'}</button>
+        {canVibrate() && (
+          <label className="dr-vibrar"><input type="checkbox" checked={vibrar} disabled={sonando} onChange={(e) => setVibrar(e.target.checked)} /> 📳 Vibrar también</label>
+        )}
+      </div>
+      <button type="button" className="suave" onClick={() => setTabla((v) => !v)} aria-expanded={tabla}>{tabla ? 'Ocultar tabla' : 'Ver tabla de golpes'}</button>
+      {tabla && (
+        <>
+          <table className="dr-polibio" aria-label="Tabla de golpes: fila y columna">
+            <thead><tr><th /> {[1, 2, 3, 4, 5].map((c) => <th key={c} scope="col">{c}</th>)}</tr></thead>
+            <tbody>
+              {SQUARE.map((row, r) => (
+                <tr key={r}><th scope="row">{r + 1}</th>{[...row].map((l) => <td key={l}>{l}</td>)}</tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="dr-nota">La K no está: se escribe con la C. El primer número es la fila y el segundo, la columna.</p>
+        </>
+      )}
+      <CajaRespuesta onCheck={onCheck} label="Tu traducción" />
+    </>
+  )
+}
+
+/* ---------- El interrogatorio (lógica) ---------- */
+const MARCAS = { verdad: '😇 Dice la verdad', miente: '🤥 Miente' }
+function Interrogatorio({ puzzle, onCheck }) {
+  const { suspects, statements, rule } = puzzle.data
+  const [marks, setMarks] = useState({}) // tus apuntes: por sospechoso, 'verdad' | 'miente' | nada
+  const [sel, setSel] = useState('')
+  const cycle = (name) => setMarks((m) => ({ ...m, [name]: m[name] === 'verdad' ? 'miente' : m[name] === 'miente' ? undefined : 'verdad' }))
+  return (
+    <>
+      <p className="dr-regla">⚖️ {RULES[rule]}</p>
+      <ul className="dr-declaraciones">
+        {statements.map((st) => (
+          <li key={st.by} className={'dr-decl ' + (marks[st.by] ?? '')}>
+            <b>{st.by}</b>
+            <q>{st.says}</q>
+            <button type="button" className="suave" onClick={() => cycle(st.by)} aria-label={'Tu apunte sobre ' + st.by}>{MARCAS[marks[st.by]] ?? '¿Miente?'}</button>
+          </li>
+        ))}
+      </ul>
+      <p className="dr-nota">Toca "¿Miente?" para apuntar lo que crees de cada uno (es solo para ti).</p>
+      <p className="dr-pregunta">¿Quién es el culpable?</p>
+      <div className="dr-acusar">
+        {suspects.map((n) => (
+          <button type="button" key={n} className={'dr-sospechoso ' + (sel === n ? 'dr-sel' : '')} aria-pressed={sel === n} onClick={() => setSel(n)}>{n}</button>
+        ))}
+      </div>
+      <button type="button" disabled={!sel} onClick={() => onCheck(sel)}>{sel ? 'Acusar a ' + sel : 'Elige al culpable'}</button>
+    </>
+  )
+}
+
 export const GAMES = {
-  cesar: Cesar, morse: Morse, teclado: Teclado, cerradura: Cerradura, anagrama: Anagrama, acrostico: Acrostico, simbolos: Simbolos, espejo: Espejo, criptico: Criptico, vigenere: Vigenere,
+  cesar: Cesar, morse: Morse, teclado: Teclado, cerradura: Cerradura, anagrama: Anagrama, acrostico: Acrostico, simbolos: Simbolos, espejo: Espejo, criptico: Criptico, vigenere: Vigenere, golpes: Golpes, interrogatorio: Interrogatorio,
 }

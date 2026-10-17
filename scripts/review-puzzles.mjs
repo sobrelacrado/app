@@ -12,7 +12,7 @@ const from = Number(process.argv[2] ?? 29)
 const to = Number(process.argv[3] ?? src.length)
 const TYPE_NAME = { // mismos nombres que games.jsx (Node no puede importar archivos .jsx)
   cesar: 'Rueda de César', morse: 'Código Morse', teclado: 'Teclado antiguo', cerradura: 'Cerradura de 3 cifras', anagrama: 'Anagrama',
-  acrostico: 'Mensaje escondido', simbolos: 'Alfabeto de símbolos', espejo: 'Alfabeto en espejo', criptico: 'Críptico', vigenere: 'Cifrado Vigenère',
+  acrostico: 'Mensaje escondido', simbolos: 'Alfabeto de símbolos', espejo: 'Alfabeto en espejo', criptico: 'Críptico', vigenere: 'Cifrado Vigenère', golpes: 'Golpes en la pared', interrogatorio: 'El interrogatorio',
 }
 const DIAS = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo']
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
@@ -25,7 +25,9 @@ for (let n = from; n <= Math.min(to, src.length); n++) {
   const solucion = p.type === 'cesar' ? `${esc(p.text)} <small>(desplazamiento ${p.shift})</small>`
     : p.type === 'vigenere' ? `${esc(p.text)} <small>(clave ${esc(p.key)} · ${p.keyGiven ? 'la clave se enseña' : 'clave secreta, se adivina con la pista'})</small>`
     : p.type === 'acrostico' ? `${esc(p.text)} <small>(iniciales de las líneas)</small>` : esc(p.text)
-  const cuerpo = p.type === 'criptico'
+  const cuerpo = p.type === 'interrogatorio'
+    ? `<p><b>Regla:</b> ${esc(p.rule)} · <b>Pista:</b> ${esc(p.hint)}</p><ul>${p.statements.map((st) => `<li><b>${esc(st.by)}:</b> «${esc(st.says)}»</li>`).join('')}</ul>`
+    : p.type === 'criptico'
     ? `<p class="cripti">${esc(p.cryptic.clue)}</p><p><b>Tipo de juego:</b> ${esc(KIND_NAME[p.cryptic.kind])}</p><p><b>Cómo se resuelve:</b> ${esc(p.cryptic.explain)}</p>`
     : `<p><b>Pista:</b> ${esc(p.hint)}</p>${p.lines ? `<ul>${p.lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ul>` : ''}`
   cards.push(`<section class="c ${esc(p.theme)} ${p.type === 'criptico' ? 'cr' : ''}">

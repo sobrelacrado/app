@@ -6,6 +6,8 @@ import {
   atbash, caesarEncode, hashAnswer, keypadEncode, lockCandidates, lockFeedback, morseEncode, normalize, pigpenStore, rng, shuffled, vigenereDecode, vigenereEncode,
 } from '../src/diario/ciphers.js'
 import { clueBody, hideText, parseLens, validateCryptic } from '../src/diario/criptico.js'
+import { golpesDecode, golpesEncode } from '../src/diario/golpes.js'
+import { validateCase } from '../src/diario/interrogatorio.js'
 
 // Cerradura: elige intentos al azar (siempre los mismos para el mismo acertijo) hasta que solo quede un código posible.
 function lockClues(code, seed) {
@@ -47,6 +49,17 @@ const encode = {
   simbolos: (p) => pigpenStore(p.text),
   anagrama: (p, i) => anagram(p.text, i + 1),
   cerradura: (p, i) => lockClues(p.text, i + 1),
+  golpes: (p) => {
+    if (!/^[A-Z ]+$/.test(p.text) || p.text.includes('K')) throw new Error(`Golpes "${p.title}": solo A-Z y espacios, y sin K (la tabla no la tiene)`)
+    const code = golpesEncode(p.text)
+    if (golpesDecode(code) !== p.text) throw new Error(`Golpes "${p.title}": el código no se deshace bien`)
+    return code
+  },
+  interrogatorio: (p) => {
+    const errs = validateCase(p)
+    if (errs.length) throw new Error(`Interrogatorio "${p.title}": ${errs.join('; ')}`)
+    return { suspects: p.suspects, statements: p.statements.map(({ by, says }) => ({ by, says })), rule: p.rule }
+  },
   vigenere: (p) => {
     if (!/^[A-Z ]+$/.test(p.text)) throw new Error(`Vigenère "${p.title}": el texto solo admite A-Z y espacios`)
     if (!/^[A-Z]{3,8}$/.test(p.key ?? '')) throw new Error(`Vigenère "${p.title}": la clave debe ser una palabra de 3 a 8 letras A-Z`)
@@ -83,7 +96,7 @@ src.forEach((p, i) => {
   const key = normalize(p.text)
   if (answers.has(key)) throw new Error(`Acertijo ${n}: la respuesta "${p.text}" ya existe`)
   answers.add(key)
-  if (['morse', 'teclado', 'espejo', 'simbolos', 'anagrama', 'vigenere'].includes(p.type) && /[^A-Z ]/.test(p.text)) throw new Error(`Acertijo ${n}: ${p.type} solo admite A-Z y espacios`)
+  if (['morse', 'teclado', 'espejo', 'simbolos', 'anagrama', 'vigenere', 'golpes'].includes(p.type) && /[^A-Z ]/.test(p.text)) throw new Error(`Acertijo ${n}: ${p.type} solo admite A-Z y espacios`)
   const words = p.text.split(' ')
   const count = /Son (\w+) palabras/.exec(p.hint ?? '')
   if (count && NUM[count[1]] !== words.length) throw new Error(`Acertijo ${n}: la pista dice ${count[1]} palabras y hay ${words.length}`)

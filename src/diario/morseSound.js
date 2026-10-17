@@ -1,5 +1,5 @@
-// Sonido y vibración del Morse. Tiempos estándar: punto = 1 unidad, raya = 3, pausa entre símbolos = 1, entre letras = 3, entre palabras = 7.
-// morseSignals es lógica pura (se prueba con `npm test`); playMorse usa el audio y la vibración del navegador.
+// Sonido y vibración del Morse y de los golpes. Tiempos estándar del Morse: punto = 1 unidad, raya = 3, pausa entre símbolos = 1, entre letras = 3, entre palabras = 7.
+// morseSignals es lógica pura (se prueba con `npm test`); playSignals usa el audio y la vibración del navegador.
 
 export const SPEEDS = { lento: 200, normal: 120 } // milisegundos por unidad
 
@@ -28,9 +28,9 @@ export const totalMs = (signals) => signals.reduce((n, s) => n + s.ms, 0)
 
 export const canVibrate = () => typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function'
 
-// Reproduce el mensaje. Devuelve una función para pararlo. onEnd se llama al terminar o al parar.
-export function playMorse(code, { unit = SPEEDS.lento, vibrate = false, onEnd = () => {} } = {}) {
-  const signals = morseSignals(code, unit)
+// Reproduce una lista de señales [{ on, ms }]. Devuelve una función para pararlo. onEnd se llama al terminar o al parar.
+// El Morse usa un pitido agudo (650 Hz, sinusoidal); los golpes, un "toc" grave (triangular).
+export function playSignals(signals, { freq = 650, wave = 'sine', vibrate = false, onEnd = () => {} } = {}) {
   const Ctx = typeof window !== 'undefined' ? window.AudioContext || window.webkitAudioContext : null
   let ctx = null
   let done = false
@@ -49,8 +49,8 @@ export function playMorse(code, { unit = SPEEDS.lento, vibrate = false, onEnd = 
       ctx = new Ctx()
       const osc = ctx.createOscillator()
       const gain = ctx.createGain()
-      osc.type = 'sine'
-      osc.frequency.value = 650
+      osc.type = wave
+      osc.frequency.value = freq
       gain.gain.value = 0
       osc.connect(gain)
       gain.connect(ctx.destination)
@@ -71,4 +71,9 @@ export function playMorse(code, { unit = SPEEDS.lento, vibrate = false, onEnd = 
   }
   if (vibrate && canVibrate()) navigator.vibrate(vibratePattern(signals))
   return finish
+}
+
+// Reproduce un mensaje en Morse.
+export function playMorse(code, { unit = SPEEDS.lento, vibrate = false, onEnd = () => {} } = {}) {
+  return playSignals(morseSignals(code, unit), { vibrate, onEnd })
 }

@@ -250,3 +250,22 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-vtag small { font-size: 11px; opacity: .65; }
 .dr-vtag:hover, .dr-vtag:focus-visible { background: rgba(0, 0, 0, .09); outline: none; }
 .dr-ok { color: #1d6a3a; font-weight: 700; }
+
+/* Golpes en la pared */
+.dr-polibio { border-collapse: separate; border-spacing: 3px; margin: 8px auto; font-family: 'Space Mono', monospace; }
+.dr-polibio th { font-size: 12px; opacity: .7; width: 34px; height: 30px; }
+.dr-polibio td { width: 34px; height: 34px; text-align: center; font-weight: 700; font-size: 16px; background: rgba(0, 0, 0, .07); border-radius: 4px; }
+
+/* El interrogatorio */
+.dr-regla { margin: 10px 0; padding: 10px 12px; font-size: 14px; line-height: 1.5; font-weight: 700; background: rgba(0, 0, 0, .08); border-left: 4px solid currentColor; border-radius: 4px; }
+.dr-declaraciones { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 8px; }
+.dr-decl { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; align-items: center; padding: 10px 12px; border: 1px solid rgba(0, 0, 0, .2); border-radius: 8px; background: rgba(255, 255, 255, .4); }
+.dr-decl b { grid-column: 1; font-size: 15px; }
+.dr-decl q { grid-column: 1; font-size: 15px; line-height: 1.4; font-style: italic; }
+.dr-decl button { grid-column: 2; grid-row: 1 / span 2; white-space: nowrap; }
+.dr-decl.verdad { border-color: #1d6a3a; background: rgba(29, 106, 58, .12); }
+.dr-decl.miente { border-color: #a31d1d; background: rgba(163, 29, 29, .1); }
+.dr-pregunta { margin: 14px 0 6px; font-weight: 700; }
+.dr-acusar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.dr-carta button.dr-sospechoso { flex: 1 1 40%; min-height: 44px; background: transparent; color: inherit; border: 2px solid currentColor; font-size: 14px; }
+.dr-carta button.dr-sospechoso.dr-sel { background: #1d1d1d; color: #f3eee2; }

@@ -466,35 +466,35 @@ export default [
   },
   {
     "id": 32,
-    "type": "cerradura",
+    "type": "interrogatorio",
     "theme": "detective",
     "level": 2,
-    "title": "El maletín del inspector",
-    "clue": "El maletín del inspector se abre con tres cifras distintas. Antes de irse, apuntó sus intentos.",
-    "hint": "Las tres cifras suman 14.",
-    "data": [
-      {
-        "g": "548",
-        "bien": 0,
-        "mal": 1
-      },
-      {
-        "g": "703",
-        "bien": 1,
-        "mal": 0
-      },
-      {
-        "g": "205",
-        "bien": 1,
-        "mal": 1
-      },
-      {
-        "g": "276",
-        "bien": 0,
-        "mal": 2
-      }
-    ],
-    "h": "pgxx5annar"
+    "title": "El reloj del abuelo",
+    "clue": "Ha desaparecido el reloj del abuelo. Solo tres personas estaban en la casa y cada una hizo una declaración.",
+    "hint": "No fue Ana.",
+    "data": {
+      "suspects": [
+        "Marta",
+        "Luis",
+        "Ana"
+      ],
+      "statements": [
+        {
+          "by": "Marta",
+          "says": "Fue Luis."
+        },
+        {
+          "by": "Luis",
+          "says": "Fui yo o fue Marta."
+        },
+        {
+          "by": "Ana",
+          "says": "No fue Luis."
+        }
+      ],
+      "rule": "culpableMiente"
+    },
+    "h": "2231fn6kd5l"
   },
   {
     "id": 33,
@@ -562,14 +562,14 @@ export default [
   },
   {
     "id": 37,
-    "type": "cesar",
+    "type": "golpes",
     "theme": "policial",
     "level": 1,
-    "title": "Aviso en la comisaría",
-    "clue": "Alguien dejó un aviso con las letras movidas. La A se escribe D.",
-    "hint": "Gira la rueda hasta que la A de dentro quede bajo la D de fuera.",
-    "data": "HO VRVSHFKRVR KXBR",
-    "h": "piqjm05pzo"
+    "title": "Golpes en la celda 4",
+    "clue": "Alguien golpea la pared de la celda de al lado. Cada letra son dos números: la fila y la columna de la tabla. Primero los golpes de la fila, una pausa, y los de la columna.",
+    "hint": "Son tres palabras y la última es ATRAS.",
+    "data": "43 11 31 22 11 33 / 35 34 42 / 11 44 42 11 43",
+    "h": "1brgj5kx9fg"
   },
   {
     "id": 38,
@@ -719,14 +719,40 @@ export default [
   },
   {
     "id": 47,
-    "type": "cesar",
-    "theme": "alien",
+    "type": "interrogatorio",
+    "theme": "detective",
     "level": 3,
-    "title": "Luces sobre el desierto",
-    "clue": "Una transmisión extraña con letras desplazadas. Quien la envió usó siempre el mismo desplazamiento.",
-    "hint": "El desplazamiento es una cifra mayor que 5.",
-    "data": "TI TCH ZWRI UIZKI MT KIUQVW",
-    "h": "20nu9cm9kt6"
+    "title": "El maletín desaparecido",
+    "clue": "El maletín del cliente ha desaparecido de la oficina. Cuatro personas estaban allí y cada una declaró.",
+    "hint": "No fue Pablo.",
+    "data": {
+      "suspects": [
+        "Carlos",
+        "Elena",
+        "Pablo",
+        "Sofía"
+      ],
+      "statements": [
+        {
+          "by": "Carlos",
+          "says": "Elena no fue."
+        },
+        {
+          "by": "Elena",
+          "says": "Tengo claro que fue Carlos."
+        },
+        {
+          "by": "Pablo",
+          "says": "Ni yo ni Sofía fuimos."
+        },
+        {
+          "by": "Sofía",
+          "says": "Fue Pablo."
+        }
+      ],
+      "rule": "unoMiente"
+    },
+    "h": "4obik5142n"
   },
   {
     "id": 48,
@@ -782,19 +808,14 @@ export default [
   },
   {
     "id": 51,
-    "type": "anagrama",
-    "theme": "policial",
+    "type": "golpes",
+    "theme": "detective",
     "level": 1,
-    "title": "Archivo revuelto",
-    "clue": "Las letras de una palabra se cayeron del tablón de anuncios y quedaron mezcladas.",
-    "hint": "Es el lugar donde trabaja la policía.",
-    "data": {
-      "pool": "AARSCIMIO",
-      "lens": [
-        9
-      ]
-    },
-    "h": "lk3eglvdkr"
+    "title": "Aviso entre rejas",
+    "clue": "Un preso te manda un aviso golpeando la pared. Cada letra son dos números: fila y columna.",
+    "hint": "Son dos palabras y la primera es NO.",
+    "data": "33 34 / 23 11 12 31 15 43",
+    "h": "5sigt1o8aq"
   },
   {
     "id": 52,
@@ -923,14 +944,35 @@ export default [
   },
   {
     "id": 60,
-    "type": "teclado",
-    "theme": "alien",
+    "type": "interrogatorio",
+    "theme": "policial",
     "level": 2,
-    "title": "Mensaje en el comunicador",
-    "clue": "Un comunicador antiguo repite teclas pulsadas varias veces. Cada grupo es una letra.",
-    "hint": "Son seis palabras y la última es MEDIANOCHE.",
-    "data": "33 555 / 7 666 777 8 2 555 / 7777 33 / 2 22 777 33 / 2 / 6 33 3 444 2 66 666 222 44 33",
-    "h": "oyo7eitrtu"
+    "title": "Pruebas bajo llave",
+    "clue": "Alguien abrió la caja de pruebas de la comisaría. Solo tres agentes tenían las llaves y cada uno declaró.",
+    "hint": "No fue Daniel.",
+    "data": {
+      "suspects": [
+        "Rocío",
+        "Daniel",
+        "Alicia"
+      ],
+      "statements": [
+        {
+          "by": "Rocío",
+          "says": "Fui yo o fue Alicia."
+        },
+        {
+          "by": "Daniel",
+          "says": "Les aseguro que Rocío es inocente."
+        },
+        {
+          "by": "Alicia",
+          "says": "Soy inocente."
+        }
+      ],
+      "rule": "culpableMiente"
+    },
+    "h": "qslwwvpydg"
   },
   {
     "id": 61,
@@ -991,14 +1033,14 @@ export default [
   },
   {
     "id": 65,
-    "type": "espejo",
-    "theme": "alien",
+    "type": "golpes",
+    "theme": "egipcio",
     "level": 1,
-    "title": "Aviso en el espejo",
-    "clue": "Una señal con el alfabeto del revés. Cada letra es la contraria: mira la tabla.",
-    "hint": "Son tres palabras y la última es SOLO.",
-    "data": "ML VHGZH HLOL",
-    "h": "1j0od1nmv7p"
+    "title": "Piedras que hablan",
+    "clue": "Desde el otro lado del muro de piedra llegan golpes contados. Cada letra son dos números: fila y columna.",
+    "hint": "Son tres palabras y la última es HABLA.",
+    "data": "31 11 / 15 43 21 24 33 22 15 / 23 11 12 31 11",
+    "h": "21x9ur58qk1"
   },
   {
     "id": 66,
@@ -1151,14 +1193,40 @@ export default [
   },
   {
     "id": 75,
-    "type": "teclado",
-    "theme": "egipcio",
+    "type": "interrogatorio",
+    "theme": "policial",
     "level": 3,
-    "title": "Teléfono en la excavación",
-    "clue": "Entre las piedras apareció un teléfono antiguo con una frase escrita a pulsaciones. Cada grupo es una letra.",
-    "hint": "Son siete palabras y la cuarta es HORUS.",
-    "data": "33 555 / 666 5 666 / 3 33 / 44 666 777 88 7777 / 888 444 4 444 555 2 / 33 555 / 222 2 6 444 66 666",
-    "h": "uedury15xk"
+    "title": "La cámara de seguridad",
+    "clue": "Alguien apagó la cámara de seguridad del banco. Cuatro empleados estaban de guardia y cada uno declaró.",
+    "hint": "No fue Irene.",
+    "data": {
+      "suspects": [
+        "Julián",
+        "Irene",
+        "Mateo",
+        "Lucía"
+      ],
+      "statements": [
+        {
+          "by": "Julián",
+          "says": "El culpable es Lucía o Mateo."
+        },
+        {
+          "by": "Irene",
+          "says": "Fui yo o fue Julián."
+        },
+        {
+          "by": "Mateo",
+          "says": "Lucía no fue."
+        },
+        {
+          "by": "Lucía",
+          "says": "Ni yo ni Irene fuimos."
+        }
+      ],
+      "rule": "culpableMiente"
+    },
+    "h": "v9g9h16kkh"
   },
   {
     "id": 76,
@@ -1229,19 +1297,14 @@ export default [
   },
   {
     "id": 79,
-    "type": "acrostico",
-    "theme": "detective",
+    "type": "golpes",
+    "theme": "alien",
     "level": 1,
-    "title": "El plan del fugitivo",
-    "clue": "Un informe cuenta los planes de un fugitivo. Parece un resumen cualquiera, pero fíjate en cómo empieza cada línea.",
-    "hint": "Cuatro letras: un dibujo del terreno que ayuda a no perderse.",
-    "data": [
-      "Mañana sale el último tren hacia el puerto.",
-      "Allí se encontrará con el hombre del sombrero.",
-      "Pasará la noche en una pensión sin nombre.",
-      "Antes del alba, desaparecerá otra vez."
-    ],
-    "h": "e0hvzx9qvr"
+    "title": "Golpes en el casco",
+    "clue": "Alguien golpea el casco de la nave desde fuera. Cada letra son dos números: fila y columna.",
+    "hint": "Son dos palabras y la primera es ELLOS.",
+    "data": "15 31 31 34 43 / 51 24 15 33 15 33",
+    "h": "2g0b9yt31zi"
   },
   {
     "id": 80,
@@ -1351,30 +1414,35 @@ export default [
   },
   {
     "id": 88,
-    "type": "cerradura",
-    "theme": "detective",
+    "type": "interrogatorio",
+    "theme": "egipcio",
     "level": 2,
-    "title": "El cajón del archivo",
-    "clue": "El cajón del archivo se abre con tres cifras distintas. El detective anotó sus intentos antes de rendirse.",
-    "hint": "Las tres cifras suman 18.",
-    "data": [
-      {
-        "g": "843",
-        "bien": 2,
-        "mal": 0
-      },
-      {
-        "g": "610",
-        "bien": 0,
-        "mal": 1
-      },
-      {
-        "g": "256",
-        "bien": 1,
-        "mal": 0
-      }
-    ],
-    "h": "qtzdqyu86j"
+    "title": "El saqueo de la tumba",
+    "clue": "La tumba del faraón ha sido saqueada. Tres personas del campamento tuvieron ocasión y cada una declaró.",
+    "hint": "No fue Tuya.",
+    "data": {
+      "suspects": [
+        "Nefer",
+        "Amón",
+        "Tuya"
+      ],
+      "statements": [
+        {
+          "by": "Nefer",
+          "says": "El culpable es Amón o Tuya."
+        },
+        {
+          "by": "Amón",
+          "says": "No fue Tuya."
+        },
+        {
+          "by": "Tuya",
+          "says": "Fui yo o fue Nefer."
+        }
+      ],
+      "rule": "culpableMiente"
+    },
+    "h": "17vk1jd8dgt"
   },
   {
     "id": 89,
@@ -1462,14 +1530,14 @@ export default [
   },
   {
     "id": 94,
-    "type": "espejo",
+    "type": "golpes",
     "theme": "detective",
     "level": 2,
-    "title": "Papel en el espejo",
-    "clue": "Un papel escrito en espejo: cada letra ocupa el lugar contrario del alfabeto.",
-    "hint": "Son cinco palabras y la última es COARTADA.",
-    "data": "VO NZBLIWLNL GRVMV OZ XLZIGZWZ",
-    "h": "mv5efjnyhx"
+    "title": "Mensaje entre rejas",
+    "clue": "Un compañero de celda te cuenta un secreto a golpes. Cada letra son dos números: fila y columna. Escucha con calma.",
+    "hint": "Son cinco palabras y la última es TRAIDOR.",
+    "data": "15 31 / 24 33 43 35 15 13 44 34 42 / 13 34 33 34 13 15 / 11 31 / 44 42 11 24 14 34 42",
+    "h": "c5f2iadeyc"
   },
   {
     "id": 95,
@@ -1589,14 +1657,40 @@ export default [
   },
   {
     "id": 103,
-    "type": "morse",
+    "type": "interrogatorio",
     "theme": "egipcio",
     "level": 3,
-    "title": "Golpes en la cámara",
-    "clue": "Desde el otro lado del muro llegan golpes cortos y largos. Alguien intenta comunicarse.",
-    "hint": "Son siete palabras y la última es ESFINGE.",
-    "data": ".-.. .- / -.-. .- -- .- .-. .- / ... . -.-. .-. . - .- / . ... - .- / -... .- .--- --- / .-.. .- / . ... ..-. .. -. --. .",
-    "h": "1ps72lfshp1"
+    "title": "El papiro robado",
+    "clue": "El papiro sagrado ha desaparecido del templo. Cuatro sacerdotes estaban dentro y cada uno declaró.",
+    "hint": "No fue Ibi.",
+    "data": {
+      "suspects": [
+        "Kenamón",
+        "Meritra",
+        "Ibi",
+        "Sabu"
+      ],
+      "statements": [
+        {
+          "by": "Kenamón",
+          "says": "Les aseguro que Ibi es inocente."
+        },
+        {
+          "by": "Meritra",
+          "says": "Yo no fui."
+        },
+        {
+          "by": "Ibi",
+          "says": "No fue Sabu."
+        },
+        {
+          "by": "Sabu",
+          "says": "Fui yo o fue Kenamón."
+        }
+      ],
+      "rule": "unoMiente"
+    },
+    "h": "of1piafnd7"
   },
   {
     "id": 104,
@@ -1683,14 +1777,14 @@ export default [
   },
   {
     "id": 108,
-    "type": "simbolos",
-    "theme": "detective",
+    "type": "golpes",
+    "theme": "policial",
     "level": 2,
-    "title": "Clave en el sobre",
-    "clue": "Un sobre sin remitente con símbolos en lugar de letras. La clave viene dibujada en la solapa.",
-    "hint": "Son cuatro palabras y la última es FALSO.",
-    "data": "RY GRFGNZRAGB RF SNYFB",
-    "h": "wjb6588ztk"
+    "title": "Comunicado de la celda 9",
+    "clue": "Por las tuberías de la prisión llegan golpes en grupos. Cada letra son dos números: fila y columna.",
+    "hint": "Son cinco palabras y la última es MADRUGADA.",
+    "data": "15 31 / 25 15 21 15 / 43 11 31 14 42 11 / 14 15 / 32 11 14 42 45 22 11 14 11",
+    "h": "218j25t2n4z"
   },
   {
     "id": 109,
@@ -1811,23 +1905,35 @@ export default [
   },
   {
     "id": 116,
-    "type": "anagrama",
+    "type": "interrogatorio",
     "theme": "alien",
     "level": 2,
-    "title": "Letras en el desierto",
-    "clue": "Una frase del cuaderno de campo quedó con las letras revueltas.",
-    "hint": "Son cinco palabras y la última es DESIERTO.",
+    "title": "Sabotaje en la nave",
+    "clue": "Alguien ha desconectado el radar de la nave. Hay tres tripulantes a bordo y cada uno hizo una declaración.",
+    "hint": "No fue Zeta.",
     "data": {
-      "pool": "TSLNDLORESREDNPAIADEEEIE",
-      "lens": [
-        5,
-        7,
-        2,
-        2,
-        8
-      ]
+      "suspects": [
+        "Zeta",
+        "Orión",
+        "Vega"
+      ],
+      "statements": [
+        {
+          "by": "Zeta",
+          "says": "No fue Orión."
+        },
+        {
+          "by": "Orión",
+          "says": "Fui yo o fue Vega."
+        },
+        {
+          "by": "Vega",
+          "says": "El culpable es Zeta o Orión."
+        }
+      ],
+      "rule": "culpableMiente"
     },
-    "h": "16w77fkzdjs"
+    "h": "21doe332mvm"
   },
   {
     "id": 117,
@@ -1899,14 +2005,14 @@ export default [
   },
   {
     "id": 122,
-    "type": "cesar",
-    "theme": "detective",
+    "type": "golpes",
+    "theme": "egipcio",
     "level": 2,
-    "title": "Recibo cifrado",
-    "clue": "Un recibo con letras desplazadas. Quien lo escribió movió todas lo mismo, pero no dice cuánto.",
-    "hint": "El desplazamiento está entre 10 y 14.",
-    "data": "QX DQOUNA QEFM QZ QX MNDUSA",
-    "h": "1hahdlpswm7"
+    "title": "Golpes en el templo",
+    "clue": "Un sacerdote golpea el muro del templo con su cayado. Cada letra son dos números: fila y columna.",
+    "hint": "Son siete palabras y la última es LUNA.",
+    "data": "31 11 / 35 45 15 42 44 11 / 43 15 / 11 12 42 15 / 13 34 33 / 31 11 / 31 45 33 11",
+    "h": "148k7opzmwn"
   },
   {
     "id": 123,
@@ -2039,14 +2145,40 @@ export default [
   },
   {
     "id": 131,
-    "type": "espejo",
-    "theme": "detective",
+    "type": "interrogatorio",
+    "theme": "alien",
     "level": 3,
-    "title": "Informe en el espejo",
-    "clue": "Un informe escrito en espejo. Cada letra del texto ocupa el lugar contrario del alfabeto.",
-    "hint": "Son seis palabras y la segunda es VENTANA.",
-    "data": "OZ EVMGZMZ VHGZYZ ZYRVIGZ WVHWV ZMLXSV",
-    "h": "1t8rjfyejz5"
+    "title": "Intruso a bordo",
+    "clue": "Alguien abrió la compuerta mientras la nave estaba en vuelo. Cuatro tripulantes estaban despiertos y cada uno declaró.",
+    "hint": "No fue Zeph.",
+    "data": {
+      "suspects": [
+        "Kira",
+        "Tarn",
+        "Zeph",
+        "Lyra"
+      ],
+      "statements": [
+        {
+          "by": "Kira",
+          "says": "Fue Tarn o fue Zeph."
+        },
+        {
+          "by": "Tarn",
+          "says": "Fue Kira o fue Zeph."
+        },
+        {
+          "by": "Zeph",
+          "says": "Ni Lyra ni Kira fueron."
+        },
+        {
+          "by": "Lyra",
+          "says": "Fui yo o fue Tarn."
+        }
+      ],
+      "rule": "culpableMiente"
+    },
+    "h": "1728cuwaxh1"
   },
   {
     "id": 132,
@@ -2118,35 +2250,14 @@ export default [
   },
   {
     "id": 136,
-    "type": "cerradura",
+    "type": "golpes",
     "theme": "alien",
     "level": 2,
-    "title": "La escotilla trasera",
-    "clue": "La escotilla se abre con tres cifras distintas. El ordenador de la nave guarda los intentos anteriores.",
-    "hint": "Las tres cifras suman 13.",
-    "data": [
-      {
-        "g": "387",
-        "bien": 0,
-        "mal": 1
-      },
-      {
-        "g": "812",
-        "bien": 1,
-        "mal": 0
-      },
-      {
-        "g": "489",
-        "bien": 1,
-        "mal": 0
-      },
-      {
-        "g": "079",
-        "bien": 1,
-        "mal": 0
-      }
-    ],
-    "h": "jw19qnjjx6"
+    "title": "Señal bajo el hielo",
+    "clue": "Algo golpea desde debajo del hielo, en series contadas. Cada letra son dos números: fila y columna.",
+    "hint": "Son siete palabras y la última es DIAS.",
+    "data": "15 31 / 35 31 11 33 / 43 15 / 11 13 44 24 51 11 / 15 33 / 44 42 15 43 / 14 24 11 43",
+    "h": "1h26yq0eqfa"
   },
   {
     "id": 137,
