@@ -535,14 +535,19 @@ export default [
   },
   {
     "id": 35,
-    "type": "morse",
+    "type": "vigenere",
     "theme": "alien",
     "level": 5,
-    "title": "Señal desde la escotilla",
-    "clue": "Los pulsos de una baliza interior se repiten una y otra vez. Es un mensaje largo, con muchas pausas.",
-    "hint": "Son siete palabras y empieza por NO.",
-    "data": "-. --- / .- -... .-. .- ... / .-.. .- / . ... -.-. --- - .. .-.. .-.. .- / .... .- ... - .- / . .-.. / .- -- .- -. . -.-. . .-.",
-    "h": "17jstu4pmr9"
+    "title": "Primer mensaje con clave",
+    "clue": "Un mensaje cifrado con una palabra clave que se repite debajo de las letras. Hoy la clave te la damos: es SOL.",
+    "hint": "Cada letra de la clave mueve la de arriba: la S mueve 18 puestos, la O 14 y la L 11.",
+    "data": {
+      "cipher": "DOD DINWG CWUCWGLF OW SBZUVPUSC",
+      "len": 3,
+      "kh": "7os3gn6zip",
+      "key": "SOL"
+    },
+    "h": "dwdbdotsku"
   },
   {
     "id": 36,
@@ -628,14 +633,19 @@ export default [
   },
   {
     "id": 42,
-    "type": "teclado",
+    "type": "vigenere",
     "theme": "egipcio",
     "level": 5,
-    "title": "El móvil del explorador",
-    "clue": "Un viejo móvil encontrado entre las ruinas guarda un mensaje largo. Cada grupo de pulsaciones es una letra.",
-    "hint": "Son siete palabras y la tercera es DUERME.",
-    "data": "33 555 / 333 2 777 2 666 66 / 3 88 33 777 6 33 / 22 2 5 666 / 33 555 / 8 33 777 222 33 777 / 8 33 6 7 555 666",
-    "h": "29v3wwp2nwt"
+    "title": "Clave del escriba",
+    "clue": "El escriba cifró el mensaje con una palabra clave. Esta vez te la damos: es el río de Egipto.",
+    "hint": "La clave se repite sin contar los espacios: N, I, L, O, N, I, L, O...",
+    "data": {
+      "cipher": "YI EIZJL GR IMFR IW OZIYSPMC",
+      "len": 4,
+      "kh": "24yir9875t6",
+      "key": "NILO"
+    },
+    "h": "vd37p2xyxn"
   },
   {
     "id": 43,
@@ -740,14 +750,19 @@ export default [
   },
   {
     "id": 49,
-    "type": "simbolos",
-    "theme": "policial",
+    "type": "vigenere",
+    "theme": "detective",
     "level": 5,
-    "title": "Nota bajo la alfombra",
-    "clue": "Bajo la alfombra del despacho aparece una nota con símbolos. La clave estaba en el cajón.",
-    "hint": "Son seis palabras y la última es PECERA.",
-    "data": "RY NEZN RFGNON RA YN CRPREN",
-    "h": "28zf06wbeqw"
+    "title": "La clave del detective",
+    "clue": "Un mensaje cifrado con la clave LUPA. Cada letra del mensaje se mueve según la letra de la clave que le toca.",
+    "hint": "La L mueve 11 puestos, la U 20, la P 15 y la A ninguno.",
+    "data": {
+      "cipher": "PF RUWJPBWY HIPGERP XTJL OCA SOTLWU",
+      "len": 4,
+      "kh": "204mcbh9h6u",
+      "key": "LUPA"
+    },
+    "h": "2dvk5j3pmuv"
   },
   {
     "id": 50,
@@ -852,14 +867,19 @@ export default [
   },
   {
     "id": 56,
-    "type": "espejo",
-    "theme": "alien",
+    "type": "vigenere",
+    "theme": "policial",
     "level": 5,
-    "title": "Transmisión en espejo",
-    "clue": "Una transmisión larga llega con el alfabeto invertido. Cada letra es la contraria.",
-    "hint": "Son seis palabras y la tercera es ROJO.",
-    "data": "VO KOZMVGZ ILQL TFZIWZ OZ IVHKFVHGZ",
-    "h": "10x570k26f1"
+    "title": "Nota de la comisaría",
+    "clue": "La clave de hoy es LEY: una palabra corta que se repite una y otra vez bajo el mensaje.",
+    "hint": "La L mueve 11 puestos, la E 4 y la Y 24.",
+    "data": {
+      "cipher": "PP GYJMCQC OIQLTYCIATS BP PY NSKTWYCMY",
+      "len": 3,
+      "kh": "1noi7z8q0l4",
+      "key": "LEY"
+    },
+    "h": "5fklrfjpw8"
   },
   {
     "id": 57,
@@ -945,14 +965,18 @@ export default [
   },
   {
     "id": 63,
-    "type": "morse",
-    "theme": "egipcio",
+    "type": "vigenere",
+    "theme": "detective",
     "level": 5,
-    "title": "Maldición en la piedra",
-    "clue": "Un golpeteo largo y rítmico sale de la cámara sellada. Es un mensaje con muchas palabras.",
-    "hint": "Son ocho palabras y la primera es LA.",
-    "data": ".-.. .- / -- .- .-.. -.. .. -.-. .. --- -. / -.-. .- . / ... --- -... .-. . / --.- ..- .. . -. / .- -... .-. .- / . .-.. / ... .- .-. -.-. --- ..-. .- --. ---",
-    "h": "1t1tf65zx8b"
+    "title": "La clave que sube",
+    "clue": "Un mensaje cifrado cuya clave no te dan: hay que adivinarla y escribirla para activar la ayuda. La clave es lo que sale de una hoguera y sube al cielo. Tiene cuatro letras.",
+    "hint": "La clave empieza por H.",
+    "data": {
+      "cipher": "LF RILAA STJQNV YZ SS MAHHHA",
+      "len": 4,
+      "kh": "1om4avb7cif"
+    },
+    "h": "1zncf2ltob6"
   },
   {
     "id": 64,
@@ -1060,23 +1084,18 @@ export default [
   },
   {
     "id": 70,
-    "type": "anagrama",
-    "theme": "policial",
+    "type": "vigenere",
+    "theme": "egipcio",
     "level": 5,
-    "title": "Frase en la pizarra",
-    "clue": "Todas las letras de una frase se mezclaron en un solo montón, sin separar las palabras.",
-    "hint": "Son cinco palabras y empieza por EL.",
+    "title": "El secreto de la corona",
+    "clue": "Un mensaje cifrado cuya clave no te dan: hay que adivinarla y escribirla para activar la ayuda. La clave es la flor sagrada que crece en el Nilo. Tiene cuatro letras.",
+    "hint": "La clave empieza por L.",
     "data": {
-      "pool": "EAONIAOESILSVDLLAEV",
-      "lens": [
-        2,
-        7,
-        4,
-        2,
-        4
-      ]
+      "cipher": "PZ YOCOHB PGVCYRBC DI VCCCGO PB XZ ESFDWC",
+      "len": 4,
+      "kh": "1y2whms5bvf"
     },
-    "h": "28a924wk8hl"
+    "h": "16oho1i69y0"
   },
   {
     "id": 71,
@@ -1163,14 +1182,18 @@ export default [
   },
   {
     "id": 77,
-    "type": "cesar",
-    "theme": "detective",
+    "type": "vigenere",
+    "theme": "alien",
     "level": 5,
-    "title": "Carta del fugitivo",
-    "clue": "Una carta larga con las letras desplazadas. El fugitivo usó siempre el mismo desplazamiento y no lo dijo.",
-    "hint": "Cada letra se movió más de 12 puestos.",
-    "data": "SZ JSFRORSFC QIZDOPZS BIBQO SGHIJC SB ZO QWIROR",
-    "h": "7yzg9m4nat"
+    "title": "Mensaje sin clave",
+    "clue": "Un mensaje cifrado cuya clave no te dan: hay que adivinarla y escribirla para activar la ayuda. La clave es el satélite que gira alrededor de la Tierra. Tiene cuatro letras.",
+    "hint": "La clave empieza por L.",
+    "data": {
+      "cipher": "YUQIP MNBP XR DZHQE GCRNP FN SPHNL",
+      "len": 4,
+      "kh": "1qak74g6c6g"
+    },
+    "h": "1hqjscfxlrt"
   },
   {
     "id": 78,
@@ -1275,14 +1298,18 @@ export default [
   },
   {
     "id": 84,
-    "type": "teclado",
-    "theme": "alien",
+    "type": "vigenere",
+    "theme": "policial",
     "level": 5,
-    "title": "Mensaje de la nave nodriza",
-    "clue": "Un comunicador muy antiguo repite una secuencia larguísima de teclas. Cada grupo es una letra.",
-    "hint": "Son ocho palabras y la tercera es NODRIZA.",
-    "data": "555 2 / 66 2 888 33 / 66 666 3 777 444 9999 2 / 777 33 4 777 33 7777 2 777 2 / 222 88 2 66 3 666 / 7777 2 555 4 2 / 555 2 / 555 88 66 2",
-    "h": "12z94xb2l73"
+    "title": "Prueba oculta",
+    "clue": "Un mensaje cifrado cuya clave no te dan: hay que adivinarla y escribirla para activar la ayuda. La clave es lo que usó el culpable y nunca encontraron. Tiene cuatro letras.",
+    "hint": "La clave empieza por A.",
+    "data": {
+      "cipher": "EC EOSGQCHFEO LR QSCFZDIF NAJF QL PLQNTV",
+      "len": 4,
+      "kh": "11t9whf286o"
+    },
+    "h": "7qhfsgdjqm"
   },
   {
     "id": 85,
@@ -1382,14 +1409,18 @@ export default [
   },
   {
     "id": 91,
-    "type": "espejo",
-    "theme": "policial",
+    "type": "vigenere",
+    "theme": "egipcio",
     "level": 5,
-    "title": "Declaración en el espejo",
-    "clue": "Una declaración larga escrita con el alfabeto invertido. Cada letra es la del lugar contrario.",
-    "hint": "Son ocho palabras y la tercera es CAMBIO.",
-    "data": "VO GVHGRTL XZNYRL HF WVXOZIZXRLM ZMGVH WVO QFRXRL",
-    "h": "1gjpztdo46y"
+    "title": "La maldición",
+    "clue": "Un mensaje cifrado cuya clave no te dan: hay que adivinarla y escribirla para activar la ayuda. La clave es lo que encontraron dentro del sarcófago. Tiene cinco letras.",
+    "hint": "La clave empieza por M.",
+    "data": {
+      "cipher": "XO YILPWOQOZ GATO MTQKTM O XWS OCPQCUCEWS",
+      "len": 5,
+      "kh": "ifad221w05"
+    },
+    "h": "bias4i4lql"
   },
   {
     "id": 92,
@@ -1491,14 +1522,18 @@ export default [
   },
   {
     "id": 98,
-    "type": "cesar",
-    "theme": "alien",
+    "type": "vigenere",
+    "theme": "detective",
     "level": 5,
-    "title": "Transmisión de largo alcance",
-    "clue": "Una transmisión muy larga con las letras desplazadas. Quien la emitió no dice cuánto movió el alfabeto.",
-    "hint": "Cada letra se movió más de 12 puestos.",
-    "data": "UB CUDIQZU LYUDU TU CKO BUZEI O DE UIJQ TYHYWYTE Q DEIEJHEI",
-    "h": "12yfnf7tf0p"
+    "title": "Último papel",
+    "clue": "Un mensaje cifrado cuya clave no te dan: hay que adivinarla y escribirla para activar la ayuda. La clave es lo que sigue siempre un detective. Tiene cinco letras.",
+    "hint": "La clave empieza por P.",
+    "data": {
+      "cipher": "AI NXRSIV XSIITT EHKJBTP MF XL JTLBMD XSIEA",
+      "len": 5,
+      "kh": "f4oyn3rqqk"
+    },
+    "h": "h2soh5pjck"
   },
   {
     "id": 99,
@@ -1585,23 +1620,18 @@ export default [
   },
   {
     "id": 105,
-    "type": "anagrama",
-    "theme": "detective",
+    "type": "vigenere",
+    "theme": "alien",
     "level": 5,
-    "title": "Frase en la libreta",
-    "clue": "Todas las letras de una frase se mezclaron en un solo montón, sin separar las palabras.",
-    "hint": "Son cinco palabras y la última es LUGAR.",
+    "title": "Visita breve",
+    "clue": "Un mensaje cifrado cuya clave no te dan: hay que adivinarla y escribirla para activar la ayuda. La clave es el cuerpo celeste con cola de hielo y polvo. Tiene seis letras.",
+    "hint": "La clave empieza por C.",
     "data": {
-      "pool": "ACPLARLLRLBOSUEGUREGLEAE",
-      "lens": [
-        2,
-        8,
-        7,
-        2,
-        5
-      ]
+      "cipher": "PIQWMRC JUWBTC HQVFIPO OYTNFC EEEGC SX TKIOSD VTYQ",
+      "len": 6,
+      "kh": "210g8v42m9o"
     },
-    "h": "23osvc78bbt"
+    "h": "10u77m3xyzt"
   },
   {
     "id": 106,
@@ -1706,14 +1736,18 @@ export default [
   },
   {
     "id": 112,
-    "type": "morse",
-    "theme": "alien",
+    "type": "vigenere",
+    "theme": "policial",
     "level": 5,
-    "title": "Baliza en el horizonte",
-    "clue": "Una baliza lejana emite un mensaje larguísimo con puntos y rayas.",
-    "hint": "Son diez palabras y la última es SUR.",
-    "data": ".-.. .- / ... . -. .- .-.. / ... . / .-. . .--. .. - . / -.-. .- -.. .- / - .-. . ... / .... --- .-. .- ... / -.. . ... -.. . / . .-.. / ... ..- .-.",
-    "h": "1qjdp6ibh3b"
+    "title": "El juicio",
+    "clue": "Un mensaje cifrado cuya clave no te dan: hay que adivinarla y escribirla para activar la ayuda. La clave es lo que se paga para esperar el juicio en libertad. Tiene seis letras.",
+    "hint": "La clave empieza por F.",
+    "data": {
+      "cipher": "JT APTSFLO FZLNW LVARJ XOEPUJ TA CQUJJA QDSFXAEDCNW",
+      "len": 6,
+      "kh": "14gv2wgyzl6"
+    },
+    "h": "3ow5unvu1g"
   },
   {
     "id": 113,
@@ -1828,14 +1862,18 @@ export default [
   },
   {
     "id": 119,
-    "type": "simbolos",
-    "theme": "detective",
+    "type": "vigenere",
+    "theme": "egipcio",
     "level": 5,
-    "title": "Declaración en símbolos",
-    "clue": "Una declaración larga escrita con símbolos. La clave estaba grapada al final del expediente.",
-    "hint": "Son nueve palabras y la segunda es PORTERO.",
-    "data": "RY CBEGREB IVB FNYVE NY FBPVB CBE YN IRAGNAN",
-    "h": "rart6zs7qt"
+    "title": "La palabra olvidada",
+    "clue": "Un mensaje cifrado cuya clave no te dan: hay que adivinarla y escribirla para activar la ayuda. La clave es quien anotaba todo en el antiguo Egipto. Tiene siete letras.",
+    "hint": "La clave empieza por E.",
+    "data": {
+      "cipher": "PS RLMSTE KGTZFTE KG RJSE GGP LVB PEDCSZB QYW PRLJE VWELMSDE",
+      "len": 7,
+      "kh": "2a61hfxykto"
+    },
+    "h": "z5tnfhn98q"
   },
   {
     "id": 120,
@@ -1921,14 +1959,18 @@ export default [
   },
   {
     "id": 126,
-    "type": "teclado",
-    "theme": "alien",
+    "type": "vigenere",
+    "theme": "detective",
     "level": 5,
-    "title": "Mensaje del portal",
-    "clue": "Un comunicador antiguo repite una secuencia larguísima de teclas. Cada grupo es una letra.",
-    "hint": "Son ocho palabras y la última es ECLIPSE.",
-    "data": "33 555 / 7 666 777 8 2 555 / 7777 33 / 222 33 777 777 2 777 2 / 222 88 2 66 3 666 / 8 33 777 6 444 66 33 / 33 555 / 33 222 555 444 7 7777 33",
-    "h": "qin59aa8bh"
+    "title": "Noche de invitados",
+    "clue": "Un mensaje cifrado cuya clave no te dan: hay que adivinarla y escribirla para activar la ayuda. La clave es lo que usa un criminal para que no lo reconozcan. Tiene siete letras.",
+    "hint": "La clave empieza por D.",
+    "data": {
+      "cipher": "WWVTJ LNV QFAZTZGWK YVNHDV MS DOSLDG UVRN VWDT LNN WMFNR LZ OTSAV",
+      "len": 7,
+      "kh": "2yvmfuph9u"
+    },
+    "h": "emoiopmdh5"
   },
   {
     "id": 127,
@@ -2028,14 +2070,18 @@ export default [
   },
   {
     "id": 133,
-    "type": "cesar",
-    "theme": "policial",
+    "type": "vigenere",
+    "theme": "alien",
     "level": 5,
-    "title": "Carta al juez",
-    "clue": "Una carta muy larga con las letras desplazadas. El abogado nunca dijo cuántos puestos movió el alfabeto.",
-    "hint": "Cada letra se movió más de 14 puestos.",
-    "data": "WD STGYSVG KSTAS IMW KM UDAWFLW WJS UMDHSTDW Q SMF SKA DG VWXWFVAG",
-    "h": "23cf8zsbd1p"
+    "title": "La orden final",
+    "clue": "Un mensaje cifrado cuya clave no te dan: hay que adivinarla y escribirla para activar la ayuda. La clave es el enorme conjunto de estrellas al que pertenece el Sol. Tiene siete letras.",
+    "hint": "La clave empieza por G.",
+    "data": {
+      "cipher": "RA YASM NUDCIWI EYPPRX CNG OCDBV PGRL AQMRXIKAO MN RA EIBZRG",
+      "len": 7,
+      "kh": "lonq6fpsjq"
+    },
+    "h": "254yvz4gghc"
   },
   {
     "id": 134,
@@ -2152,13 +2198,17 @@ export default [
   },
   {
     "id": 140,
-    "type": "morse",
-    "theme": "egipcio",
+    "type": "vigenere",
+    "theme": "policial",
     "level": 5,
-    "title": "Ritmo en la última cámara",
-    "clue": "Un golpeteo largo y rítmico llega de la cámara final. Es un mensaje con muchas palabras.",
-    "hint": "Son diez palabras y la primera es EL.",
-    "data": ". .-.. / ... . -.-. .-. . - --- / -.. . .-.. / ..-. .- .-. .- --- -. / . ... - .- / --. ..- .- .-. -.. .- -.. --- / . -. / .-.. .- / ..- .-.. - .. -- .- / -.-. .- -- .- .-. .-",
-    "h": "k8jhnmqw14"
+    "title": "El último testigo",
+    "clue": "Un mensaje cifrado cuya clave no te dan: hay que adivinarla y escribirla para activar la ayuda. La clave es lo que buscan los jueces y defiende la ley. Tiene ocho letras.",
+    "hint": "La clave empieza por J.",
+    "data": {
+      "cipher": "NF UTAQ YUNXG KMUCEUNG VCCVDX YD NTVQMX NWLBKOO MYUBLKW HJVDTZ",
+      "len": 8,
+      "kh": "253lby71kwd"
+    },
+    "h": "q52p8un97j"
   }
 ]

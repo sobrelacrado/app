@@ -3,7 +3,7 @@
 import { writeFileSync } from 'node:fs'
 import { loadSources } from './load-sources.mjs'
 import {
-  atbash, caesarEncode, hashAnswer, keypadEncode, lockCandidates, lockFeedback, morseEncode, normalize, pigpenStore, rng, shuffled,
+  atbash, caesarEncode, hashAnswer, keypadEncode, lockCandidates, lockFeedback, morseEncode, normalize, pigpenStore, rng, shuffled, vigenereDecode, vigenereEncode,
 } from '../src/diario/ciphers.js'
 import { clueBody, hideText, parseLens, validateCryptic } from '../src/diario/criptico.js'
 
@@ -47,6 +47,13 @@ const encode = {
   simbolos: (p) => pigpenStore(p.text),
   anagrama: (p, i) => anagram(p.text, i + 1),
   cerradura: (p, i) => lockClues(p.text, i + 1),
+  vigenere: (p) => {
+    if (!/^[A-Z ]+$/.test(p.text)) throw new Error(`Vigenère "${p.title}": el texto solo admite A-Z y espacios`)
+    if (!/^[A-Z]{3,8}$/.test(p.key ?? '')) throw new Error(`Vigenère "${p.title}": la clave debe ser una palabra de 3 a 8 letras A-Z`)
+    const cipher = vigenereEncode(p.text, p.key)
+    if (vigenereDecode(cipher, p.key) !== p.text || cipher === p.text) throw new Error(`Vigenère "${p.title}": el cifrado no se deshace bien`)
+    return { cipher, len: p.key.length, kh: hashAnswer(p.key, 'sl-vigenere-clave'), ...(p.keyGiven ? { key: p.key } : {}) }
+  },
   criptico: (p) => {
     const errs = validateCryptic(p)
     if (errs.length) throw new Error(`Críptico "${p.title}": ${errs.join('; ')}`)
@@ -76,12 +83,17 @@ src.forEach((p, i) => {
   const key = normalize(p.text)
   if (answers.has(key)) throw new Error(`Acertijo ${n}: la respuesta "${p.text}" ya existe`)
   answers.add(key)
-  if (['morse', 'teclado', 'espejo', 'simbolos', 'anagrama'].includes(p.type) && /[^A-Z ]/.test(p.text)) throw new Error(`Acertijo ${n}: ${p.type} solo admite A-Z y espacios`)
+  if (['morse', 'teclado', 'espejo', 'simbolos', 'anagrama', 'vigenere'].includes(p.type) && /[^A-Z ]/.test(p.text)) throw new Error(`Acertijo ${n}: ${p.type} solo admite A-Z y espacios`)
   const words = p.text.split(' ')
   const count = /Son (\w+) palabras/.exec(p.hint ?? '')
   if (count && NUM[count[1]] !== words.length) throw new Error(`Acertijo ${n}: la pista dice ${count[1]} palabras y hay ${words.length}`)
   const ord = /(?<!comienzo de )la (\w+) es ([A-ZÑ]+)/.exec(p.hint ?? '')
   if (ord && ORD[ord[1]] !== undefined && words[ORD[ord[1]]] !== ord[2]) throw new Error(`Acertijo ${n}: la pista dice que la ${ord[1]} palabra es ${ord[2]} y es ${words[ORD[ord[1]]]}`)
+  if (p.type === 'vigenere' && !p.keyGiven) {
+    const name = Object.keys(NUM).find((k) => NUM[k] === p.key.length)
+    if (!name || !p.clue.includes(`${name} letras`)) throw new Error(`Acertijo ${n}: la historia debe decir de cuántas letras es la clave ("${name} letras")`)
+    if (p.hint !== `La clave empieza por ${p.key[0]}.`) throw new Error(`Acertijo ${n}: la pista debe ser "La clave empieza por ${p.key[0]}."`)
+  }
   const last = /la última es ([A-ZÑ]+)/.exec(p.hint ?? '')
   if (last && words.at(-1) !== last[1]) throw new Error(`Acertijo ${n}: la pista dice que la última palabra es ${last[1]} y es ${words.at(-1)}`)
 })

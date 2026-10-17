@@ -4,7 +4,7 @@ import assert from 'node:assert/strict'
 import {
   atbash, caesarDecode, caesarEncode, dateKey, dayIndex, fmtTime, hashAnswer, isCorrect, keypadDecode, keypadEncode, keypadWords,
   lockCandidates, lockFeedback, morseDecode, morseEncode, nextKey, normalize, pigpenGlyph, pigpenLetters, pigpenStore, puzzleFor,
-  shareText, shuffled, streakOf,
+  shareText, shuffled, streakOf, vigenereDecode, vigenereEncode, vigenereKeyFor, vigenereLetter,
 } from '../src/diario/ciphers.js'
 import { bestStreak, calendar, diarioStats, mergeDays } from '../src/diario/stats.js'
 import PUZZLES from '../src/diario/puzzles.js'
@@ -54,6 +54,15 @@ test('cada acertijo se resuelve con su solución (necesita el archivo fuente)', 
     if (s.type === 'cesar') {
       assert.ok(!/[ÑÁÉÍÓÚ]/.test(s.text), 'César solo admite A-Z')
       assert.ok(isCorrect(p, caesarDecode(p.data, s.shift)))
+    }
+    if (s.type === 'vigenere') {
+      assert.ok(isCorrect(p, vigenereDecode(p.data.cipher, s.key)), 'con la clave sale la solución')
+      assert.equal(p.data.kh, hashAnswer(s.key, 'sl-vigenere-clave'))
+      assert.equal(p.data.len, s.key.length)
+      if (s.keyGiven) assert.equal(p.data.key, s.key)
+      else assert.equal(p.data.key, undefined, 'la clave secreta no viaja en claro')
+      assert.equal(p.level, 5)
+      assert.equal(i % 7, 6, 'solo los domingos')
     }
     if (s.type === 'morse') assert.ok(isCorrect(p, morseDecode(p.data)))
     if (s.type === 'teclado') assert.ok(isCorrect(p, keypadDecode(p.data)))
@@ -405,4 +414,38 @@ test('mezcla móvil/nube: lo resuelto en la nube manda también en la marca "lat
   assert.equal(r.merged.a.late, undefined)
   assert.deepEqual(mergeDays({}, { a: D({ late: true }) }).merged.a.late, true)
   assert.deepEqual(mergeDays({ a: D({ late: true }) }, {}).upload, ['a'])
+})
+
+// ---------- Vigenère ----------
+test('Vigenère: cada letra se mueve según la clave y se deshace', () => {
+  assert.equal(vigenereEncode('HOLA', 'SOL'), 'ZCWS') // H+S=Z, O+O=C, L+L=W, A+S=S
+  assert.equal(vigenereDecode('ZCWS', 'SOL'), 'HOLA')
+  assert.equal(vigenereEncode('LA TUMBA ES', 'NILO'), 'YI EIZJL SF') // los espacios no gastan letras de la clave
+  assert.equal(vigenereEncode('abc', 'a'), 'ABC') // la A no mueve nada
+  assert.equal(vigenereEncode('XYZ', 'B'), 'YZA') // da la vuelta al alfabeto
+  assert.equal(vigenereEncode('HOLA, MUNDO!', 'sol'), 'ZCWS, AFFRZ!') // la clave sigue su cuenta y la puntuación se queda igual
+  const msg = 'EL CULPABLE SIEMPRE DEJA UNA HUELLA'
+  for (const key of ['LUPA', 'A', 'ESCRIBA', 'JUSTICIA']) assert.equal(vigenereDecode(vigenereEncode(msg, key), key), msg)
+  assert.throws(() => vigenereEncode('HOLA', '123'))
+})
+
+test('Vigenère: la letra de clave de cada casilla y la tabla de ayuda', () => {
+  assert.deepEqual(vigenereKeyFor('AB CD', 'XY'), ['X', 'Y', 'X', 'Y'])
+  assert.deepEqual(vigenereKeyFor('HOLA', 'SOL'), ['S', 'O', 'L', 'S'])
+  assert.equal(vigenereLetter('Z', 'S'), 'H') // con la clave S, la Z cifrada es la H
+  assert.equal(vigenereLetter('C', 'O'), 'O')
+  assert.equal(vigenereLetter('A', 'B'), 'Z')
+})
+
+test('Vigenère: solo hay acertijos en domingo, con nivel 5, y la clave secreta no viaja en claro', () => {
+  const V = PUZZLES.filter((p) => p.type === 'vigenere')
+  assert.ok(V.length >= 16)
+  PUZZLES.forEach((p, i) => { if (p.type === 'vigenere') { assert.equal(i % 7, 6); assert.equal(p.level, 5) } })
+  for (const p of V) {
+    assert.ok(/^[A-Z ]+$/.test(p.data.cipher))
+    assert.ok(p.data.len >= 3 && p.data.len <= 8)
+    assert.equal(typeof p.data.kh, 'string')
+    if (p.data.key) assert.equal(p.data.key.length, p.data.len) // clave visible: solo en los de aprender
+  }
+  assert.ok(V.filter((p) => p.data.key).length <= 6, 'la mayoría no enseña la clave')
 })

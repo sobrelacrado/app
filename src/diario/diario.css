@@ -243,3 +243,10 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-regalo h2 { font-size: 24px; }
 .dr-regalo .dr-regalo-sub { margin: 0 0 10px; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; opacity: .92; }
 .dr-regalo a.boton.dr-cta { background: #f7d046 !important; color: #1d1d1d !important; border-color: #f7d046 !important; }
+
+/* Vigenère */
+.dr-vtag { display: flex; flex-direction: column; align-items: center; line-height: 1.05; cursor: pointer; padding: 2px 3px; border-radius: 4px; }
+.dr-vtag b { font-size: 16px; }
+.dr-vtag small { font-size: 11px; opacity: .65; }
+.dr-vtag:hover, .dr-vtag:focus-visible { background: rgba(0, 0, 0, .09); outline: none; }
+.dr-ok { color: #1d6a3a; font-weight: 700; }

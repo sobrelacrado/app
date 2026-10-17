@@ -1,12 +1,13 @@
 // Los minijuegos del Diario: cada tipo de código tiene su propia forma de resolverse.
 import { useEffect, useRef, useState } from 'react'
-import { KEYPAD, MORSE, atbash, caesarDecode, keypadWords, pigpenGlyph, pigpenLetters } from './ciphers.js'
+import { KEYPAD, MORSE, atbash, caesarDecode, hashAnswer, keypadWords, normalize, pigpenGlyph, pigpenLetters, vigenereKeyFor } from './ciphers.js'
 import { KIND_HELP, KIND_NAME } from './criptico.js'
 import { SPEEDS, canVibrate, playMorse } from './morseSound.js'
 
 export const TYPE_NAME = {
   cesar: 'Rueda de César', morse: 'Código Morse', teclado: 'Teclado antiguo', cerradura: 'Cerradura de 3 cifras',
   anagrama: 'Anagrama', acrostico: 'Mensaje escondido', simbolos: 'Alfabeto de símbolos', espejo: 'Alfabeto en espejo', criptico: 'Críptico',
+  vigenere: 'Cifrado Vigenère',
 }
 export const HOWTO = {
   cesar: 'Cada letra del mensaje se ha movido varios puestos en el alfabeto. Gira la rueda: la fila de dentro te dice qué letra es cada una. Cuando el texto se lea con sentido, pulsa "Es esta".',
@@ -17,6 +18,7 @@ export const HOWTO = {
   acrostico: 'Lo importante no es lo que dice el texto, sino cómo está escrito. Descubre el mensaje que esconde y escríbelo.',
   simbolos: 'Cada letra se ha cambiado por un dibujo. Usa la clave de abajo para saber qué letra es cada dibujo y rellena las casillas.',
   criptico: 'Una sola pista que dice la respuesta DOS veces: una definición (siempre al principio o al final) y un juego con las letras, con un aviso que te dice qué hacer (mezclar, leer al revés, pegar, meter una pieza dentro de otra). Ejemplo: «Plato caliente: paso revuelto (4)». «Plato caliente» es la definición; «revuelto» es el aviso de que hay que mezclar las letras de «paso»; y la respuesta, de 4 letras, es SOPA. El número entre paréntesis son las letras de la respuesta. Las tildes no cuentan. Si te atascas, cada pista te da un poco más.',
+  vigenere: 'Es como el cifrado de César, pero el desplazamiento cambia en cada letra. Una palabra clave se repite debajo del mensaje (los espacios se saltan) y cada letra de la clave mueve la de arriba: la A no la mueve, la B la mueve 1 puesto, la C 2... Para descifrar hay que retroceder esos puestos. Toca el par de letras de una casilla y la tabla te dice qué letra real es. Ejemplo con la clave SOL: la H se cifra como Z (la S mueve 18 puestos). Si la clave no se da, la historia te describe la palabra: adivínala y escríbela para activar la ayuda.',
   espejo: 'Aquí el alfabeto está del revés: la A es la Z, la B es la Y... Cada letra del mensaje es su "reflejo". Usa la tabla y escribe el mensaje.',
 }
 
@@ -352,6 +354,68 @@ function Criptico({ puzzle, onCheck, hintStep = 0 }) {
   )
 }
 
+/* ---------- Vigenère ---------- */
+const VIGENERE_SALT = 'sl-vigenere-clave'
+function Vigenere({ puzzle, onCheck }) {
+  const { cipher, len, kh, key: given } = puzzle.data
+  const [typed, setTyped] = useState('')
+  const [sel, setSel] = useState(null) // { c: letra cifrada, k: letra de clave } de la casilla tocada
+  const key = given ?? (hashAnswer(typed, VIGENERE_SALT) === kh ? normalize(typed) : null)
+  const keyLetters = key ? vigenereKeyFor(cipher, key) : []
+  const shift = sel ? ALPHA.indexOf(sel.k) : 0
+  let n = -1
+  const words = key
+    ? cipher.split(' ').map((w) => [...w].map((c) => {
+      n++
+      const k = keyLetters[n]
+      return (
+        <span className="dr-vtag" role="button" tabIndex={0} aria-label={'Letra cifrada ' + c + ', clave ' + k}
+          onClick={() => setSel({ c, k })} onKeyDown={(e) => { if (e.key === 'Enter') setSel({ c, k }) }}>
+          <b>{c}</b><small>{k}</small>
+        </span>
+      )
+    }))
+    : []
+  const half = (from) => ALPHA.slice(from, from + 13)
+  const real = (l) => ALPHA[(ALPHA.indexOf(l) - shift + 26) % 26]
+  const rows = (letters, cls) => letters.map((l) => (
+    <button type="button" key={cls + l} className={'dr-ficha dr-mini ' + (sel && sel.c === l ? 'dr-sel' : '')} onClick={() => setSel({ c: l, k: sel ? sel.k : ALPHA[0] })}>
+      {cls === 'real' ? real(l) : l}
+    </button>
+  ))
+  return (
+    <>
+      <p className="dr-cifrado" aria-label="Mensaje cifrado">{cipher}</p>
+      {!given && (
+        <>
+          <label className="dr-campo">
+            Palabra clave ({len} letras)
+            <input value={typed} onChange={(e) => setTyped(e.target.value)} autoCapitalize="characters" autoComplete="off" spellCheck="false" />
+          </label>
+          {key
+            ? <p className="dr-nota dr-ok">✔ ¡Clave correcta!</p>
+            : <p className="dr-nota">{normalize(typed).length >= len ? 'Esa no es la clave. Relee la historia.' : 'Descubre la clave con lo que dice la historia y escríbela aquí.'}</p>}
+        </>
+      )}
+      {key && (
+        <>
+          <p className="dr-nota">Clave: <b>{key}</b> (se repite debajo de las letras). Toca el par de letras de una casilla para ver su traducción.</p>
+          {sel && (
+            <div className="dr-espejo" aria-label={'Tabla para la letra de clave ' + sel.k}>
+              <div className="dr-fila">{rows(half(0), 'cifrada')}</div>
+              <div className="dr-fila dr-reflejo">{rows(half(0), 'real')}</div>
+              <div className="dr-fila">{rows(half(13), 'cifrada')}</div>
+              <div className="dr-fila dr-reflejo">{rows(half(13), 'real')}</div>
+            </div>
+          )}
+          <p className="dr-nota">{sel ? 'Con la clave ' + sel.k + ': la ' + sel.c + ' cifrada es la ' + real(sel.c) + '. Fila de arriba: letra cifrada; fila de abajo: letra real.' : 'Aún no has tocado ninguna casilla.'}</p>
+          <Casillas words={words} onCheck={onCheck} />
+        </>
+      )}
+    </>
+  )
+}
+
 export const GAMES = {
-  cesar: Cesar, morse: Morse, teclado: Teclado, cerradura: Cerradura, anagrama: Anagrama, acrostico: Acrostico, simbolos: Simbolos, espejo: Espejo, criptico: Criptico,
+  cesar: Cesar, morse: Morse, teclado: Teclado, cerradura: Cerradura, anagrama: Anagrama, acrostico: Acrostico, simbolos: Simbolos, espejo: Espejo, criptico: Criptico, vigenere: Vigenere,
 }

@@ -29,6 +29,30 @@ const rot = (text, n) =>
 export const caesarEncode = (text, shift) => rot(text, shift)
 export const caesarDecode = (text, shift) => rot(text, -shift)
 
+// ---------- Vigenère ----------
+// Cada letra se mueve tantos puestos como diga la letra de la clave (A = 0, B = 1, C = 2...). La clave se repite debajo del mensaje
+// y se salta lo que no es letra (los espacios no gastan letras de la clave). Solo A-Z; lo demás se deja igual.
+const keyShifts = (key) => {
+  const shifts = [...String(key).toUpperCase()].filter((c) => /[A-Z]/.test(c)).map((c) => c.charCodeAt(0) - 65)
+  if (!shifts.length) throw new Error('La clave de Vigenère necesita al menos una letra')
+  return shifts
+}
+function vigenere(text, key, sign) {
+  const k = keyShifts(key)
+  let i = 0
+  return String(text).toUpperCase().replace(/[A-Z]/g, (c) => ALPHA[(((c.charCodeAt(0) - 65 + sign * k[i++ % k.length]) % 26) + 26) % 26])
+}
+export const vigenereEncode = (text, key) => vigenere(text, key, 1)
+export const vigenereDecode = (text, key) => vigenere(text, key, -1)
+// Letra de la clave que le toca a cada letra del texto (para enseñarla debajo): "AB CD", "XY" -> ["X","Y","X","Y"]
+export function vigenereKeyFor(text, key) {
+  const letters = [...String(key).toUpperCase()].filter((c) => /[A-Z]/.test(c))
+  let i = 0
+  return [...String(text).toUpperCase()].filter((c) => /[A-Z]/.test(c)).map(() => letters[i++ % letters.length])
+}
+// Letra real que corresponde a una letra cifrada y una letra de clave
+export const vigenereLetter = (cipher, keyLetter) => vigenereDecode(cipher, keyLetter)
+
 // ---------- Morse ----------
 export const MORSE = {
   A: '.-', B: '-...', C: '-.-.', D: '-..', E: '.', F: '..-.', G: '--.', H: '....', I: '..', J: '.---', K: '-.-', L: '.-..', M: '--',
