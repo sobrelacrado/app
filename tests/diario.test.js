@@ -7,6 +7,7 @@ import {
   shareText, shuffled, streakOf, vigenereDecode, vigenereEncode, vigenereKeyFor, vigenereLetter,
 } from '../src/diario/ciphers.js'
 import { golpesDecode } from '../src/diario/golpes.js'
+import { escitalaRead } from '../src/diario/escitala.js'
 import { bestStreak, calendar, diarioStats, mergeDays } from '../src/diario/stats.js'
 import PUZZLES from '../src/diario/puzzles.js'
 // El archivo con las soluciones en claro NO está en GitHub (el repositorio es público): solo en el PC de Alberto.
@@ -69,6 +70,13 @@ test('cada acertijo se resuelve con su solución (necesita el archivo fuente)', 
       assert.ok(isCorrect(p, golpesDecode(p.data)))
       assert.ok(!s.text.includes('K'))
       assert.ok(i % 7 === 1 || i % 7 === 2, 'golpes entre semana temprano (niveles 1-2)')
+    }
+    if (s.type === 'escitala') {
+      assert.equal(s.level, 3)
+      assert.ok(i % 7 === 4, 'escítala en viernes (nivel 3)')
+      assert.equal(escitalaRead(p.data.cipher, s.rows), normalize(s.text), 'con el grosor correcto se lee el mensaje')
+      assert.ok(isCorrect(p, s.text))
+      assert.ok(!JSON.stringify(p.data).includes(normalize(s.text)), 'el mensaje no viaja en claro')
     }
     if (s.type === 'interrogatorio') {
       assert.ok(isCorrect(p, s.text), 'la huella es la del culpable')
@@ -543,4 +551,19 @@ test('Interrogatorio: todos los casos de la lista tienen una sola solución (nec
   assert.ok(IN.length >= 8)
   for (const c of IN) assert.deepEqual(validateCase(c), [], c.title)
   assert.equal(PUZZLES.filter((p) => p.type === 'interrogatorio').length, IN.length, 'todos están en la lista')
+})
+
+// ---------- Escítala ----------
+test('Escítala: se cifra por columnas, se lee por filas y solo el grosor justo da el mensaje', async () => {
+  const { escitalaEncode, escitalaGrid, escitalaRead, escitalaFits } = await import('../src/diario/escitala.js')
+  const texto = 'EL TESORO ESTA EN EL POZO'
+  const cifrado = escitalaEncode(texto, 4)
+  assert.equal(cifrado, 'EOTLLRAPTOEOEENZSSEO')
+  assert.equal(escitalaRead(cifrado, 4), 'ELTESOROESTAENELPOZO')
+  assert.notEqual(escitalaRead(cifrado, 5), 'ELTESOROESTAENELPOZO')
+  assert.notEqual(escitalaRead(cifrado, 3), 'ELTESOROESTAENELPOZO')
+  assert.deepEqual(escitalaFits(cifrado), [2, 4, 5, 10])
+  assert.deepEqual(escitalaGrid(cifrado, 3).map((r) => r.length), [7, 7, 7]) // 20 letras en 3 filas: casillas vacías al final
+  assert.equal(escitalaGrid(cifrado, 3)[2][6], '')
+  assert.throws(() => escitalaEncode('HOLA', 3))
 })

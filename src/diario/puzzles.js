@@ -595,21 +595,16 @@ export default [
   },
   {
     "id": 40,
-    "type": "anagrama",
-    "theme": "alien",
+    "type": "escitala",
+    "theme": "policial",
     "level": 3,
-    "title": "Letras en la pantalla",
-    "clue": "La pantalla de la nave muestra una frase con las letras revueltas.",
-    "hint": "Son tres palabras y empieza por LA.",
+    "title": "La tira del mensajero",
+    "clue": "Un mensajero te entrega una tira de cuero con letras sin sentido. Dicen que, enrollada en el palo del grosor justo, el mensaje se lee de corrido.",
+    "hint": "Son seis palabras y la última es FELPUDO.",
     "data": {
-      "pool": "ARENVTAELIAZRA",
-      "lens": [
-        2,
-        4,
-        8
-      ]
+      "cipher": "LEAEAEJLLSOPLTEUAALDVBFO"
     },
-    "h": "2cu738hcu3z"
+    "h": "1f4rgcl9h9i"
   },
   {
     "id": 41,
@@ -857,14 +852,16 @@ export default [
   },
   {
     "id": 54,
-    "type": "morse",
-    "theme": "detective",
+    "type": "escitala",
+    "theme": "egipcio",
     "level": 3,
-    "title": "Golpes en la biblioteca",
-    "clue": "Desde detrás de una estantería llegan golpes cortos y largos. Alguien intenta avisarte.",
-    "hint": "Son seis palabras y la última es BIBLIOTECA.",
-    "data": ". .-.. / - . ... - .- -- . -. - --- / . ... - .- / . -. / .-.. .- / -... .. -... .-.. .. --- - . -.-. .-",
-    "h": "1al6ima3b43"
+    "title": "Vara del sacerdote",
+    "clue": "Un sacerdote te da una cinta de lino con signos revueltos y una vara de medir. Solo con el grosor correcto aparece el mensaje.",
+    "hint": "Son cinco palabras y la última es AMULETO.",
+    "data": {
+      "cipher": "LMUDLLAISIAEMATAMTOCOEUO"
+    },
+    "h": "239mw5cnww1"
   },
   {
     "id": 55,
@@ -1087,22 +1084,16 @@ export default [
   },
   {
     "id": 68,
-    "type": "acrostico",
+    "type": "escitala",
     "theme": "alien",
     "level": 3,
-    "title": "Cuaderno del radioastrónomo",
-    "clue": "Un radioastrónomo anotó lo ocurrido en su cuaderno. El texto parece normal, pero guarda un mensaje.",
-    "hint": "Siete letras: un mundo que gira alrededor de una estrella.",
-    "data": [
-      "Pasamos la noche junto a la antena.",
-      "Las luces parpadeaban sin ningún orden.",
-      "Algo respondió a nuestras llamadas.",
-      "Nadie en la base quiso creerlo.",
-      "En el cielo se abrió un círculo oscuro.",
-      "Tardamos horas en entender lo que decía.",
-      "Ahora sabemos que venían de lejos."
-    ],
-    "h": "594r4vb8ip"
+    "title": "Cinta de la sonda",
+    "clue": "La sonda ha devuelto una cinta con símbolos mezclados. Los ingenieros creen que se leen enrollándola en un cilindro del diámetro adecuado.",
+    "hint": "Son cinco palabras y la última es AMANECER.",
+    "data": {
+      "cipher": "LEAARMNRAAINVZEEACAAETLR"
+    },
+    "h": "g1dyswyvkl"
   },
   {
     "id": 69,
@@ -1446,14 +1437,16 @@ export default [
   },
   {
     "id": 89,
-    "type": "simbolos",
-    "theme": "egipcio",
+    "type": "escitala",
+    "theme": "detective",
     "level": 3,
-    "title": "Jeroglífico del escriba",
-    "clue": "En la pared de la sala aparecen símbolos en lugar de letras. La clave está tallada al lado.",
-    "hint": "Son cinco palabras y la segunda es ESCRIBA.",
-    "data": "RY RFPEVON PBABPR RY PNZVAB",
-    "h": "si7grx1zlo"
+    "title": "El palo de Esparta",
+    "clue": "Entre los papeles del sospechoso aparece una tira con letras sin sentido y un palo de madera. Parece un truco de los antiguos espartanos.",
+    "hint": "Son seis palabras y la última es TEJADO.",
+    "data": {
+      "cipher": "EORLSESOLOHTSUEPYJEEACPDHOO"
+    },
+    "h": "1fb3a3l1pyy"
   },
   {
     "id": 90,
@@ -1799,14 +1792,16 @@ export default [
   },
   {
     "id": 110,
-    "type": "teclado",
-    "theme": "egipcio",
+    "type": "escitala",
+    "theme": "policial",
     "level": 3,
-    "title": "Pulsaciones en la excavación",
-    "clue": "Un teléfono antiguo guarda una frase escrita a pulsaciones. Cada grupo de pulsaciones es una letra.",
-    "hint": "Son cinco palabras y la última es TRAICIONADO.",
-    "data": "33 555 / 8 33 777 222 33 777 / 333 2 777 2 666 66 / 333 88 33 / 8 777 2 444 222 444 666 66 2 3 666",
-    "h": "a8uzdm3o50"
+    "title": "Mensaje en el cinturón",
+    "clue": "Un confidente te pasa su cinturón de cuero. Por dentro lleva letras escritas en tira: hay que enrollarlo en un tubo del grosor justo.",
+    "hint": "Son cinco palabras y la última es ANOCHECER.",
+    "data": {
+      "cipher": "EAOAEACCLMNRANHECIPTLOER"
+    },
+    "h": "knp5lksd3z"
   },
   {
     "id": 111,
@@ -2027,21 +2022,16 @@ export default [
   },
   {
     "id": 124,
-    "type": "anagrama",
-    "theme": "policial",
+    "type": "escitala",
+    "theme": "egipcio",
     "level": 3,
-    "title": "Orden en el tablón",
-    "clue": "Las letras de una orden quedaron mezcladas sobre el tablón de la comisaría.",
-    "hint": "Son tres palabras y la última es SOCIO.",
+    "title": "Papiro enrollado",
+    "clue": "Un papiro largo y estrecho lleva letras en hilera. Los escribas lo enrollaban en un cilindro para leerlo: busca el grosor del cilindro.",
+    "hint": "Son seis palabras y la última es TEMPLO.",
     "data": {
-      "pool": "IEOCDTNLOSANEGA",
-      "lens": [
-        8,
-        2,
-        5
-      ]
+      "cipher": "EERSDRDTPLSOTEAEELTOEATSLMO"
     },
-    "h": "1s96c7iezbf"
+    "h": "53ozl9iehq"
   },
   {
     "id": 125,

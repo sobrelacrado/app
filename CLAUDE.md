@@ -117,3 +117,8 @@ App web instalable (PWA) para gestionar partidas de casos de misterio imprimible
 - **Interrogatorio** (`interrogatorio.js`, componente `Interrogatorio`): 3-5 sospechosos con una declaración cada uno + una regla (`culpableMiente` / `unoMiente`). `validateCase` exige UNA sola solución. Los casos se generan con `node scripts/gen-interrogatorios.mjs` (semilla fija) a `interrogatorios.src.mjs` (NO en GitHub, en el zip de copias). La lógica NO viaja a la web: solo `{suspects, statements:[{by,says}], rule}`. Van en jueves (nivel 2) y viernes (nivel 3).
 - Reglas: `golpes` e `interrogatorio` añadidos a los tipos permitidos. `playSignals` en `morseSound.js` es genérico.
 - **Pendientes aprobados**: Escítala (niveles 3-4) y Sopa de letras escondidas (niveles 1-3); Braille descartado.
+
+## Escítala (17/10/2026, publicado)
+- Tipo `escitala` (`escitala.js` lógica pura, componente `Escitala` en `games.jsx`): la tira llega como letras sin sentido; con − / + se elige el número de filas (2-10) del "palo", la tira se rellena por columnas y se lee por filas; con el grosor justo aparece el mensaje (la lectura se muestra siempre, nivel 3). Fuente `escitalas.src.mjs` (6 acertijos, `rows` = grosor correcto; el texto sin espacios debe dividirse exacto por `rows`; make-puzzles comprueba que ningún otro grosor dé el mensaje). Van los viernes (nivel 3) de las semanas 6, 8, 10, 13, 16 y 18. Reglas: `escitala` añadido a los tipos permitidos.
+- Pruebas de reglas necesitan Java 21: en este PC está en `C:\Program Files\Microsoft\jdk-21...`; si `npm test` dice "Java version before 21", poner `JAVA_HOME` y `PATH` a ese JDK antes de lanzar.
+- Pendiente aprobado: **Sopa de letras escondidas** (niveles 1-3).

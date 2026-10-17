@@ -367,6 +367,7 @@ test('Diario: el tipo críptico se puede guardar y uno inventado no', async () =
   await assertSucceeds(setDoc(doc(ana, 'users/ana/diario/2026-10-16'), dia({ type: 'vigenere', level: 5 })))
   await assertSucceeds(setDoc(doc(ana, 'users/ana/diario/2026-10-15'), dia({ type: 'golpes', level: 1 })))
   await assertSucceeds(setDoc(doc(ana, 'users/ana/diario/2026-10-14'), dia({ type: 'interrogatorio', level: 3 })))
+  await assertSucceeds(setDoc(doc(ana, 'users/ana/diario/2026-10-13'), dia({ type: 'escitala', level: 3 })))
   await assertSucceeds(setDoc(doc(ana, 'users/ana/diario/2026-10-17'), dia({ type: 'criptico', level: 4 })))
   await assertFails(setDoc(doc(ana, 'users/ana/diario/2026-10-18'), dia({ type: 'inventado' })))
 })

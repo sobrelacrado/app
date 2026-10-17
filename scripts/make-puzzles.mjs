@@ -7,6 +7,7 @@ import {
 } from '../src/diario/ciphers.js'
 import { clueBody, hideText, parseLens, validateCryptic } from '../src/diario/criptico.js'
 import { golpesDecode, golpesEncode } from '../src/diario/golpes.js'
+import { escitalaFits, escitalaRead, escitalaEncode } from '../src/diario/escitala.js'
 import { validateCase } from '../src/diario/interrogatorio.js'
 
 // Cerradura: elige intentos al azar (siempre los mismos para el mismo acertijo) hasta que solo quede un código posible.
@@ -55,6 +56,15 @@ const encode = {
     if (golpesDecode(code) !== p.text) throw new Error(`Golpes "${p.title}": el código no se deshace bien`)
     return code
   },
+  escitala: (p) => {
+    if (!/^[A-Z ]+$/.test(p.text)) throw new Error(`Escítala "${p.title}": solo A-Z y espacios`)
+    if (!Number.isInteger(p.rows) || p.rows < 3) throw new Error(`Escítala "${p.title}": falta rows (grosor correcto, 3 o más)`)
+    const cipher = escitalaEncode(p.text, p.rows)
+    if (escitalaRead(cipher, p.rows) !== normalize(p.text)) throw new Error(`Escítala "${p.title}": no se deshace bien`)
+    if (!escitalaFits(cipher).includes(p.rows)) throw new Error(`Escítala "${p.title}": el grosor correcto no se puede elegir`)
+    for (const r of escitalaFits(cipher)) if (r !== p.rows && escitalaRead(cipher, r) === normalize(p.text)) throw new Error(`Escítala "${p.title}": otro grosor también da el mensaje`)
+    return { cipher }
+  },
   interrogatorio: (p) => {
     const errs = validateCase(p)
     if (errs.length) throw new Error(`Interrogatorio "${p.title}": ${errs.join('; ')}`)
@@ -96,7 +106,7 @@ src.forEach((p, i) => {
   const key = normalize(p.text)
   if (answers.has(key)) throw new Error(`Acertijo ${n}: la respuesta "${p.text}" ya existe`)
   answers.add(key)
-  if (['morse', 'teclado', 'espejo', 'simbolos', 'anagrama', 'vigenere', 'golpes'].includes(p.type) && /[^A-Z ]/.test(p.text)) throw new Error(`Acertijo ${n}: ${p.type} solo admite A-Z y espacios`)
+  if (['morse', 'teclado', 'espejo', 'simbolos', 'anagrama', 'vigenere', 'golpes', 'escitala'].includes(p.type) && /[^A-Z ]/.test(p.text)) throw new Error(`Acertijo ${n}: ${p.type} solo admite A-Z y espacios`)
   const words = p.text.split(' ')
   const count = /Son (\w+) palabras/.exec(p.hint ?? '')
   if (count && NUM[count[1]] !== words.length) throw new Error(`Acertijo ${n}: la pista dice ${count[1]} palabras y hay ${words.length}`)
