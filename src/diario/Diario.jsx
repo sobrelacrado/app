@@ -3,6 +3,7 @@ import { dateKey, dayIndex, fmtTime, isCorrect, levelStars, nextKey, puzzleFor, 
 import { GAMES, HOWTO, TYPE_NAME } from './games.jsx'
 import './diario.css'
 import PUZZLES from './puzzles.js'
+import Avisos from './Avisos.jsx'
 import Progreso from './Progreso.jsx'
 import { mergeDays } from './stats.js'
 
@@ -175,6 +176,7 @@ export default function Diario({ onExit }) {
             </p>
             <button type="button" onClick={share}>{copied ? '¡Copiado!' : 'Compartir resultado'}</button>
             <p className="dr-proximo">Próximo acertijo en <b>{countdown}</b></p>
+            <Avisos compact />
             {BRAND_URL && (
               <a className="boton dr-cta" href={BRAND_URL} target="_blank" rel="noopener noreferrer">
                 ¿Te gusta descifrar? Síguenos en Instagram @sobrelacrado

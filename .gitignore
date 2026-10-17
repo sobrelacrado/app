@@ -31,3 +31,6 @@ firebase-debug.log
 
 # Soluciones en claro del Diario (el repositorio es público): solo en el PC de Alberto
 src/diario/puzzles.src.mjs
+
+# Claves privadas (avisos del Diario): nunca se suben
+secretos-NO-SUBIR/

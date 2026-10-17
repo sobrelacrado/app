@@ -188,3 +188,12 @@ test('mezcla móvil + nube: un día resuelto gana, lo que solo está en el móvi
   assert.equal(m3.merged.y.tries, 4)
   assert.equal(m3.merged.y.hint, true)
 })
+
+test('aviso diario: el mensaje cambia cada día y trae número y dificultad', async () => {
+  const { buildMessage, BODIES } = await import('../scripts/send-diario-push.mjs')
+  const a = buildMessage('2026-10-12'), b = buildMessage('2026-10-13')
+  assert.match(a.title, /nº 1 · ★+☆*/)
+  assert.notEqual(a.body, b.body)
+  assert.ok(BODIES.every((t) => t.length < 80))
+  assert.equal(buildMessage('2026-10-12').body, buildMessage('2026-10-12').body)
+})

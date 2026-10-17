@@ -291,3 +291,24 @@ test('Diario: se rechazan datos con forma incorrecta', async () => {
   await assertFails(setDoc(doc(ana, 'users/ana/otra/2026-10-16'), dia())) // solo existe la carpeta "diario"
   await assertFails(setDoc(doc(ana, 'users/ana'), { x: 1 }))
 })
+
+// ---------- Avisos diarios del Diario ----------
+const SUB_ID = 'a'.repeat(64)
+const sub = (extra = {}) => ({ endpoint: 'https://fcm.googleapis.com/fcm/send/abc', p256dh: 'BKey', auth: 'secret', at: serverTimestamp(), ...extra })
+
+test('Avisos: cualquiera puede suscribirse y darse de baja, pero nadie puede leer las suscripciones', async () => {
+  await assertSucceeds(setDoc(doc(player(), `pushSubs/${SUB_ID}`), sub()))
+  await assertFails(getDoc(doc(player(), `pushSubs/${SUB_ID}`)))
+  await assertFails(getDoc(doc(other(), `pushSubs/${SUB_ID}`)))
+  await assertFails(getDocs(collection(player(), 'pushSubs')))
+  await assertSucceeds(getDoc(doc(admin(), `pushSubs/${SUB_ID}`)))
+  await assertSucceeds(deleteDoc(doc(player(), `pushSubs/${SUB_ID}`)))
+})
+test('Avisos: se rechazan ids y datos con forma incorrecta', async () => {
+  await assertFails(setDoc(doc(player(), 'pushSubs/corto'), sub()))
+  await assertFails(setDoc(doc(player(), `pushSubs/${SUB_ID}`), sub({ endpoint: 'http://no-seguro' })))
+  await assertFails(setDoc(doc(player(), `pushSubs/${SUB_ID}`), sub({ extra: 1 })))
+  await assertFails(setDoc(doc(player(), `pushSubs/${SUB_ID}`), sub({ endpoint: 'https://x/' + 'a'.repeat(1000) })))
+  await assertFails(setDoc(doc(player(), `pushSubs/${SUB_ID}`), sub({ at: Timestamp.now() })))
+  await assertFails(setDoc(doc(player(), `pushSubs/${SUB_ID}`), { endpoint: 'https://x/', p256dh: 'k', at: serverTimestamp() }))
+})

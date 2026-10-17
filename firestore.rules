@@ -78,6 +78,24 @@ service cloud.firestore {
       }
     }
 
+    // ---------- Avisos diarios del Diario ----------
+    // Cada móvil que activa los avisos guarda su suscripción; el id es la huella del identificador (imposible de adivinar).
+    // Nadie puede leerlas salvo el administrador; el envío lo hace un programa con clave de servicio (GitHub Actions).
+    match /pushSubs/{id} {
+      allow read: if isAdmin();
+      allow create, update: if id.matches('[0-9a-f]{64}') && isValidSub(request.resource.data);
+      allow delete: if id.matches('[0-9a-f]{64}');
+
+      function isValidSub(d) {
+        return d.keys().hasOnly(['endpoint', 'p256dh', 'auth', 'at'])
+          && d.keys().hasAll(['endpoint', 'p256dh', 'auth', 'at'])
+          && d.endpoint is string && d.endpoint.matches('https://.*') && d.endpoint.size() <= 1000
+          && d.p256dh is string && d.p256dh.size() <= 200
+          && d.auth is string && d.auth.size() <= 100
+          && d.at == request.time;
+      }
+    }
+
     // ---------- Progreso personal del Diario ----------
     // Cada persona (sesión de Google) lee y escribe solo lo suyo; el administrador puede leerlo.
     match /users/{uid}/diario/{day} {

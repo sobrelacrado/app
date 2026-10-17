@@ -31,10 +31,12 @@
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
     "firebase": "^13.0.0",
+    "firebase-admin": "^14.5.0",
     "jsqr": "^1.4.0",
     "oxlint": "^1.81.0",
     "sharp": "^0.35.5",
     "vite": "^8.3.0",
-    "vite-plugin-pwa": "^2.0.0"
+    "vite-plugin-pwa": "^2.0.0",
+    "web-push": "^3.6.7"
   }
 }

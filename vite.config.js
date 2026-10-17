@@ -14,7 +14,7 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,woff2,png,svg,webmanifest}'],
         // La página del jugador y las rutas de acceso de Firebase nunca pasan por el service worker.
-        globIgnores: ['scan.html', 'assets/scan-*', 'diario.html', 'assets/diario-*'],
+        globIgnores: ['scan.html', 'assets/scan-*', 'diario.html', 'assets/diario-*', 'diario-sw.js'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/s\//, /^\/diario/, /^\/__\//],
         importScripts: ['sw-extra.js'],

@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { fmtTime } from './ciphers.js'
 import { TYPE_NAME } from './games.jsx'
+import Avisos from './Avisos.jsx'
 import { diarioStats } from './stats.js'
 import PUZZLES from './puzzles.js'
 
@@ -48,6 +49,9 @@ export default function Progreso({ days, todayKey, user, status, onLogin, onLogo
         </>
       )}
       {s.solved === 0 && <p className="dr-nota">Aún no has resuelto ningún acertijo. ¡Empieza por el de hoy!</p>}
+
+      <h2 className="dr-sub">Avisos</h2>
+      <Avisos />
 
       <h2 className="dr-sub">Tu cuenta</h2>
       {user ? (

@@ -40,7 +40,7 @@
         ]
       },
       {
-        "source": "{/sw.js,/sw-extra.js,/manifest.webmanifest,/registerSW.js}",
+        "source": "{/sw.js,/sw-extra.js,/diario-sw.js,/manifest.webmanifest,/registerSW.js}",
         "headers": [
           {
             "key": "Cache-Control",
