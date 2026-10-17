@@ -33,11 +33,15 @@ export function readServiceAccount(raw) {
   let acc
   try { acc = JSON.parse(text) } catch { throw new Error('FIREBASE_SERVICE_ACCOUNT no es un JSON válido: pega el contenido ENTERO del archivo, de { a }.') }
   if (typeof acc.private_key !== 'string') throw new Error('Al JSON le falta "private_key": no es la clave de cuenta de servicio.')
-  acc.private_key = acc.private_key.replace(/\\n/g, '\n').trim() + '\n'
-  const k = acc.private_key
-  if (!k.startsWith('-----BEGIN PRIVATE KEY-----') || !k.trimEnd().endsWith('-----END PRIVATE KEY-----')) {
-    throw new Error(`La private_key no tiene el formato esperado (largo ${k.length}, contiene BEGIN: ${k.includes("BEGIN")}, contiene END: ${k.includes("END")}). Debe ser de -----BEGIN PRIVATE KEY----- a -----END PRIVATE KEY-----.`)
-  }
+  const H = '-----BEGIN PRIVATE KEY-----', F = '-----END PRIVATE KEY-----'
+  const raw0 = acc.private_key.replace(/\\n/g, '\n')
+  const i = raw0.indexOf(H), j = raw0.indexOf(F)
+  if (i < 0 || j < i) throw new Error(`La private_key no tiene el formato esperado (largo ${raw0.length}, contiene BEGIN: ${i >= 0}, contiene END: ${j >= 0}).`)
+  const body = raw0.slice(i + H.length, j).replace(/\s+/g, '') // quita saltos de línea, espacios y tabuladores
+  const bad = [...new Set(body.replace(/[A-Za-z0-9+/=]/g, ''))]
+  if (bad.length) throw new Error(`La private_key tiene caracteres que no deberían estar (códigos: ${bad.map((c) => c.charCodeAt(0)).join(', ')}). Largo del cuerpo: ${body.length}.`)
+  if (body.length < 1000) throw new Error(`La private_key parece cortada: el cuerpo mide ${body.length} caracteres y debería pasar de 1000.`)
+  acc.private_key = `${H}\n${body.match(/.{1,64}/g).join('\n')}\n${F}\n` // se reconstruye en líneas de 64
   return acc
 }
 
