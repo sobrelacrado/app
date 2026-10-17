@@ -279,3 +279,16 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-palo { display: grid; gap: 3px; width: fit-content; max-width: 100%; margin: 8px auto; padding: 10px; border-radius: 24px; background: linear-gradient(#6b4a2b, #8a6238 50%, #5a3d22); box-shadow: inset 0 0 10px rgba(0, 0, 0, .5); }
 .dr-palo span { min-width: 0; width: 28px; height: 30px; display: flex; align-items: center; justify-content: center; background: #f1dfb8; color: #2a1c0c; border-radius: 5px; font: 800 16px 'Space Mono', monospace; }
 .dr-lee { margin: 4px 0 10px; text-align: center; font: 700 16px 'Space Mono', monospace; letter-spacing: .1em; word-break: break-all; }
+
+/* Sopa de letras escondidas */
+.dr-sopa { display: grid; gap: 3px; margin: 10px 0; }
+.dr-sopa button { aspect-ratio: 1; min-width: 0; min-height: 0; padding: 0; font: 800 17px 'Space Mono', monospace; border-radius: 6px; background: rgba(0, 0, 0, .1); color: inherit; border: 0; }
+.dr-sopa button.dr-ini { outline: 3px solid #d9a441; background: rgba(217, 164, 65, .35); }
+.dr-sopa button.dr-sobra { background: #d9a441; color: #1a1209; box-shadow: 0 0 8px #d9a441; }
+.dr-sopa .dr-f0 { background: #c0563b; color: #fff; } .dr-sopa .dr-f1 { background: #3e7cc0; color: #fff; } .dr-sopa .dr-f2 { background: #7a5bb5; color: #fff; }
+.dr-sopa .dr-f3 { background: #2e8f7a; color: #fff; } .dr-sopa .dr-f4 { background: #b58a2a; color: #fff; } .dr-sopa .dr-f5 { background: #b5517d; color: #fff; }
+.dr-sopa .dr-f6 { background: #4f8a3c; color: #fff; } .dr-sopa .dr-f7 { background: #8a6a4b; color: #fff; } .dr-sopa .dr-f8 { background: #3b8aa0; color: #fff; } .dr-sopa .dr-f9 { background: #9a5a2a; color: #fff; }
+.dr-palabras { list-style: none; margin: 6px 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.dr-palabras li { padding: 4px 10px; border-radius: 99px; background: rgba(0, 0, 0, .1); font: 700 13px 'Space Mono', monospace; }
+.dr-palabras li.dr-hecha { text-decoration: line-through; opacity: .65; }
+.dr-palabras li small { font-weight: 400; }

@@ -7,6 +7,7 @@ import {
 } from '../src/diario/ciphers.js'
 import { clueBody, hideText, parseLens, validateCryptic } from '../src/diario/criptico.js'
 import { golpesDecode, golpesEncode } from '../src/diario/golpes.js'
+import { sopaBuild } from './sopa-build.mjs'
 import { escitalaFits, escitalaRead, escitalaEncode } from '../src/diario/escitala.js'
 import { validateCase } from '../src/diario/interrogatorio.js'
 
@@ -55,6 +56,18 @@ const encode = {
     const code = golpesEncode(p.text)
     if (golpesDecode(code) !== p.text) throw new Error(`Golpes "${p.title}": el código no se deshace bien`)
     return code
+  },
+  sopa: (p) => {
+    if (!/^[A-Z ]+$/.test(p.text)) throw new Error(`Sopa "${p.title}": la respuesta solo admite A-Z y espacios`)
+    const hidden = p.level === 3
+    const { rows } = sopaBuild(p)
+    const words = p.words.map((x) => {
+      const w = normalize(typeof x === 'string' ? x : x.w)
+      if (hidden && (typeof x === 'string' || !x.c)) throw new Error(`Sopa "${p.title}": en el nivel 3 cada palabra necesita su pista (c)`)
+      if (!hidden && typeof x !== 'string') throw new Error(`Sopa "${p.title}": en los niveles 1 y 2 la lista va con las palabras tal cual`)
+      return hidden ? { h: hashAnswer(w, 'sl-sopa'), len: w.length, c: x.c } : { w, h: hashAnswer(w, 'sl-sopa'), len: w.length }
+    })
+    return { size: p.size, grid: rows, words, secretLen: normalize(p.text).length }
   },
   escitala: (p) => {
     if (!/^[A-Z ]+$/.test(p.text)) throw new Error(`Escítala "${p.title}": solo A-Z y espacios`)
@@ -106,7 +119,7 @@ src.forEach((p, i) => {
   const key = normalize(p.text)
   if (answers.has(key)) throw new Error(`Acertijo ${n}: la respuesta "${p.text}" ya existe`)
   answers.add(key)
-  if (['morse', 'teclado', 'espejo', 'simbolos', 'anagrama', 'vigenere', 'golpes', 'escitala'].includes(p.type) && /[^A-Z ]/.test(p.text)) throw new Error(`Acertijo ${n}: ${p.type} solo admite A-Z y espacios`)
+  if (['morse', 'teclado', 'espejo', 'simbolos', 'anagrama', 'vigenere', 'golpes', 'escitala', 'sopa'].includes(p.type) && /[^A-Z ]/.test(p.text)) throw new Error(`Acertijo ${n}: ${p.type} solo admite A-Z y espacios`)
   const words = p.text.split(' ')
   const count = /Son (\w+) palabras/.exec(p.hint ?? '')
   if (count && NUM[count[1]] !== words.length) throw new Error(`Acertijo ${n}: la pista dice ${count[1]} palabras y hay ${words.length}`)

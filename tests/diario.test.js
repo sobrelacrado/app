@@ -71,6 +71,14 @@ test('cada acertijo se resuelve con su solución (necesita el archivo fuente)', 
       assert.ok(!s.text.includes('K'))
       assert.ok(i % 7 === 1 || i % 7 === 2, 'golpes entre semana temprano (niveles 1-2)')
     }
+    if (s.type === 'sopa') {
+      assert.ok([1, 2, 3].includes(s.level) && [0, 1, 2, 3, 4].includes(i % 7), 'sopa en niveles 1-3 (lunes a viernes)')
+      assert.ok(isCorrect(p, s.text))
+      assert.ok(p.data.words.every((w) => w.h), 'cada palabra va con su huella')
+      if (s.level === 3) assert.ok(p.data.words.every((w) => !w.w && w.c), 'nivel 3: palabras ocultas, con pista')
+      else assert.ok(p.data.words.every((w) => w.w))
+      assert.ok(!JSON.stringify(p.data).includes(normalize(s.text)), 'el mensaje no viaja en claro')
+    }
     if (s.type === 'escitala') {
       assert.equal(s.level, 3)
       assert.ok(i % 7 === 4, 'escítala en viernes (nivel 3)')
@@ -566,4 +574,43 @@ test('Escítala: se cifra por columnas, se lee por filas y solo el grosor justo 
   assert.deepEqual(escitalaGrid(cifrado, 3).map((r) => r.length), [7, 7, 7]) // 20 letras en 3 filas: casillas vacías al final
   assert.equal(escitalaGrid(cifrado, 3)[2][6], '')
   assert.throws(() => escitalaEncode('HOLA', 3))
+})
+
+// ---------- Sopa de letras escondidas ----------
+test('Sopa: líneas rectas, lectura, apariciones y letras sobrantes', async () => {
+  const { sopaLine, sopaRead, sopaOccurrences, sopaLeftover } = await import('../src/diario/sopa.js')
+  assert.deepEqual(sopaLine([0, 0], [0, 2]), [[0, 0], [0, 1], [0, 2]])
+  assert.deepEqual(sopaLine([2, 2], [0, 0]), [[2, 2], [1, 1], [0, 0]])
+  assert.equal(sopaLine([0, 0], [1, 2]), null) // no es recta
+  assert.equal(sopaLine([1, 1], [1, 1]), null)
+  const rows = ['SOLX', 'AYZA', 'LXOY', 'AAAR']
+  assert.equal(sopaRead(rows, sopaLine([0, 0], [0, 2])), 'SOL')
+  assert.equal(sopaOccurrences(rows, 'SOL').length, 1)
+  assert.equal(sopaOccurrences(rows, 'LOS').length, 1) // al revés cuenta como otra aparición (no es la misma palabra)
+  assert.equal(sopaOccurrences(rows, 'ALA').length, 2) // una palabra capicúa cuenta dos veces: por eso el generador no las admite
+  assert.equal(sopaLeftover(['ABC', 'DEF', 'GHI'], [[0, 0], [1, 1], [2, 2]]), 'BCDFGH')
+})
+
+test('Sopa: todas las sopas de la lista se resuelven, cada palabra sale una vez y sobra la respuesta (necesita los archivos fuente)', async (t) => {
+  const SO = await import('../src/diario/sopas.src.mjs').then((m) => m.default).catch(() => null)
+  if (!SO) return t.skip('no está sopas.src.mjs')
+  const { sopaOccurrences, sopaLeftover } = await import('../src/diario/sopa.js')
+  const sopas = PUZZLES.filter((p) => p.type === 'sopa')
+  assert.equal(sopas.length, SO.length)
+  const reales = SO.map((s) => PUZZLES.find((p) => p.title === s.title))
+  reales.forEach((p, i) => {
+    const words = SO[i].words.map((w) => normalize(typeof w === 'string' ? w : w.w))
+    const cells = []
+    const dirs = new Set()
+    for (const w of words) {
+      const occ = sopaOccurrences(p.data.grid, w)
+      assert.equal(occ.length, 1, SO[i].title + ': ' + w)
+      cells.push(...occ[0].cells); dirs.add(occ[0].dir)
+    }
+    assert.equal(sopaLeftover(p.data.grid, cells), normalize(SO[i].text), SO[i].title)
+    const adelante = [...dirs].filter((d) => d < 4).length, atras = [...dirs].filter((d) => d >= 4).length
+    assert.ok(adelante >= 3, SO[i].title + ': mezcla de direcciones')
+    if (SO[i].level === 1) assert.equal(atras, 0, 'nivel 1 sin palabras al revés')
+    else assert.ok(atras >= 1, SO[i].title + ': nivel 2-3 con palabras al revés')
+  })
 })

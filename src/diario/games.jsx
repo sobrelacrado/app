@@ -4,13 +4,14 @@ import { KEYPAD, MORSE, atbash, caesarDecode, hashAnswer, keypadWords, normalize
 import { KIND_HELP, KIND_NAME } from './criptico.js'
 import { GOLPES_SPEEDS, SQUARE, golpesSignals } from './golpes.js'
 import { MAX_ROWS, MIN_ROWS, escitalaGrid, escitalaRead } from './escitala.js'
+import { sopaLeftover, sopaLine, sopaRead } from './sopa.js'
 import { RULES } from './interrogatorio.js'
 import { SPEEDS, canVibrate, playMorse, playSignals } from './morseSound.js'
 
 export const TYPE_NAME = {
   cesar: 'Rueda de César', morse: 'Código Morse', teclado: 'Teclado antiguo', cerradura: 'Cerradura de 3 cifras',
   anagrama: 'Anagrama', acrostico: 'Mensaje escondido', simbolos: 'Alfabeto de símbolos', espejo: 'Alfabeto en espejo', criptico: 'Críptico',
-  vigenere: 'Cifrado Vigenère', golpes: 'Golpes en la pared', interrogatorio: 'El interrogatorio', escitala: 'Escítala',
+  vigenere: 'Cifrado Vigenère', golpes: 'Golpes en la pared', interrogatorio: 'El interrogatorio', escitala: 'Escítala', sopa: 'Sopa de letras escondidas',
 }
 export const HOWTO = {
   cesar: 'Cada letra del mensaje se ha movido varios puestos en el alfabeto. Gira la rueda: la fila de dentro te dice qué letra es cada una. Cuando el texto se lea con sentido, pulsa "Es esta".',
@@ -22,6 +23,7 @@ export const HOWTO = {
   simbolos: 'Cada letra se ha cambiado por un dibujo. Usa la clave de abajo para saber qué letra es cada dibujo y rellena las casillas.',
   criptico: 'Una sola pista que dice la respuesta DOS veces: una definición (siempre al principio o al final) y un juego con las letras, con un aviso que te dice qué hacer (mezclar, leer al revés, pegar, meter una pieza dentro de otra). Ejemplo: «Plato caliente: paso revuelto (4)». «Plato caliente» es la definición; «revuelto» es el aviso de que hay que mezclar las letras de «paso»; y la respuesta, de 4 letras, es SOPA. El número entre paréntesis son las letras de la respuesta. Las tildes no cuentan. Si te atascas, cada pista te da un poco más.',
   golpes: 'Cada letra son dos números: la fila y la columna de la tabla (la K se escribe con la C). Con 2·3 vas a la fila 2 y la columna 3: es la H. Los presos lo golpeaban en la pared: primero los golpes de la fila, una pausa, y los de la columna. Pulsa "Escuchar" para oírlo (o notarlo vibrar) y escribe el mensaje.',
+  sopa: 'Es una sopa de letras con un truco: las letras que NO pertenecen a ninguna palabra, leídas de izquierda a derecha y de arriba abajo, forman el mensaje. Toca la primera letra de una palabra y luego la última: si es de la lista, se queda marcada. Las palabras pueden ir en horizontal, vertical o diagonal, y en los niveles difíciles también al revés. En el nivel más alto no hay lista: solo una definición de cada palabra y su número de letras. Cuando las encuentres todas, las letras sobrantes se encienden: léelas y escribe el mensaje.',
   escitala: 'Los espartanos enrollaban una tira de cuero en un palo y escribían a lo largo: sin el palo del grosor justo, las letras no tenían sentido. La tira de arriba es el mensaje tal como llega. Con + y − eliges cuántas filas tiene el palo: la tira se enrolla rellenando columna a columna y el mensaje se lee por filas. Cuando el grosor es el correcto, el texto se lee con sentido. Escríbelo.',
   interrogatorio: 'Cada sospechoso hace una declaración, y la regla de arriba dice quién miente y quién dice la verdad. Prueba con cada uno: "¿y si él fuera el culpable?" ¿Cuadran las declaraciones con la regla? Solo uno encaja. Puedes apuntar quién crees que miente. Cuando lo sepas, toca al culpable y acúsalo.',
   vigenere: 'Es como el cifrado de César, pero el desplazamiento cambia en cada letra. Una palabra clave se repite debajo del mensaje (los espacios se saltan) y cada letra de la clave mueve la de arriba: la A no la mueve, la B la mueve 1 puesto, la C 2... Para descifrar hay que retroceder esos puestos. Toca el par de letras de una casilla y la tabla te dice qué letra real es. Ejemplo con la clave SOL: la H se cifra como Z (la S mueve 18 puestos). Si la clave no se da, la historia te describe la palabra: adivínala y escríbela para activar la ayuda.',
@@ -498,6 +500,55 @@ function Escitala({ puzzle, onCheck }) {
   )
 }
 
+/* ---------- Sopa de letras escondidas ---------- */
+const SOPA_COLORES = 10
+function Sopa({ puzzle, onCheck }) {
+  const { grid, words, secretLen } = puzzle.data
+  const [ini, setIni] = useState(null) // [fila, columna] de la primera letra tocada
+  const [found, setFound] = useState({}) // índice de la palabra -> { cells, text }
+  const [aviso, setAviso] = useState('')
+  const n = grid.length
+  const cellColor = {}
+  Object.entries(found).forEach(([k, f]) => f.cells.forEach(([r, c]) => { cellColor[r * n + c] = Number(k) % SOPA_COLORES }))
+  const todas = Object.keys(found).length === words.length
+  const sobran = todas ? sopaLeftover(grid, Object.values(found).flatMap((f) => f.cells)) : ''
+  const tocar = (r, c) => {
+    setAviso('')
+    if (!ini) { setIni([r, c]); return }
+    const cells = (ini[0] === r && ini[1] === c) ? null : sopaLine(ini, [r, c])
+    setIni(null)
+    if (!cells) return
+    const text = sopaRead(grid, cells)
+    const back = [...text].reverse().join('')
+    const k = words.findIndex((w, i) => !found[i] && (w.h === hashAnswer(text, 'sl-sopa') || w.h === hashAnswer(back, 'sl-sopa')))
+    if (k < 0) { setAviso(words.some((w, i) => found[i] && (w.h === hashAnswer(text, 'sl-sopa') || w.h === hashAnswer(back, 'sl-sopa'))) ? 'Esa ya la tienes.' : 'Ahí no hay ninguna palabra.'); return }
+    setFound((f) => ({ ...f, [k]: { cells, text: w2(words[k], text, back) } }))
+  }
+  return (
+    <>
+      <div className="dr-sopa" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }} role="group" aria-label="Sopa de letras">
+        {grid.flatMap((row, r) => [...row].map((l, c) => {
+          const i = r * n + c
+          const cls = ini && ini[0] === r && ini[1] === c ? 'dr-ini' : i in cellColor ? 'dr-f' + cellColor[i] : todas ? 'dr-sobra' : ''
+          return <button type="button" key={i} className={cls} onClick={() => tocar(r, c)} aria-label={`${l}, fila ${r + 1}, columna ${c + 1}`}>{l}</button>
+        }))}
+      </div>
+      {aviso && <p className="dr-nota" role="status">{aviso}</p>}
+      <ul className="dr-palabras">
+        {words.map((w, i) => (
+          <li key={i} className={found[i] ? 'dr-hecha' : ''}>
+            {w.w ? w.w : <>{found[i] ? found[i].text : '?'.repeat(w.len)} <small>({w.len})</small>{!found[i] && ' · ' + w.c}</>}
+          </li>
+        ))}
+      </ul>
+      <p className="dr-nota">{todas ? 'Letras que sobran, en orden:' : `Cuando las encuentres todas, sobrarán ${secretLen} letras: formarán el mensaje.`}</p>
+      {todas && <p className="dr-lee">{[...sobran].join(' ')}</p>}
+      <CajaRespuesta onCheck={onCheck} label="El mensaje" />
+    </>
+  )
+}
+const w2 = (w, text, back) => (w.h === hashAnswer(text, 'sl-sopa') ? text : back)
+
 /* ---------- El interrogatorio (lógica) ---------- */
 const MARCAS = { verdad: '😇 Dice la verdad', miente: '🤥 Miente' }
 function Interrogatorio({ puzzle, onCheck }) {
@@ -530,5 +581,5 @@ function Interrogatorio({ puzzle, onCheck }) {
 }
 
 export const GAMES = {
-  cesar: Cesar, morse: Morse, teclado: Teclado, cerradura: Cerradura, anagrama: Anagrama, acrostico: Acrostico, simbolos: Simbolos, espejo: Espejo, criptico: Criptico, vigenere: Vigenere, golpes: Golpes, interrogatorio: Interrogatorio, escitala: Escitala,
+  cesar: Cesar, morse: Morse, teclado: Teclado, cerradura: Cerradura, anagrama: Anagrama, acrostico: Acrostico, simbolos: Simbolos, espejo: Espejo, criptico: Criptico, vigenere: Vigenere, golpes: Golpes, interrogatorio: Interrogatorio, escitala: Escitala, sopa: Sopa,
 }
