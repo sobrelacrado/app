@@ -1,6 +1,6 @@
 // Cuenta de jugador y progreso del Diario en la nube. Se carga solo cuando hace falta (no pesa en la primera pantalla).
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
-import { collection, deleteField, doc, getDoc, getDocs, query, serverTimestamp, setDoc, updateDoc, where, writeBatch } from 'firebase/firestore'
+import { collection, deleteDoc, deleteField, doc, getDoc, getDocs, query, serverTimestamp, setDoc, updateDoc, where, writeBatch } from 'firebase/firestore'
 import { auth } from '../auth.js'
 import { db } from '../firebase.js'
 
@@ -33,7 +33,18 @@ export function pushDay(uid, key, d) {
   return setDoc(doc(days(uid), key), data)
 }
 
+// Perfil del jugador (nombre y correo de su cuenta de Google) para que el creador sepa quién juega. Se actualiza "last" en cada visita.
+export async function saveProfile(u) {
+  const ref = doc(db, 'users', u.uid)
+  const data = { name: String(u.displayName ?? '').slice(0, 120), email: u.email ?? '', last: serverTimestamp() }
+  try { await updateDoc(ref, data) } catch (e) {
+    if (e?.code !== 'not-found') throw e
+    await setDoc(ref, { ...data, first: serverTimestamp() })
+  }
+}
+
 export async function deleteAll(uid) {
+  await deleteDoc(doc(db, 'users', uid)).catch(() => {}) // el perfil (nombre y correo) también se borra
   const snap = await getDocs(days(uid))
   for (let i = 0; i < snap.docs.length; i += 400) {
     const batch = writeBatch(db)

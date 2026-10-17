@@ -12,6 +12,8 @@ import Stats from './components/Stats.jsx'
 
 // El Diario público se carga solo cuando Alberto lo abre desde el menú (así el panel no pesa más).
 const Diario = lazy(() => import('./diario/Diario.jsx'))
+// La pestaña de jugadores del Diario también se carga solo al abrirla.
+const Players = lazy(() => import('./components/Players.jsx'))
 
 const store = {
   get: (k, d) => { try { return localStorage.getItem(k) ?? d } catch { return d } },
@@ -162,11 +164,13 @@ export default function App() {
               <button type="button" className={tab === 'runs' ? 'activa' : ''} onClick={() => setTab('runs')}>{t.tabRuns}</button>
               <button type="button" className={tab === 'stats' ? 'activa' : ''} onClick={() => setTab('stats')}>{t.tabStats}</button>
               <button type="button" className={tab === 'games' ? 'activa' : ''} onClick={() => setTab('games')}>{t.tabGames}</button>
+              <button type="button" className={tab === 'players' ? 'activa' : ''} onClick={() => setTab('players')}>{t.tabPlayers}</button>
             </nav>
             <div className="vista" key={tab}>
               {tab === 'runs' && <Panel />}
               {tab === 'stats' && <Stats />}
               {tab === 'games' && <Games />}
+              {tab === 'players' && <Suspense fallback={<p className="vacio">{t.loading}</p>}><Players /></Suspense>}
             </div>
             <AlertWatcher enabled={alertsOn} onOpen={() => setTab('runs')} />
           </>

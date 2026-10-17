@@ -67,6 +67,9 @@ export default function Diario({ onExit }) {
       setUser(u)
       if (!u) return
       flag(true)
+      try { // perfil (nombre y correo) una vez por sesión del navegador; no es crítico
+        if (!sessionStorage.getItem('sl_perfil_' + u.uid)) { await cloud.current.saveProfile(u); sessionStorage.setItem('sl_perfil_' + u.uid, '1') }
+      } catch { /* sin permiso o sin red: se reintenta otro día */ }
       setStatus('sincronizando')
       try {
         const remote = await cloud.current.pullDays(u.uid)
@@ -90,7 +93,10 @@ export default function Diario({ onExit }) {
   const doLogout = async () => { await cloud.current?.logout(); flag(false); setUser(null); userRef.current = null; setStatus('') }
   const doDelete = async () => {
     setStatus('sincronizando')
-    try { await cloud.current.deleteAll(userRef.current.uid); setStatus('') } catch { setStatus('error') }
+    try {
+      await cloud.current.deleteAll(userRef.current.uid)
+      await doLogout() // sin sesión no se vuelve a crear el perfil
+    } catch { setStatus('error') }
   }
 
   // Reloj: suma tiempo solo con la pantalla visible y mientras no esté resuelto; pasada la medianoche cambia de día.

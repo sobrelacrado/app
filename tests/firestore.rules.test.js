@@ -372,6 +372,32 @@ test('Diario: el tipo críptico se puede guardar y uno inventado no', async () =
   await assertSucceeds(setDoc(doc(ana, 'users/ana/diario/2026-10-17'), dia({ type: 'criptico', level: 4 })))
   await assertFails(setDoc(doc(ana, 'users/ana/diario/2026-10-18'), dia({ type: 'inventado' })))
 })
+test('Perfil del jugador: cada persona guarda el suyo con su correo, el administrador lista todos y nadie más los ve', async () => {
+  const ana = persona('ana')
+  const perfil = (extra = {}) => ({ name: 'Ana', email: 'ana@gmail.com', first: serverTimestamp(), last: serverTimestamp(), ...extra })
+  await assertSucceeds(setDoc(doc(ana, 'users/ana'), perfil()))
+  assert.equal((await getDoc(doc(ana, 'users/ana'))).data().email, 'ana@gmail.com')
+  await assertFails(setDoc(doc(persona('luis'), 'users/ana'), perfil())) // en el perfil de otra persona no
+  await assertFails(setDoc(doc(persona('luis'), 'users/luis'), perfil({ email: 'otro@gmail.com' }))) // el correo debe ser el de la sesión
+  await assertFails(setDoc(doc(persona('luis'), 'users/luis'), perfil({ foto: 'x' }))) // solo los campos previstos
+  await assertFails(getDoc(doc(persona('luis'), 'users/ana'))) // otra persona no lo lee
+  await assertFails(getDocs(collection(persona('luis'), 'users'))) // ni lista a todos
+  await assertFails(getDocs(collection(player(), 'users')))
+  assert.equal((await getDocs(collection(admin(), 'users'))).size, 1) // el administrador sí
+  assert.equal((await getDoc(doc(admin(), 'users/ana'))).data().name, 'Ana')
+  await assertFails(getDocs(collection(unverified(), 'users')))
+})
+test('Perfil del jugador: la fecha de la primera visita no se puede cambiar y el dueño puede borrarlo', async () => {
+  const ana = persona('ana')
+  await assertSucceeds(setDoc(doc(ana, 'users/ana'), { name: 'Ana', email: 'ana@gmail.com', first: serverTimestamp(), last: serverTimestamp() }))
+  await assertSucceeds(updateDoc(doc(ana, 'users/ana'), { name: 'Ana B', email: 'ana@gmail.com', last: serverTimestamp() }))
+  await assertFails(updateDoc(doc(ana, 'users/ana'), { first: Timestamp.fromDate(new Date('2020-01-01')), last: serverTimestamp() }))
+  await assertFails(updateDoc(doc(ana, 'users/ana'), { last: Timestamp.fromDate(new Date('2020-01-01')) })) // "last" lo pone el servidor
+  await assertSucceeds(deleteDoc(doc(ana, 'users/ana')))
+  assert.equal((await getDoc(doc(ana, 'users/ana'))).exists(), false)
+  await env.withSecurityRulesDisabled(async (ctx) => { await setDoc(doc(ctx.firestore(), 'users/ana'), { name: 'Ana', email: 'ana@gmail.com', first: Timestamp.now(), last: Timestamp.now() }) })
+  await assertFails(deleteDoc(doc(persona('luis'), 'users/ana')))
+})
 test('Diario: la marca "late" (resuelto desde el archivo) es opcional y solo booleana', async () => {
   const ana = persona('ana')
   await assertSucceeds(setDoc(doc(ana, 'users/ana/diario/2026-10-17'), dia({ late: true })))

@@ -509,3 +509,8 @@ button.paso-toggle:not(:disabled):hover, button.paso-toggle:not(:disabled):activ
 .capa > summary::after { content: '+'; font-size: 22px; line-height: 1; }
 .capa[open] > summary::after { content: '\2212'; }
 .capa-cuerpo { padding-bottom: 14px; animation: aparecer .25s ease-out; }
+
+/* Jugadores del Diario (panel) */
+.jugador { margin: 12px 0; padding-bottom: 14px; }
+.jugador-nombre { display: block; font-family: var(--titulo); font-size: 17px; }
+.jugador-correo { display: block; color: var(--gris); font-size: 13px; word-break: break-all; margin-bottom: 8px; }

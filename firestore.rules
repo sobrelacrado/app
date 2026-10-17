@@ -117,6 +117,31 @@ service cloud.firestore {
       }
     }
 
+    // ---------- Perfil del jugador del Diario ----------
+    // Al entrar con Google se guarda nombre y correo (para que Alberto sepa quién juega). Cada persona solo escribe y lee el suyo;
+    // el administrador lista todos. El correo debe ser el de la sesión (no se puede inventar) y "first" no se puede cambiar.
+    match /users/{uid} {
+      allow get: if (request.auth != null && request.auth.uid == uid) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if request.auth != null && request.auth.uid == uid
+        && isValidProfile(request.resource.data)
+        && request.resource.data.first == request.time;
+      allow update: if request.auth != null && request.auth.uid == uid
+        && isValidProfile(request.resource.data)
+        && request.resource.data.first == resource.data.first;
+      allow delete: if request.auth != null && request.auth.uid == uid;
+
+      function isValidProfile(d) {
+        return d.keys().hasOnly(['name', 'email', 'first', 'last'])
+          && d.keys().hasAll(['name', 'email', 'first', 'last'])
+          && d.name is string && d.name.size() <= 120
+          && d.email is string && d.email == request.auth.token.email
+          && request.auth.token.email_verified == true
+          && d.first is timestamp
+          && d.last == request.time;
+      }
+    }
+
     // ---------- Progreso personal del Diario ----------
     // Cada persona (sesión de Google) lee y escribe solo lo suyo; el administrador puede leerlo.
     match /users/{uid}/diario/{day} {

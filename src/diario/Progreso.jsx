@@ -7,7 +7,7 @@ import { fmtMult, rankOf, todayMultiplier, totalPoints } from './points.js'
 import { diarioStats } from './stats.js'
 import PUZZLES from './puzzles.js'
 
-const PRIVACY = 'Guardamos tu identificador de cuenta y tus resultados del Diario solo para mostrarte tus estadísticas y que no se pierdan si cambias de móvil. No publicamos nada ni lo compartimos. Puedes borrarlo cuando quieras.'
+const PRIVACY = 'Al entrar con Google guardamos tu nombre, tu correo y tus resultados del Diario. Sirven para mostrarte tus estadísticas y para que el creador del juego sepa cuántas personas juegan y cómo les va; no se publican ni se comparten con nadie más. Puedes borrarlo cuando quieras (se cierra tu sesión).'
 
 export default function Progreso({ days, todayKey, user, status, onLogin, onLogout, onDelete }) {
   const s = diarioStats(days, todayKey, PUZZLES)
@@ -74,7 +74,7 @@ export default function Progreso({ days, todayKey, user, status, onLogin, onLogo
             ? <button type="button" className="suave" onClick={() => setSure(true)}>Borrar mi progreso guardado</button>
             : (
               <div className="dr-borrar">
-                <p>Se borrará lo guardado en tu cuenta (en este móvil se conserva). ¿Seguro?</p>
+                <p>Se borrará lo guardado en tu cuenta (tu progreso, nombre y correo) y se cerrará tu sesión. En este móvil se conserva. ¿Seguro?</p>
                 <button type="button" className="suave" onClick={() => { setSure(false); onDelete() }}>Sí, borrar</button>
                 <button type="button" className="suave" onClick={() => setSure(false)}>Cancelar</button>
               </div>
