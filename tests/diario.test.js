@@ -197,3 +197,16 @@ test('aviso diario: el mensaje cambia cada día y trae número y dificultad', as
   assert.ok(BODIES.every((t) => t.length < 80))
   assert.equal(buildMessage('2026-10-12').body, buildMessage('2026-10-12').body)
 })
+
+test('Mis casos: resumen de una partida con tiempo por paso', async () => {
+  const { caseSummary } = await import('../src/diario/casos.js')
+  const t0 = new Date('2026-10-17T10:00:00Z'), at = (min) => new Date(t0.getTime() + min * 60000)
+  const steps = { v0: { type: 'start', label: 'V0' }, p1: { type: 'clue', label: 'Pista 1' }, sol: { type: 'solution', label: 'Solución' } }
+  const scans = [{ id: 'sol', at: at(95) }, { id: 'v0', at: at(0) }, { id: 'p1', at: at(30) }, { id: 'x', at: null }]
+  const fin = caseSummary({ startedAt: t0, endedAt: at(95) }, { timeLimitMinutes: 240 }, scans, steps, at(500).getTime())
+  assert.equal(fin.status.kind, 'finished')
+  assert.equal(fin.status.ms, 95 * 60000)
+  assert.deepEqual(fin.rows.map((r) => [r.label, r.ms / 60000]), [['Inicio', 0], ['Pista 1', 30], ['Solución', 65]])
+  assert.equal(caseSummary({ startedAt: t0, endedAt: null }, { timeLimitMinutes: 60 }, [], {}, at(61).getTime()).status.kind, 'timeout')
+  assert.equal(caseSummary({ startedAt: t0, endedAt: null }, null, [{ id: 'z', at: at(5) }], {}, at(10).getTime()).rows[0].label, 'Paso')
+})

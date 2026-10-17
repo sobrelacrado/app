@@ -4,6 +4,7 @@ import { GAMES, HOWTO, TYPE_NAME } from './games.jsx'
 import './diario.css'
 import PUZZLES from './puzzles.js'
 import Avisos from './Avisos.jsx'
+import Casos from './Casos.jsx'
 import Progreso from './Progreso.jsx'
 import { mergeDays } from './stats.js'
 
@@ -24,7 +25,7 @@ export default function Diario({ onExit }) {
   const [wrong, setWrong] = useState(0) // fallos de esta visita, para animar el aviso
   const [copied, setCopied] = useState(false)
   const [now, setNow] = useState(Date.now)
-  const [vista, setVista] = useState('hoy') // 'hoy' | 'progreso'
+  const [vista, setVista] = useState('hoy') // 'hoy' | 'progreso' | 'casos'
   const [user, setUser] = useState(null) // cuenta de Google (null = sin sesión)
   const [status, setStatus] = useState('') // '' | 'entrando' | 'sincronizando' | 'error'
   const cloud = useRef(null) // módulo de la nube, se carga solo cuando hace falta
@@ -145,11 +146,14 @@ export default function Diario({ onExit }) {
         <button type="button" className={vista === 'progreso' ? 'activa' : ''} onClick={() => setVista('progreso')}>
           Mi progreso{user ? ' ✓' : ''}
         </button>
+        <button type="button" className={vista === 'casos' ? 'activa' : ''} onClick={() => setVista('casos')}>Mis casos</button>
       </nav>
 
       {vista === 'progreso' && (
         <Progreso days={days} todayKey={key} user={user} status={status} onLogin={doLogin} onLogout={doLogout} onDelete={doDelete} />
       )}
+
+      {vista === 'casos' && <Casos user={user} cloud={cloud.current} status={status} onLogin={doLogin} />}
 
       {vista === 'hoy' && (
       <article className={`dr-carta tema-${puzzle.theme}`}>

@@ -8,7 +8,7 @@ import {
 } from '@firebase/rules-unit-testing'
 import {
   doc, getDoc, setDoc, updateDoc, deleteDoc, getDocs, collection,
-  serverTimestamp, writeBatch, Timestamp,
+  serverTimestamp, writeBatch, Timestamp, query, where, deleteField,
 } from 'firebase/firestore'
 
 const ADMIN = 'sobrelacradojuegos@gmail.com'
@@ -311,4 +311,54 @@ test('Avisos: se rechazan ids y datos con forma incorrecta', async () => {
   await assertFails(setDoc(doc(player(), `pushSubs/${SUB_ID}`), sub({ endpoint: 'https://x/' + 'a'.repeat(1000) })))
   await assertFails(setDoc(doc(player(), `pushSubs/${SUB_ID}`), sub({ at: Timestamp.now() })))
   await assertFails(setDoc(doc(player(), `pushSubs/${SUB_ID}`), { endpoint: 'https://x/', p256dh: 'k', at: serverTimestamp() }))
+})
+
+// ---------- Mis casos (vincular partidas a la cuenta) ----------
+const withUid = (uid) => env.withSecurityRulesDisabled((ctx) => updateDoc(doc(ctx.firestore(), 'runs/r1'), { uid }))
+const mine = () => env.authenticatedContext('u2', { email: 'otro@gmail.com', email_verified: true }).firestore()
+const third = () => env.authenticatedContext('u3', { email: 'tercero@gmail.com', email_verified: true }).firestore()
+
+test('Mis casos: quien tiene sesión vincula una partida sin dueño, una sola vez y solo con su uid', async () => {
+  await assertFails(updateDoc(doc(player(), 'runs/r1'), { uid: 'u2' })) // sin sesión
+  await assertFails(updateDoc(doc(mine(), 'runs/r1'), { uid: 'u3' })) // uid de otra persona
+  await assertFails(updateDoc(doc(mine(), 'runs/r1'), { uid: 'u2', alias: 'Otro' })) // no se toca nada más
+  await assertFails(updateDoc(doc(mine(), 'runs/r1'), { uid: 'u2', endedAt: serverTimestamp(), endStepId: 'sol' }))
+  await assertSucceeds(updateDoc(doc(mine(), 'runs/r1'), { uid: 'u2' }))
+  await assertFails(updateDoc(doc(third(), 'runs/r1'), { uid: 'u3' })) // ya tiene dueño
+  await assertFails(updateDoc(doc(mine(), 'runs/r1'), { uid: 'u3' })) // ni el dueño la regala
+})
+test('Mis casos: cada persona lista solo sus partidas y sus escaneos', async () => {
+  await withUid('u2')
+  await env.withSecurityRulesDisabled((ctx) => setDoc(doc(ctx.firestore(), 'runs/r1/scans/v0'), { scannedAt: Timestamp.now() }))
+  const own = await assertSucceeds(getDocs(query(collection(mine(), 'runs'), where('uid', '==', 'u2'))))
+  assert.equal(own.size, 1)
+  await assertFails(getDocs(collection(mine(), 'runs'))) // sin filtrar por su uid
+  await assertFails(getDocs(query(collection(third(), 'runs'), where('uid', '==', 'u2')))) // filtrando por la de otro
+  await assertFails(getDocs(query(collection(player(), 'runs'), where('uid', '==', 'u2'))))
+  assert.equal((await assertSucceeds(getDocs(collection(mine(), 'runs/r1/scans')))).size, 1)
+  await assertFails(getDocs(collection(third(), 'runs/r1/scans')))
+  await assertFails(getDocs(collection(player(), 'runs/r1/scans')))
+})
+test('Mis casos: una partida sin dueño no aparece en mis partidas ni se pueden listar sus escaneos', async () => {
+  await assertFails(getDocs(collection(mine(), 'runs/r1/scans')))
+  const own = await assertSucceeds(getDocs(query(collection(mine(), 'runs'), where('uid', '==', 'u2'))))
+  assert.equal(own.size, 0)
+})
+test('Mis casos: el dueño la desvincula; otros no; el administrador conserva la partida', async () => {
+  await withUid('u2')
+  await assertFails(updateDoc(doc(third(), 'runs/r1'), { uid: deleteField() }))
+  await assertFails(updateDoc(doc(mine(), 'runs/r1'), { uid: deleteField(), alias: 'x' }))
+  await assertSucceeds(updateDoc(doc(mine(), 'runs/r1'), { uid: deleteField() }))
+  assert.equal((await getDoc(doc(admin(), 'runs/r1'))).exists(), true)
+  assert.equal('uid' in (await getDoc(doc(admin(), 'runs/r1'))).data(), false)
+  await assertFails(deleteDoc(doc(mine(), 'runs/r1'))) // borrar la partida sigue siendo solo del administrador
+})
+test('Mis casos: con dueño asignado, el grupo (sin sesión) sigue escaneando y cerrando', async () => {
+  await withUid('u2')
+  const db = player()
+  await assertSucceeds(scan(db, 'p1'))
+  const b = writeBatch(db)
+  b.set(doc(db, 'runs/r1/scans/sol'), { scannedAt: serverTimestamp() })
+  b.update(doc(db, 'runs/r1'), { endedAt: serverTimestamp(), endStepId: 'sol' })
+  await assertSucceeds(b.commit())
 })
