@@ -151,8 +151,8 @@ export default function Diario({ onExit }) {
 
   return (
     <main className="dr-pagina">
+      {onExit && <div className="dr-volver-fila"><button type="button" className="suave dr-volver" onClick={onExit}>← Panel</button></div>}
       <header className="dr-cab">
-        {onExit && <button type="button" className="suave dr-volver" onClick={onExit}>← Panel</button>}
         <div className="logo">SOBRE LACRADO</div>
         <div className="dr-racha" title="Racha de días seguidos · puntos">🔥 {streak} · ⭐ {pts}</div>
       </header>
@@ -161,7 +161,7 @@ export default function Diario({ onExit }) {
         <button type="button" className={vista === 'hoy' && !viewKey ? 'activa' : ''} onClick={() => { setViewKey(null); setVista('hoy') }}>Hoy</button>
         <button type="button" className={vista === 'archivo' || (vista === 'hoy' && viewKey) ? 'activa' : ''} onClick={() => setVista('archivo')}>Archivo</button>
         <button type="button" className={vista === 'progreso' ? 'activa' : ''} onClick={() => setVista('progreso')}>
-          Progreso{user ? ' ✓' : ''}
+          Progreso
         </button>
         <button type="button" className={vista === 'casos' ? 'activa' : ''} onClick={() => setVista('casos')}>Casos</button>
       </nav>

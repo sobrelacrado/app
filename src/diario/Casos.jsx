@@ -3,6 +3,19 @@ import { useEffect, useState } from 'react'
 import { fmtDuration } from '../lib/runs.js'
 import { caseSummary, STATUS_TEXT } from './casos.js'
 
+// Formulario de la lista de espera (el mismo enlace del perfil de Instagram): al apuntarse se recibe por correo el Caso 2, gratis.
+const FREE_CASE_URL = 'https://preview.mailerlite.io/forms/2670725/199972870005195853/share'
+
+function CasoGratis() {
+  return (
+    <aside className="dr-regalo">
+      <h2>Caso 2 · Agencia Duarte</h2>
+      <p>¿Aún no tienes el caso? El detective Tomás Duarte te espera. Es <b>gratis</b>: apúntate a la lista de espera y te llega por correo.</p>
+      <a className="boton dr-cta" href={FREE_CASE_URL} target="_blank" rel="noopener noreferrer">Conseguir el caso gratis</a>
+    </aside>
+  )
+}
+
 const NOTE = 'Aquí aparecen las partidas que has jugado con los QR de los casos desde este móvil. Se vinculan a tu cuenta solo para que puedas verlas; no se comparten con nadie. Quitar una partida de tu cuenta no la borra del juego.'
 const fmtDate = (d) => d.toLocaleString('es', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
 
@@ -38,6 +51,7 @@ export default function Casos({ user, cloud, status, onLogin }) {
           {status === 'error' && <p className="dr-aviso">No se pudo entrar. Inténtalo de nuevo.</p>}
           <p className="dr-nota">{NOTE}</p>
         </div>
+        <CasoGratis />
       </article>
     )
   }
@@ -91,6 +105,7 @@ export default function Casos({ user, cloud, status, onLogin }) {
           )
         })}
       </ul>
+      <CasoGratis />
       <p className="dr-nota">{NOTE}</p>
     </article>
   )

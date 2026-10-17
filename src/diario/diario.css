@@ -210,3 +210,15 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-arch .dr-dia { min-width: 0; min-height: 0; width: 100%; box-sizing: border-box; overflow: hidden; letter-spacing: 0; text-transform: none; color: inherit; }
 .dr-arch .dr-dia.miss { background: rgba(0, 0, 0, .08); }
 .dr-arch .dr-dia.done, .dr-arch .dr-dia.late { color: #fff; }
+
+/* Caso gratis (enlace en Mis casos) */
+.dr-regalo { margin: 18px 0 8px; padding: 14px; border: 2px dashed currentColor; border-radius: 8px; text-align: center; }
+.dr-regalo h2 { margin: 0 0 6px; font-size: 18px; }
+.dr-regalo p { margin: 0 0 10px; font-size: 14px; line-height: 1.5; }
+.dr-regalo .dr-cta { margin-top: 0; }
+
+/* Legible en claro y en oscuro: estos bloques van sobre el fondo de la página (siempre oscuro), con texto claro fijo */
+.dr-archivo-aviso { background: rgba(243, 238, 226, .14); color: #f3eee2; border: 1px solid rgba(243, 238, 226, .35); }
+.dr-archivo-aviso button.suave { color: #f3eee2; border-color: rgba(243, 238, 226, .7); background: transparent; }
+.dr-arch .dr-dia.miss { background: rgba(128, 128, 128, .22); }
+.dr-volver-fila { margin: 0 0 8px; }
