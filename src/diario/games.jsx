@@ -17,7 +17,7 @@ export const HOWTO = {
   cesar: 'Cada letra del mensaje se ha movido varios puestos en el alfabeto. Gira la rueda: la fila de dentro te dice qué letra es cada una. Cuando el texto se lea con sentido, pulsa "Es esta".',
   morse: 'Cada letra son puntos y rayas; las letras van separadas por un espacio y las palabras por una barra "/". Usa la tabla y escribe el mensaje. Con el botón "Escuchar" lo oyes (o lo notas vibrar) como se oiría por radio.',
   teclado: 'Es un móvil de los de antes: para escribir una C se pulsaba 3 veces la tecla 2, para una F, 3 veces la 3... Cada grupo es una letra: rellena las casillas.',
-  cerradura: 'El código tiene 3 cifras distintas. Cada intento anotado dice cuántas cifras son correctas y están en su sitio (●) y cuántas son correctas pero están en otro sitio (○). Deduce el código y ponlo en la cerradura.',
+  cerradura: 'El código tiene 3 cifras distintas. Cada intento anotado dice cuántas cifras son correctas y están en su sitio (●) y cuántas son correctas pero están en otro sitio (○). Descartar también vale: si un intento no tiene ninguna correcta, ninguna de sus cifras está en el código. Deduce el código y ponlo en la cerradura.',
   anagrama: 'Las letras de la frase están mezcladas. Toca una letra para colocarla en el siguiente hueco; toca un hueco ocupado para quitarla. Los huecos separados son palabras distintas.',
   acrostico: 'Lo importante no es lo que dice el texto, sino cómo está escrito. Descubre el mensaje que esconde y escríbelo.',
   simbolos: 'Cada letra se ha cambiado por un dibujo. Usa la clave de abajo para saber qué letra es cada dibujo y rellena las casillas.',

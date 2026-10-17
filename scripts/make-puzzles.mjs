@@ -28,6 +28,9 @@ function lockClues(code, seed) {
       const rest = clues.filter((_, k) => k !== i)
       if (lockCandidates(rest).length === 1) clues.splice(i, 1)
     }
+    // Desde el día 7: cada cifra del código debe dejar rastro en algún intento (que no haya que adivinarla por pura eliminación de las demás).
+    const huella = (d) => clues.some((q) => q.g.includes(d) && q.bien + q.mal > 0)
+    if (seed > 6 && ![...code].every(huella)) continue
     if (clues.length >= 3 && clues.length <= 5) return clues
   }
   throw new Error('No se pudo generar la cerradura ' + code)

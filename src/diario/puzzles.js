@@ -1675,29 +1675,19 @@ export default [
     "hint": "Las tres cifras suman 13.",
     "data": [
       {
-        "g": "605",
+        "g": "407",
         "bien": 1,
-        "mal": 0
-      },
-      {
-        "g": "397",
-        "bien": 0,
         "mal": 1
       },
       {
-        "g": "917",
-        "bien": 1,
-        "mal": 0
+        "g": "790",
+        "bien": 0,
+        "mal": 2
       },
       {
-        "g": "628",
+        "g": "273",
         "bien": 0,
         "mal": 0
-      },
-      {
-        "g": "071",
-        "bien": 0,
-        "mal": 1
       }
     ],
     "h": "lie1cuysi4"
