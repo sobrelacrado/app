@@ -103,7 +103,7 @@ async function main() {
     await Promise.all(snap.docs.slice(i, i + 50).map(async (d) => {
       const s = d.data()
       try {
-        await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload, { TTL: 6 * 3600 })
+        await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload, { TTL: 6 * 3600, urgency: 'high' })
         ok++
       } catch (e) {
         if (e.statusCode === 404 || e.statusCode === 410) { gone++; await d.ref.delete() } // el móvil ya no quiere avisos
