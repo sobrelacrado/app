@@ -1,6 +1,7 @@
 // Envía el aviso diario del Diario a los móviles suscritos. Lo ejecuta GitHub Actions (.github/workflows/diario-aviso.yml).
 // Variables: FIREBASE_SERVICE_ACCOUNT (JSON de la cuenta de servicio), VAPID_PRIVATE_KEY.
 // Opcionales: FORCE=1 (envía aunque no sean las 8:00 en Madrid), DRY_RUN=1 (no envía, solo cuenta).
+import { createPrivateKey } from 'node:crypto'
 import { cert, initializeApp } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'
 import webpush from 'web-push'
@@ -42,6 +43,12 @@ export function readServiceAccount(raw) {
   if (bad.length) throw new Error(`La private_key tiene caracteres que no deberían estar (códigos: ${bad.map((c) => c.charCodeAt(0)).join(', ')}). Largo del cuerpo: ${body.length}.`)
   if (body.length < 1000) throw new Error(`La private_key parece cortada: el cuerpo mide ${body.length} caracteres y debería pasar de 1000.`)
   acc.private_key = `${H}\n${body.match(/.{1,64}/g).join('\n')}\n${F}\n` // se reconstruye en líneas de 64
+  try { createPrivateKey(acc.private_key) } catch {
+    // Diagnóstico sin enseñar la clave: una clave PKCS#8 empieza por 0x30 y declara su propio largo.
+    const der = Buffer.from(body, 'base64')
+    const declared = der[1] === 0x82 ? ((der[2] << 8) | der[3]) + 4 : der[1] === 0x81 ? der[2] + 3 : null
+    throw new Error(`La private_key está dañada: cuerpo ${body.length} caracteres (múltiplo de 4: ${body.length % 4 === 0}), ${der.length} bytes, primer byte ${der[0]?.toString(16)}, largo declarado ${declared}. Una clave normal mide unos 1624 caracteres / 1217 bytes. Vuelve a copiar el .json entero.`)
+  }
   return acc
 }
 
