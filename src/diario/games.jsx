@@ -1,19 +1,22 @@
 // Los minijuegos del Diario: cada tipo de código tiene su propia forma de resolverse.
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { KEYPAD, MORSE, atbash, caesarDecode, keypadWords, pigpenGlyph, pigpenLetters } from './ciphers.js'
+import { KIND_HELP, KIND_NAME } from './criptico.js'
+import { SPEEDS, canVibrate, playMorse } from './morseSound.js'
 
 export const TYPE_NAME = {
   cesar: 'Rueda de César', morse: 'Código Morse', teclado: 'Teclado antiguo', cerradura: 'Cerradura de 3 cifras',
-  anagrama: 'Anagrama', acrostico: 'Mensaje escondido', simbolos: 'Alfabeto de símbolos', espejo: 'Alfabeto en espejo',
+  anagrama: 'Anagrama', acrostico: 'Mensaje escondido', simbolos: 'Alfabeto de símbolos', espejo: 'Alfabeto en espejo', criptico: 'Críptico',
 }
 export const HOWTO = {
   cesar: 'Cada letra del mensaje se ha movido varios puestos en el alfabeto. Gira la rueda: la fila de dentro te dice qué letra es cada una. Cuando el texto se lea con sentido, pulsa "Es esta".',
-  morse: 'Cada letra son puntos y rayas; las letras van separadas por un espacio y las palabras por una barra "/". Usa la tabla y escribe el mensaje.',
+  morse: 'Cada letra son puntos y rayas; las letras van separadas por un espacio y las palabras por una barra "/". Usa la tabla y escribe el mensaje. Con el botón "Escuchar" lo oyes (o lo notas vibrar) como se oiría por radio.',
   teclado: 'Es un móvil de los de antes: para escribir una C se pulsaba 3 veces la tecla 2, para una F, 3 veces la 3... Cada grupo es una letra: rellena las casillas.',
   cerradura: 'El código tiene 3 cifras distintas. Cada intento anotado dice cuántas cifras son correctas y están en su sitio (●) y cuántas son correctas pero están en otro sitio (○). Deduce el código y ponlo en la cerradura.',
   anagrama: 'Las letras de la frase están mezcladas. Toca una letra para colocarla en el siguiente hueco; toca un hueco ocupado para quitarla. Los huecos separados son palabras distintas.',
   acrostico: 'Lo importante no es lo que dice el texto, sino cómo está escrito. Descubre el mensaje que esconde y escríbelo.',
   simbolos: 'Cada letra se ha cambiado por un dibujo. Usa la clave de abajo para saber qué letra es cada dibujo y rellena las casillas.',
+  criptico: 'Una sola pista que dice la respuesta DOS veces: una definición (siempre al principio o al final) y un juego con las letras, con un aviso que te dice qué hacer (mezclar, leer al revés, pegar, meter una pieza dentro de otra). Ejemplo: «Plato caliente: paso revuelto (4)». «Plato caliente» es la definición; «revuelto» es el aviso de que hay que mezclar las letras de «paso»; y la respuesta, de 4 letras, es SOPA. El número entre paréntesis son las letras de la respuesta. Las tildes no cuentan. Si te atascas, cada pista te da un poco más.',
   espejo: 'Aquí el alfabeto está del revés: la A es la Z, la B es la Y... Cada letra del mensaje es su "reflejo". Usa la tabla y escribe el mensaje.',
 }
 
@@ -122,6 +125,16 @@ function Cesar({ puzzle, onCheck }) {
 /* ---------- Morse ---------- */
 function Morse({ puzzle, onCheck }) {
   const [tabla, setTabla] = useState(false)
+  const [sonando, setSonando] = useState(false)
+  const [rapido, setRapido] = useState(false)
+  const [vibrar, setVibrar] = useState(false)
+  const stop = useRef(null)
+  useEffect(() => () => stop.current?.(), []) // al salir de la pantalla se calla
+  const escuchar = () => {
+    if (sonando) { stop.current?.(); return }
+    setSonando(true)
+    stop.current = playMorse(puzzle.data, { unit: rapido ? SPEEDS.normal : SPEEDS.lento, vibrate: vibrar, onEnd: () => setSonando(false) })
+  }
   const words = puzzle.data.split('/').map((w) => w.trim().split(/\s+/))
   return (
     <>
@@ -131,6 +144,13 @@ function Morse({ puzzle, onCheck }) {
             {w.map((g, j) => <span className="dr-grupo" key={j}>{dots(g)}</span>)}
           </div>
         ))}
+      </div>
+      <div className="dr-audio">
+        <button type="button" onClick={escuchar} aria-pressed={sonando}>{sonando ? '⏹ Parar' : '🔊 Escuchar'}</button>
+        <button type="button" className="suave" onClick={() => setRapido((v) => !v)} disabled={sonando} aria-pressed={rapido}>Velocidad: {rapido ? 'normal' : 'lento'}</button>
+        {canVibrate() && (
+          <label className="dr-vibrar"><input type="checkbox" checked={vibrar} disabled={sonando} onChange={(e) => setVibrar(e.target.checked)} /> 📳 Vibrar también</label>
+        )}
       </div>
       <button type="button" className="suave" onClick={() => setTabla((v) => !v)} aria-expanded={tabla}>{tabla ? 'Ocultar tabla' : 'Ver tabla Morse'}</button>
       {tabla && (
@@ -296,6 +316,42 @@ function Espejo({ puzzle, onCheck }) {
   )
 }
 
+/* ---------- Críptico ---------- */
+// Marca en el texto de la pista las partes pedidas (definición, aviso), sin cambiar nada más.
+function Marcada({ text, marks }) {
+  const found = marks
+    .map((m) => ({ ...m, at: text.toLowerCase().indexOf(String(m.text).toLowerCase()) }))
+    .filter((m) => m.at >= 0)
+    .sort((a, b) => a.at - b.at)
+  const out = []
+  let pos = 0
+  found.forEach((m, i) => {
+    if (m.at < pos) return
+    if (m.at > pos) out.push(text.slice(pos, m.at))
+    out.push(<mark key={i} className={m.cls}>{text.slice(m.at, m.at + m.text.length)}</mark>)
+    pos = m.at + m.text.length
+  })
+  out.push(text.slice(pos))
+  return <>{out}</>
+}
+
+// hintStep: 0 sin ayudas · 1 subraya la definición · 2 dice el tipo de juego y señala el aviso · 3 da la primera letra.
+function Criptico({ puzzle, onCheck, hintStep = 0 }) {
+  const { clue, lens, def, def2, kind, indicator, first } = puzzle.data
+  const marks = []
+  if (hintStep >= 1) { marks.push({ text: def, cls: 'dr-m-def' }); if (def2) marks.push({ text: def2, cls: 'dr-m-def' }) }
+  if (hintStep >= 2 && indicator) marks.push({ text: indicator, cls: 'dr-m-aviso' })
+  return (
+    <>
+      <p className="dr-cripti"><Marcada text={clue} marks={marks} /> <span className="dr-largo">({lens.join(',')})</span></p>
+      {hintStep >= 1 && <p className="dr-ayuda-cr">Subrayado en <mark className="dr-m-def">azul</mark>: {def2 ? 'las dos definiciones' : 'la definición'}. La respuesta significa eso.</p>}
+      {hintStep >= 2 && <p className="dr-ayuda-cr"><b>Juego de letras: {KIND_NAME[kind]}.</b> {KIND_HELP[kind]}{indicator ? <> El aviso está marcado en <mark className="dr-m-aviso">naranja</mark>.</> : null}</p>}
+      {hintStep >= 3 && <p className="dr-ayuda-cr">La respuesta empieza por <b>{first}</b>.</p>}
+      <Casillas words={lens.map((n) => Array(n).fill(''))} onCheck={onCheck} />
+    </>
+  )
+}
+
 export const GAMES = {
-  cesar: Cesar, morse: Morse, teclado: Teclado, cerradura: Cerradura, anagrama: Anagrama, acrostico: Acrostico, simbolos: Simbolos, espejo: Espejo,
+  cesar: Cesar, morse: Morse, teclado: Teclado, cerradura: Cerradura, anagrama: Anagrama, acrostico: Acrostico, simbolos: Simbolos, espejo: Espejo, criptico: Criptico,
 }

@@ -162,3 +162,19 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-pasos { margin: 10px 0 0; padding: 0; list-style: none; font-size: 14px; }
 .dr-pasos li { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px dashed rgba(0, 0, 0, .25); }
 .dr-quitar { margin-top: 10px; display: block; }
+
+/* Críptico */
+.dr-cripti { margin: 14px 0; padding: 14px 12px; font-size: 20px; line-height: 1.5; font-style: italic; text-align: center; border-top: 2px solid currentColor; border-bottom: 2px solid currentColor; }
+.dr-cripti mark, .dr-ayuda-cr mark { padding: 0 3px; border-radius: 3px; color: inherit; font-style: normal; }
+.dr-m-def { background: rgba(53, 120, 214, .28); box-shadow: inset 0 -2px 0 #3578d6; }
+.dr-m-aviso { background: rgba(224, 128, 32, .30); box-shadow: inset 0 -2px 0 #e08020; }
+.dr-ayuda-cr { margin: 8px 0; font-size: 14px; line-height: 1.5; }
+.dr-explica { margin: 14px 0 6px; padding: 10px 12px; text-align: left; border-left: 4px solid currentColor; background: rgba(0, 0, 0, .05); border-radius: 4px; }
+.dr-explica b { display: block; margin-bottom: 4px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; }
+.dr-explica p { margin: 0; font-size: 14px; line-height: 1.5; }
+.dr-largo { font-style: normal; font-weight: 700; white-space: nowrap; }
+
+/* Morse: sonido */
+.dr-audio { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0; }
+.dr-audio button { flex: 1 1 auto; }
+.dr-vibrar { flex: 1 1 100%; font-size: 14px; display: flex; align-items: center; gap: 8px; }

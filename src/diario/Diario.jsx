@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { dateKey, dayIndex, fmtTime, isCorrect, levelStars, nextKey, puzzleFor, shareText, streakOf } from './ciphers.js'
+import { showText } from './criptico.js'
 import { GAMES, HOWTO, TYPE_NAME } from './games.jsx'
 import './diario.css'
 import PUZZLES from './puzzles.js'
@@ -117,6 +118,8 @@ export default function Diario({ onExit }) {
   const streak = streakOf(days, key)
   const solvedTotal = Object.values(days).filter((d) => d.done).length
   const Game = GAMES[puzzle.type]
+  const multi = puzzle.type === 'criptico' // el críptico da la ayuda por pasos (0-3)
+  const step = day.hintStep ?? 0
 
   const share = async () => {
     const text = shareText(puzzle, { ...day, n }, SITE_URL)
@@ -179,6 +182,7 @@ export default function Diario({ onExit }) {
               {day.tries === 0 ? 'A la primera' : `${day.tries} ${day.tries === 1 ? 'fallo' : 'fallos'}`} · {fmtTime(day.ms)}{day.hint ? ' · con pista' : ''}
             </p>
             <button type="button" onClick={share}>{copied ? '¡Copiado!' : 'Compartir resultado'}</button>
+            {multi && <div className="dr-explica"><b>Cómo se resolvía</b><p>{showText(puzzle.data.explain)}</p></div>}
             <p className="dr-proximo">Próximo acertijo en <b>{countdown}</b></p>
             <Avisos compact />
             {BRAND_URL && (
@@ -189,14 +193,18 @@ export default function Diario({ onExit }) {
           </div>
         ) : (
           <>
-            <Game puzzle={puzzle} onCheck={check} key={key} />
+            <Game puzzle={puzzle} onCheck={check} key={key} hintStep={step} />
             <p className={`dr-aviso ${wrong ? 'dr-fallo' : ''}`} key={wrong} role="status">
               {wrong ? 'Esa no es. Vuelve a mirarlo.' : ''}
             </p>
             <div className="dr-pie-juego">
-              {day.hint
-                ? <p className="dr-pista-extra"><b>Pista:</b> {puzzle.hint}</p>
-                : <button type="button" className="suave" onClick={() => update({ hint: true })}>Pedir pista</button>}
+              {multi
+                ? (step < 3
+                  ? <button type="button" className="suave" onClick={() => update({ hint: true, hintStep: step + 1 })}>{step ? `Otra pista (${step}/3)` : 'Pedir pista'}</button>
+                  : <p className="dr-pista-extra">Ya no quedan más pistas.</p>)
+                : day.hint
+                  ? <p className="dr-pista-extra"><b>Pista:</b> {puzzle.hint}</p>
+                  : <button type="button" className="suave" onClick={() => update({ hint: true })}>Pedir pista</button>}
               <span className="dr-tiempo">{fmtTime(day.ms)}</span>
             </div>
           </>

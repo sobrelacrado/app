@@ -9,7 +9,7 @@ import {
 import { bestStreak, calendar, diarioStats, mergeDays } from '../src/diario/stats.js'
 import PUZZLES from '../src/diario/puzzles.js'
 // El archivo con las soluciones en claro NO está en GitHub (el repositorio es público): solo en el PC de Alberto.
-const SRC = await import('../src/diario/puzzles.src.mjs').then((m) => m.default).catch(() => null)
+const SRC = await import('../scripts/load-sources.mjs').then((m) => m.loadSources()).catch(() => null)
 
 test('normalize quita acentos, mayúsculas y signos', () => {
   assert.equal(normalize('¡Está en el reloj!'), 'ESTAENELRELOJ')
@@ -44,7 +44,7 @@ test('los acertijos de la lista no repiten tipo dos días seguidos (ni al reinic
   PUZZLES.forEach((p, i) => assert.notEqual(p.type, PUZZLES[(i + 1) % PUZZLES.length].type, `acertijo ${i + 1}: mismo tipo que el siguiente`))
 })
 
-test('cada acertijo se resuelve con su solución (necesita el archivo fuente)', { skip: !SRC && 'sin puzzles.src.mjs' }, () => {
+test('cada acertijo se resuelve con su solución (necesita el archivo fuente)', { skip: !SRC && 'sin los archivos .src.mjs' }, () => {
   assert.equal(PUZZLES.length, SRC.length)
   PUZZLES.forEach((p, i) => {
     const s = SRC[i]
@@ -104,9 +104,11 @@ test('el nivel sube de lunes a domingo', () => {
 
 test('fechas: la lista se repite, cambia de día a medianoche y no se rompe con el horario de verano', () => {
   assert.equal(puzzleFor(PUZZLES, '2026-10-12').id, 1)
-  assert.equal(puzzleFor(PUZZLES, '2026-11-08').id, 28)
-  assert.equal(puzzleFor(PUZZLES, '2026-11-09').id, 1)
-  assert.equal(puzzleFor(PUZZLES, '2026-10-11').id, 28) // antes del inicio también hay acertijo
+  const L = PUZZLES.length
+  assert.equal(puzzleFor(PUZZLES, nextKey('2026-10-12', L - 1)).id, L)
+  assert.equal(puzzleFor(PUZZLES, nextKey('2026-10-12', L)).id, 1) // al acabar la lista vuelve a empezar
+  assert.equal(puzzleFor(PUZZLES, '2026-10-11').id, L) // antes del inicio también hay acertijo
+  assert.equal(puzzleFor(PUZZLES, '2026-11-08').id, 28) // los 28 primeros no cambian al alargar la lista
   assert.equal(dayIndex('2027-03-29') - dayIndex('2027-03-27'), 2)
   assert.equal(nextKey('2026-12-31'), '2027-01-01')
   assert.equal(nextKey('2026-03-01', -1), '2026-02-28')
@@ -209,4 +211,85 @@ test('Mis casos: resumen de una partida con tiempo por paso', async () => {
   assert.deepEqual(fin.rows.map((r) => [r.label, r.ms / 60000]), [['Inicio', 0], ['Pista 1', 30], ['Solución', 65]])
   assert.equal(caseSummary({ startedAt: t0, endedAt: null }, { timeLimitMinutes: 60 }, [], {}, at(61).getTime()).status.kind, 'timeout')
   assert.equal(caseSummary({ startedAt: t0, endedAt: null }, null, [{ id: 'z', at: at(5) }], {}, at(10).getTime()).rows[0].label, 'Paso')
+})
+
+// ---------- Críptico ----------
+test('críptico: la longitud de la pista y el texto de la explicación', async () => {
+  const { parseLens, clueBody, hideText, showText } = await import('../src/diario/criptico.js')
+  assert.deepEqual(parseLens('Algo: cosa (5)'), [5])
+  assert.deepEqual(parseLens('Algo (3,4)'), [3, 4])
+  assert.equal(parseLens('Sin longitud'), null)
+  assert.equal(clueBody('Algo: cosa (3, 4)'), 'Algo: cosa')
+  const t = 'Si mezclas S-E-P-I-A te sale ESPÍA. ¡Ñandú! «ok»'
+  assert.equal(showText(hideText(t)), t)
+  assert.ok(!hideText(t).includes('ESPÍA'))
+})
+
+test('críptico: la comprobación acepta pistas correctas de cada tipo y rechaza las rotas', async () => {
+  const { validateCryptic } = await import('../src/diario/criptico.js')
+  const ok = (text, cryptic) => assert.deepEqual(validateCryptic({ text, cryptic: { explain: 'x', ...cryptic } }), [])
+  const bad = (text, cryptic, re) => assert.match(validateCryptic({ text, cryptic: { explain: 'x', ...cryptic } }).join('|'), re)
+  ok('SOPA', { clue: 'Plato caliente: paso revuelto (4)', def: 'Plato caliente', kind: 'anagrama', material: 'paso', indicator: 'revuelto' })
+  ok('CLAVE', { clue: 'Contraseña escondida en el ancla vetusta (5)', def: 'Contraseña', kind: 'escondida', material: 'ancla vetusta', indicator: 'escondida en' })
+  ok('ROMA', { clue: 'Ciudad eterna: pasión devuelta (4)', def: 'Ciudad eterna', kind: 'reves', indicator: 'devuelta', parts: [{ word: 'AMOR', from: 'pasión' }] })
+  ok('SOLDADO', { clue: 'Astro rey y cubo de juego forman un militar (7)', def: 'un militar', kind: 'suma', indicator: 'forman', parts: [{ word: 'SOL', from: 'Astro rey' }, { word: 'DADO', from: 'cubo de juego' }] })
+  ok('SOMBRA', { clue: 'Lo que te sigue de cerca: sobra con eme dentro (6)', def: 'Lo que te sigue de cerca', kind: 'contenedor', indicator: 'dentro', parts: [{ word: 'SOBRA', from: 'sobra' }, { word: 'M', from: 'eme' }] })
+  ok('LLAVE', { clue: 'Abre la puerta y cierra el agua (5)', def: 'Abre la puerta', def2: 'cierra el agua', kind: 'doble' })
+  ok('EL SOL', { clue: 'Astro rey: los el revueltos (2,3)', def: 'Astro rey', kind: 'anagrama', material: 'los el', indicator: 'revueltos' })
+  bad('SOPA', { clue: 'Plato caliente: paso revuelto (4)', def: 'Plato caliente', kind: 'anagrama', material: 'pase', indicator: 'revuelto' }, /no aparece|no forman/)
+  bad('SOPA', { clue: 'Plato caliente: pasos revuelto (4)', def: 'Plato caliente', kind: 'anagrama', material: 'pasos', indicator: 'revuelto' }, /no forman/)
+  bad('SOPA', { clue: 'Plato caliente: paso revuelto (5)', def: 'Plato caliente', kind: 'anagrama', material: 'paso', indicator: 'revuelto' }, /longitud/)
+  bad('SOPA', { clue: 'Plato caliente: paso revuelto', def: 'Plato caliente', kind: 'anagrama', material: 'paso', indicator: 'revuelto' }, /paréntesis/)
+  bad('SOPA', { clue: 'Un plato: paso revuelto hoy (4)', def: 'paso', kind: 'anagrama', material: 'paso', indicator: 'revuelto' }, /principio o al final/)
+  bad('SOPA', { clue: 'Plato caliente: paso (4)', def: 'Plato caliente', kind: 'anagrama', material: 'paso', indicator: 'revuelto' }, /aviso/)
+  bad('ROMA', { clue: 'Ciudad eterna: pasión devuelta (4)', def: 'Ciudad eterna', kind: 'reves', indicator: 'devuelta', parts: [{ word: 'AMAR', from: 'pasión' }] }, /al revés/)
+  bad('SOLDADO', { clue: 'Astro rey y cubo de juego forman un militar (7)', def: 'un militar', kind: 'suma', indicator: 'forman', parts: [{ word: 'SOL', from: 'Astro rey' }, { word: 'DAD', from: 'cubo de juego' }] }, /pegadas/)
+  bad('SOMBRA', { clue: 'Lo que te sigue: sobra con eme dentro (6)', def: 'Lo que te sigue', kind: 'contenedor', indicator: 'dentro', parts: [{ word: 'SOBRA', from: 'sobra' }, { word: 'N', from: 'eme' }] }, /Metiendo la pieza/)
+  bad('CLAVE', { clue: 'Contraseña escondida en la clave nueva (5)', def: 'Contraseña', kind: 'escondida', material: 'clave', indicator: 'escondida en' }, /palabra entera/)
+  bad('LLAVE', { clue: 'Abre la puerta y cierra el agua (5)', def: 'Abre la puerta', kind: 'doble' }, /def2/)
+  bad('LLAVE', { clue: 'Abre la puerta (5)', def: 'Abre la puerta', kind: 'inventado' }, /desconocido/)
+})
+
+test('críptico: los crípticos de Alberto cuadran (solo en su PC, el archivo no está en GitHub)', async (t) => {
+  const CR = await import('../src/diario/criptos.src.mjs').then((m) => m.default).catch(() => null)
+  if (!CR) return t.skip('no está criptos.src.mjs')
+  const { validateCryptic } = await import('../src/diario/criptico.js')
+  const answers = new Set()
+  for (const p of CR) {
+    assert.deepEqual(validateCryptic(p), [], p.title)
+    assert.equal(p.level, 4, p.title) // sábado
+    assert.ok(!answers.has(normalize(p.text)), 'respuesta repetida ' + p.text)
+    answers.add(normalize(p.text))
+  }
+  assert.ok(CR.length >= 8)
+})
+
+// ---------- Morse con sonido ----------
+test('Morse sonoro: puntos, rayas y pausas con los tiempos estándar', async () => {
+  const { morseSignals, vibratePattern, totalMs } = await import('../src/diario/morseSound.js')
+  const u = 100
+  // "S" = ... : sonido 1, pausa 1, sonido 1, pausa 1, sonido 1
+  assert.deepEqual(morseSignals('...', u), [{ on: true, ms: 100 }, { on: false, ms: 100 }, { on: true, ms: 100 }, { on: false, ms: 100 }, { on: true, ms: 100 }])
+  // letras separadas por 3 unidades, palabras por 7: "A B" = .- / -...
+  const ab = morseSignals('.- / -...', u).map((s) => `${s.on ? 'X' : '_'}${s.ms / u}`).join(' ')
+  assert.equal(ab, 'X1 _1 X3 _7 X3 _1 X1 _1 X1 _1 X1')
+  assert.equal(morseSignals('.- -...', u).map((s) => s.ms / u).join(','), '1,1,3,3,3,1,1,1,1,1,1') // dos letras: pausa de 3
+  // siempre alterna y empieza con sonido
+  for (const s of ['... --- ...', '-.-. .- ... --- / .- -...']) {
+    const sig = morseSignals(s, u)
+    assert.ok(sig[0].on && sig.every((x, i) => x.on === (i % 2 === 0)))
+    assert.equal(vibratePattern(sig).length, sig.length)
+  }
+  assert.equal(totalMs(morseSignals('.', 50)), 50)
+  assert.deepEqual(morseSignals('', u), [])
+})
+test('Morse sonoro: el mensaje de cada acertijo tiene la duración esperada', async () => {
+  const { morseSignals, totalMs, SPEEDS } = await import('../src/diario/morseSound.js')
+  const M = PUZZLES.filter((p) => p.type === 'morse')
+  assert.ok(M.length >= 10)
+  for (const p of M) {
+    const signals = morseSignals(p.data, SPEEDS.lento)
+    assert.ok(signals.length > 4)
+    assert.ok(totalMs(signals) < 5 * 60000, 'dura menos de 5 minutos') // incluso el más largo
+  }
 })

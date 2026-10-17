@@ -362,3 +362,8 @@ test('Mis casos: con dueño asignado, el grupo (sin sesión) sigue escaneando y 
   b.update(doc(db, 'runs/r1'), { endedAt: serverTimestamp(), endStepId: 'sol' })
   await assertSucceeds(b.commit())
 })
+test('Diario: el tipo críptico se puede guardar y uno inventado no', async () => {
+  const ana = persona('ana')
+  await assertSucceeds(setDoc(doc(ana, 'users/ana/diario/2026-10-17'), dia({ type: 'criptico', level: 4 })))
+  await assertFails(setDoc(doc(ana, 'users/ana/diario/2026-10-18'), dia({ type: 'inventado' })))
+})

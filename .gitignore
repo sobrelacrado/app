@@ -30,7 +30,10 @@ ui-debug.log
 firebase-debug.log
 
 # Soluciones en claro del Diario (el repositorio es público): solo en el PC de Alberto
-src/diario/puzzles.src.mjs
+src/diario/*.src.mjs
 
 # Claves privadas (avisos del Diario): nunca se suben
 secretos-NO-SUBIR/
+
+# Hojas de revision de acertijos (llevan las soluciones en claro)
+revision/
