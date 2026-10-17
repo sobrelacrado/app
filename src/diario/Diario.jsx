@@ -28,6 +28,7 @@ export default function Diario({ onExit }) {
   const [store, setStore] = useState(load)
   const [wrong, setWrong] = useState(0) // fallos de esta visita, para animar el aviso
   const [copied, setCopied] = useState(false)
+  const [laterLogin, setLaterLogin] = useState(() => { try { return localStorage.getItem('sl_login_ahora') === dateKey() } catch { return false } }) // "Ahora no" vale hasta mañana
   const [now, setNow] = useState(Date.now)
   const [vista, setVista] = useState('hoy') // 'hoy' | 'archivo' | 'progreso' | 'casos'
   const [user, setUser] = useState(null) // cuenta de Google (null = sin sesión)
@@ -223,6 +224,16 @@ export default function Diario({ onExit }) {
                     ? `Archivo: nivel ${puzzle.level} (${gained.base}) ${gained.firstTry ? '· a la primera ' : ''}${gained.noHint ? '· sin pista ' : ''}→ mitad`
                     : [`nivel ${puzzle.level}: ${gained.base}`, gained.firstTry && 'a la primera +50 %', gained.noHint && 'sin pista +25 %', gained.multiplier > 1 && `racha ${fmtMult(gained.multiplier)}`].filter(Boolean).join(' · ')}
                 </small>
+              </div>
+            )}
+            {!user && !laterLogin && (
+              <div className="dr-guardar">
+                <b>🔥 Guarda tu racha y tus puntos</b>
+                <p>Entra con Google y no los perderás si cambias de móvil o borras el navegador. Es opcional: puedes seguir jugando sin cuenta.</p>
+                <button type="button" onClick={doLogin} disabled={status === 'entrando'}>{status === 'entrando' ? 'Entrando…' : 'Entrar con Google'}</button>
+                {status === 'error' && <p className="dr-aviso">No se pudo entrar. Inténtalo de nuevo.</p>}
+                <button type="button" className="suave dr-ahora-no" onClick={() => { try { localStorage.setItem('sl_login_ahora', dateKey()) } catch { /* sin almacenamiento */ } setLaterLogin(true) }}>Ahora no</button>
+                <small>Se guarda tu nombre, correo y resultados; el creador del juego los ve para saber cuántas personas juegan.</small>
               </div>
             )}
             {late

@@ -291,3 +291,11 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-palabras li { padding: 4px 10px; border-radius: 99px; background: rgba(0, 0, 0, .1); font: 700 13px 'Space Mono', monospace; }
 .dr-palabras li.dr-hecha { text-decoration: line-through; opacity: .65; }
 .dr-palabras li small { font-weight: 400; }
+
+/* Invitación (opcional) a guardar el progreso con Google, debajo del resultado */
+.dr-guardar { margin: 14px 0 6px; padding: 14px; border: 2px solid currentColor; border-radius: 8px; text-align: center; display: grid; gap: 8px; }
+.dr-guardar b { font-size: 16px; }
+.dr-guardar p { margin: 0; font-size: 14px; line-height: 1.5; }
+.dr-guardar > button:first-of-type { font-size: 16px; padding: 12px 14px; }
+.dr-guardar .dr-ahora-no { justify-self: center; border: none; text-decoration: underline; padding: 4px 8px; }
+.dr-guardar small { font-size: 11px; opacity: .75; line-height: 1.4; }
