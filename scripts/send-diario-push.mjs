@@ -1,7 +1,7 @@
 // Envía el aviso diario del Diario a los móviles suscritos. Lo ejecuta GitHub Actions (.github/workflows/diario-aviso.yml).
 // Variables: FIREBASE_SERVICE_ACCOUNT (JSON de la cuenta de servicio), VAPID_PRIVATE_KEY.
 // Opcionales: FORCE=1 (envía aunque no sean las 8:00 en Madrid), DRY_RUN=1 (no envía, solo cuenta).
-import { createPrivateKey } from 'node:crypto'
+import { createPrivateKey, createPublicKey, sign, verify } from 'node:crypto'
 import { cert, initializeApp } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'
 import webpush from 'web-push'
@@ -27,6 +27,14 @@ export function buildMessage(key) {
   return { title: `🔎 Diario nº ${dayIndex(key) + 1} · ${levelStars(level)}`, body: BODIES[i] }
 }
 
+// Una clave es buena si se puede leer Y firmar con ella algo que su clave pública verifica (descarta claves alteradas que aun así se leen).
+const works = (pem) => {
+  try {
+    const priv = createPrivateKey(pem), data = Buffer.from('sobre lacrado')
+    return verify('sha256', data, createPublicKey(priv), sign('sha256', data, priv))
+  } catch { return false }
+}
+
 // Lee la clave de servicio tolerando pegados raros (comillas de más, "\n" sin convertir) y explica el fallo sin enseñar la clave.
 export function readServiceAccount(raw) {
   let text = String(raw).trim()
@@ -47,10 +55,17 @@ export function readServiceAccount(raw) {
   const pad = body.lastIndexOf('=')
   const candidates = [body, body.slice(0, -1), body.slice(1), ...(pad >= 0 ? [body.slice(0, pad + 1)] : [])]
   for (const c of candidates) {
-    try { createPrivateKey(pem(c)); acc.private_key = pem(c); return acc } catch { /* siguiente */ }
+    if (works(pem(c))) { acc.private_key = pem(c); return acc }
+  }
+  // Un único carácter de más en cualquier punto: se busca cuál es probando a quitar cada uno.
+  if (body.length % 4 !== 0 && body.length <= 4000) {
+    for (let n = 0; n < body.length; n++) {
+      const c = body.slice(0, n) + body.slice(n + 1)
+      if (works(pem(c))) { acc.private_key = pem(c); console.warn(`Aviso: sobraba un carácter en la posición ${n} de la clave; conviene volver a pegar el secreto.`); return acc }
+    }
   }
   acc.private_key = pem(body)
-  try { createPrivateKey(acc.private_key) } catch {
+  if (!works(acc.private_key)) {
     // Diagnóstico sin enseñar la clave: una clave PKCS#8 empieza por 0x30 y declara su propio largo.
     const der = Buffer.from(body, 'base64')
     const declared = der[1] === 0x82 ? ((der[2] << 8) | der[3]) + 4 : der[1] === 0x81 ? der[2] + 3 : null
