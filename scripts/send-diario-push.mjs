@@ -26,6 +26,21 @@ export function buildMessage(key) {
   return { title: `🔎 Diario nº ${dayIndex(key) + 1} · ${levelStars(level)}`, body: BODIES[i] }
 }
 
+// Lee la clave de servicio tolerando pegados raros (comillas de más, "\n" sin convertir) y explica el fallo sin enseñar la clave.
+export function readServiceAccount(raw) {
+  let text = String(raw).trim()
+  if (text.startsWith('"') && text.endsWith('"')) text = JSON.parse(text) // pegado entre comillas
+  let acc
+  try { acc = JSON.parse(text) } catch { throw new Error('FIREBASE_SERVICE_ACCOUNT no es un JSON válido: pega el contenido ENTERO del archivo, de { a }.') }
+  if (typeof acc.private_key !== 'string') throw new Error('Al JSON le falta "private_key": no es la clave de cuenta de servicio.')
+  acc.private_key = acc.private_key.replace(/\\n/g, '\n').trim() + '\n'
+  const k = acc.private_key
+  if (!k.startsWith('-----BEGIN PRIVATE KEY-----') || !k.trimEnd().endsWith('-----END PRIVATE KEY-----')) {
+    throw new Error(`La private_key no tiene el formato esperado (largo ${k.length}, contiene BEGIN: ${k.includes("BEGIN")}, contiene END: ${k.includes("END")}). Debe ser de -----BEGIN PRIVATE KEY----- a -----END PRIVATE KEY-----.`)
+  }
+  return acc
+}
+
 async function main() {
   if (process.env.FORCE !== '1' && Number(parts.hour) !== SEND_HOUR) {
     console.log(`Son las ${parts.hour}:xx en Madrid; el aviso sale a las ${SEND_HOUR}. No se envía nada.`)
@@ -36,7 +51,7 @@ async function main() {
   console.log(`Día ${key}:`, message)
 
   if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-    initializeApp({ credential: cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)) })
+    initializeApp({ credential: cert(readServiceAccount(process.env.FIREBASE_SERVICE_ACCOUNT)) })
   } else if (process.env.FIRESTORE_EMULATOR_HOST) {
     initializeApp({ projectId: 'demo-sobre-lacrado' })
   } else {
