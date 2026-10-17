@@ -222,3 +222,24 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-archivo-aviso button.suave { color: #f3eee2; border-color: rgba(243, 238, 226, .7); background: transparent; }
 .dr-arch .dr-dia.miss { background: rgba(128, 128, 128, .22); }
 .dr-volver-fila { margin: 0 0 8px; }
+
+/* Caso gratis: tarjeta llamativa (colores fijos, se ve igual en claro y oscuro) */
+.dr-regalo { position: relative; margin: 6px 0 18px; padding: 26px 16px 18px; border: 0; border-radius: 12px; overflow: hidden; text-align: center; color: #fff;
+  background: linear-gradient(135deg, #c0392b 0%, #7d130d 100%); box-shadow: 0 8px 22px rgba(0, 0, 0, .35); }
+.dr-regalo::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .08;
+  background: repeating-linear-gradient(45deg, #fff 0 8px, transparent 8px 22px); }
+.dr-regalo > * { position: relative; z-index: 1; }
+.dr-gratis { position: absolute !important; top: 14px; right: -30px; width: 120px; padding: 3px 0; transform: rotate(35deg); background: #f7d046; color: #1d1d1d; font: 700 13px var(--titulo); letter-spacing: 2px; box-shadow: 0 2px 6px rgba(0, 0, 0, .3); }
+.dr-regalo .dr-regalo-sup { margin: 0 0 4px; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; opacity: .9; }
+.dr-regalo h2 { margin: 0 0 8px; padding: 0; border: 0; color: #fff; font-size: 22px; line-height: 1.15; text-transform: none; }
+.dr-regalo p { margin: 0 0 14px; color: #fff; font-size: 14px; line-height: 1.5; }
+.dr-regalo .dr-cta { display: block; margin: 0; padding: 14px 12px; background: #f7d046; color: #1d1d1d; border: 2px solid #f7d046; font-size: 15px; box-shadow: 0 3px 0 rgba(0, 0, 0, .35); }
+@media (prefers-reduced-motion: no-preference) {
+  .dr-regalo .dr-cta { animation: dr-pulso 2.4s ease-in-out infinite; }
+  @keyframes dr-pulso { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+}
+.dr-regalo { padding-top: 46px; }
+.dr-gratis { top: 12px; right: -26px; width: 104px; font-size: 12px; }
+.dr-regalo h2 { font-size: 24px; }
+.dr-regalo .dr-regalo-sub { margin: 0 0 10px; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; opacity: .92; }
+.dr-regalo a.boton.dr-cta { background: #f7d046 !important; color: #1d1d1d !important; border-color: #f7d046 !important; }

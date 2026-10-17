@@ -250,18 +250,27 @@ test('críptico: la comprobación acepta pistas correctas de cada tipo y rechaza
   bad('LLAVE', { clue: 'Abre la puerta (5)', def: 'Abre la puerta', kind: 'inventado' }, /desconocido/)
 })
 
-test('críptico: los crípticos de Alberto cuadran (solo en su PC, el archivo no está en GitHub)', async (t) => {
-  const CR = await import('../src/diario/criptos.src.mjs').then((m) => m.default).catch(() => null)
-  if (!CR) return t.skip('no está criptos.src.mjs')
+test('críptico: los crípticos de Alberto cuadran (solo en su PC, los archivos no están en GitHub)', async (t) => {
+  const { readdirSync } = await import('node:fs')
+  const dir = new URL('../src/diario/', import.meta.url)
+  const files = readdirSync(dir).filter((f) => /^criptos(-\d+)?\.src\.mjs$/.test(f))
+  if (!files.length) return t.skip('no hay criptos*.src.mjs')
   const { validateCryptic } = await import('../src/diario/criptico.js')
   const answers = new Set()
-  for (const p of CR) {
-    assert.deepEqual(validateCryptic(p), [], p.title)
-    assert.equal(p.level, 4, p.title) // sábado
-    assert.ok(!answers.has(normalize(p.text)), 'respuesta repetida ' + p.text)
-    answers.add(normalize(p.text))
+  let total = 0
+  for (const f of files) {
+    const CR = (await import(new URL(f, dir))).default
+    assert.ok(CR.length >= 8, f)
+    for (const p of CR) {
+      assert.deepEqual(validateCryptic(p), [], p.title)
+      assert.equal(p.level, 4, p.title) // sábado
+      assert.ok(!answers.has(normalize(p.text)), 'respuesta repetida ' + p.text)
+      answers.add(normalize(p.text))
+      total++
+    }
   }
-  assert.ok(CR.length >= 8)
+  // en la lista final hay un críptico cada sábado
+  assert.equal(PUZZLES.filter((p) => p.type === 'criptico').length, total, 'todos los crípticos están en la lista')
 })
 
 // ---------- Morse con sonido ----------

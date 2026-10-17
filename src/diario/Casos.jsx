@@ -9,9 +9,11 @@ const FREE_CASE_URL = 'https://preview.mailerlite.io/forms/2670725/1999728700051
 function CasoGratis() {
   return (
     <aside className="dr-regalo">
-      <h2>Caso 2 · Agencia Duarte</h2>
-      <p>¿Aún no tienes el caso? El detective Tomás Duarte te espera. Es <b>gratis</b>: apúntate a la lista de espera y te llega por correo.</p>
-      <a className="boton dr-cta" href={FREE_CASE_URL} target="_blank" rel="noopener noreferrer">Conseguir el caso gratis</a>
+      <span className="dr-gratis" aria-hidden="true">GRATIS</span>
+      <h2>🕵️ Caso 2: Agencia Duarte</h2>
+      <p className="dr-regalo-sub">Resuelve el caso del detective Tomás Duarte</p>
+      <p>Un caso completo para imprimir y jugar en casa, con códigos QR, pistas y vídeos. Apúntate a la lista de espera y <b>te llega gratis por correo</b>.</p>
+      <a className="boton dr-cta" href={FREE_CASE_URL} target="_blank" rel="noopener noreferrer">Quiero el caso gratis</a>
     </aside>
   )
 }
@@ -45,13 +47,13 @@ export default function Casos({ user, cloud, status, onLogin }) {
     return (
       <article className="dr-carta tema-detective">
         <h1>Mis casos</h1>
+        <CasoGratis />
         <div className="dr-cuenta">
           <p>Entra con Google para ver aquí tus partidas de los casos: cuánto tardaste en total y en cada paso.</p>
           <button type="button" onClick={onLogin} disabled={status === 'entrando'}>{status === 'entrando' ? 'Entrando…' : 'Entrar con Google'}</button>
           {status === 'error' && <p className="dr-aviso">No se pudo entrar. Inténtalo de nuevo.</p>}
           <p className="dr-nota">{NOTE}</p>
         </div>
-        <CasoGratis />
       </article>
     )
   }
@@ -60,6 +62,7 @@ export default function Casos({ user, cloud, status, onLogin }) {
   return (
     <article className="dr-carta tema-detective">
       <h1>Mis casos</h1>
+      {(!items || items.length === 0) && <CasoGratis />}
       {items === null && <p className="dr-nota">Buscando tus partidas…</p>}
       {error && <p className="dr-aviso">No se pudieron cargar todas. <button type="button" className="suave" onClick={load}>Reintentar</button></p>}
       {items?.length === 0 && !error && (
@@ -105,7 +108,7 @@ export default function Casos({ user, cloud, status, onLogin }) {
           )
         })}
       </ul>
-      <CasoGratis />
+      {items?.length > 0 && <CasoGratis />}
       <p className="dr-nota">{NOTE}</p>
     </article>
   )

@@ -1283,5 +1283,882 @@ export default [
     "hint": "Son ocho palabras y la tercera es NODRIZA.",
     "data": "555 2 / 66 2 888 33 / 66 666 3 777 444 9999 2 / 777 33 4 777 33 7777 2 777 2 / 222 88 2 66 3 666 / 7777 2 555 4 2 / 555 2 / 555 88 66 2",
     "h": "12z94xb2l73"
+  },
+  {
+    "id": 85,
+    "type": "cesar",
+    "theme": "detective",
+    "level": 1,
+    "title": "Nota bajo la puerta",
+    "clue": "Alguien deslizó una nota bajo la puerta. Cada letra está movida del alfabeto. La A se escribe C.",
+    "hint": "Gira la rueda hasta que la A de dentro quede bajo la C de fuera.",
+    "data": "PCFKG UCNKQ FG ECUC",
+    "h": "oostmjrcfo"
+  },
+  {
+    "id": 86,
+    "type": "anagrama",
+    "theme": "policial",
+    "level": 1,
+    "title": "Fichas del tablón",
+    "clue": "Las letras de una palabra del informe cayeron al suelo y quedaron mezcladas.",
+    "hint": "Es la persona a la que sigue la policía.",
+    "data": {
+      "pool": "CSHSEOPSOO",
+      "lens": [
+        10
+      ]
+    },
+    "h": "3yjrhqqy4r"
+  },
+  {
+    "id": 87,
+    "type": "morse",
+    "theme": "alien",
+    "level": 2,
+    "title": "Pulsos en la antena",
+    "clue": "La antena de la base capta pulsos largos y cortos. Parece un mensaje.",
+    "hint": "Son cuatro palabras y la segunda es ANTENA.",
+    "data": ".-.. .- / .- -. - . -. .- / .-. . -.-. .. -... . / .- .-.. --. ---",
+    "h": "jqmqegp7af"
+  },
+  {
+    "id": 88,
+    "type": "cerradura",
+    "theme": "detective",
+    "level": 2,
+    "title": "El cajón del archivo",
+    "clue": "El cajón del archivo se abre con tres cifras distintas. El detective anotó sus intentos antes de rendirse.",
+    "hint": "Las tres cifras suman 18.",
+    "data": [
+      {
+        "g": "843",
+        "bien": 2,
+        "mal": 0
+      },
+      {
+        "g": "610",
+        "bien": 0,
+        "mal": 1
+      },
+      {
+        "g": "256",
+        "bien": 1,
+        "mal": 0
+      }
+    ],
+    "h": "qtzdqyu86j"
+  },
+  {
+    "id": 89,
+    "type": "simbolos",
+    "theme": "egipcio",
+    "level": 3,
+    "title": "Jeroglífico del escriba",
+    "clue": "En la pared de la sala aparecen símbolos en lugar de letras. La clave está tallada al lado.",
+    "hint": "Son cinco palabras y la segunda es ESCRIBA.",
+    "data": "RY RFPEVON PBABPR RY PNZVAB",
+    "h": "si7grx1zlo"
+  },
+  {
+    "id": 90,
+    "type": "criptico",
+    "theme": "detective",
+    "level": 4,
+    "title": "Correo de madrugada",
+    "clue": "Un mensaje llega antes del amanecer. Una parte te dice qué es; la otra esconde la palabra entre letras revueltas.",
+    "data": {
+      "clue": "Mensaje por escrito: traca alterada",
+      "lens": [
+        5
+      ],
+      "def": "Mensaje por escrito",
+      "kind": "anagrama",
+      "indicator": "alterada",
+      "first": "C",
+      "explain": "LkFUUkFDIG9tb2MgYW5lZHJvZXIgZXMgQS1DLUEtUi1UIDphbWFyZ2FuYSBlZCBvc2l2YSAsYWRhcmV0bGEgw6F0c2UgKXNvZHJhdGVwIGVkIGFyaXQgYW51KCDCu2FjYXJUwqsgLsK7b3RpcmNzZSByb3AgZWphc25lbcKrIHNlIG7Ds2ljaW5pZmVkIGFM"
+    },
+    "h": "1aebciexo0j"
+  },
+  {
+    "id": 91,
+    "type": "espejo",
+    "theme": "policial",
+    "level": 5,
+    "title": "Declaración en el espejo",
+    "clue": "Una declaración larga escrita con el alfabeto invertido. Cada letra es la del lugar contrario.",
+    "hint": "Son ocho palabras y la tercera es CAMBIO.",
+    "data": "VO GVHGRTL XZNYRL HF WVXOZIZXRLM ZMGVH WVO QFRXRL",
+    "h": "1gjpztdo46y"
+  },
+  {
+    "id": 92,
+    "type": "teclado",
+    "theme": "alien",
+    "level": 1,
+    "title": "Saludo desde el espacio",
+    "clue": "Un comunicador antiguo recibe una secuencia de teclas desde muy lejos. Cada grupo es una letra.",
+    "hint": "Son dos palabras y la primera es HOLA.",
+    "data": "44 666 555 2 / 8 33 777 777 444 222 666 555 2",
+    "h": "19jmgvio6nn"
+  },
+  {
+    "id": 93,
+    "type": "cerradura",
+    "theme": "egipcio",
+    "level": 1,
+    "title": "El cofre de la tumba",
+    "clue": "El cofre se cierra con tres cifras distintas. Un explorador marcó en el barro sus intentos.",
+    "hint": "Solo una de las cifras es par.",
+    "data": [
+      {
+        "g": "872",
+        "bien": 0,
+        "mal": 1
+      },
+      {
+        "g": "765",
+        "bien": 0,
+        "mal": 1
+      },
+      {
+        "g": "529",
+        "bien": 1,
+        "mal": 2
+      }
+    ],
+    "h": "qv7wh7w55i"
+  },
+  {
+    "id": 94,
+    "type": "espejo",
+    "theme": "detective",
+    "level": 2,
+    "title": "Papel en el espejo",
+    "clue": "Un papel escrito en espejo: cada letra ocupa el lugar contrario del alfabeto.",
+    "hint": "Son cinco palabras y la última es COARTADA.",
+    "data": "VO NZBLIWLNL GRVMV OZ XLZIGZWZ",
+    "h": "mv5efjnyhx"
+  },
+  {
+    "id": 95,
+    "type": "morse",
+    "theme": "policial",
+    "level": 2,
+    "title": "Aviso en la frecuencia",
+    "clue": "Por la frecuencia policial llega una señal de puntos y rayas.",
+    "hint": "Son cuatro palabras y la última es TARDE.",
+    "data": ".-.. .- / .--. .- - .-. ..- .-.. .-.. .- / .-.. .-.. . --. .- / - .- .-. -.. .",
+    "h": "27cka4x8t0h"
+  },
+  {
+    "id": 96,
+    "type": "acrostico",
+    "theme": "policial",
+    "level": 3,
+    "title": "Informe de vigilancia",
+    "clue": "Un informe de vigilancia parece aburrido. Fíjate bien en cómo empieza cada línea.",
+    "hint": "Seis letras: algo que se prepara para atrapar a alguien.",
+    "data": [
+      "Todo parecía preparado para una cena tranquila.",
+      "Rodeamos la casa antes de que cayera la noche.",
+      "Alguien había dejado la ventana entreabierta.",
+      "Mientras tanto, el sospechoso miraba el reloj.",
+      "Pasaron cinco minutos sin que ocurriera nada.",
+      "Al final, la puerta se cerró detrás de él."
+    ],
+    "h": "1l4o9q2cf68"
+  },
+  {
+    "id": 97,
+    "type": "criptico",
+    "theme": "policial",
+    "level": 4,
+    "title": "La pista de dos caras",
+    "clue": "Esta vez no hay juego de letras. Dos pistas distintas apuntan a la misma palabra: piensa en cosas diferentes que se llaman igual.",
+    "data": {
+      "clue": "Asiento en el parque y guardián del dinero",
+      "lens": [
+        5
+      ],
+      "def": "Asiento en el parque",
+      "def2": "guardián del dinero",
+      "kind": "doble",
+      "first": "B",
+      "explain": "Lk9DTkFCIDphcmJhbGFwIGFtc2ltIGFsIGVkIHNvZGFjaWZpbmdpcyBzb2Qgbm9zIMK7b3JlbmlkIGxlZCBuw6FpZHJhdWfCqyB5IMK7ZXVxcmFwIGxlIG5lIG90bmVpc2HCqyA6bsOzaWNpbmlmZWQgZWxib2QgYW51IHNF"
+    },
+    "h": "1oym3hl0kgp"
+  },
+  {
+    "id": 98,
+    "type": "cesar",
+    "theme": "alien",
+    "level": 5,
+    "title": "Transmisión de largo alcance",
+    "clue": "Una transmisión muy larga con las letras desplazadas. Quien la emitió no dice cuánto movió el alfabeto.",
+    "hint": "Cada letra se movió más de 12 puestos.",
+    "data": "UB CUDIQZU LYUDU TU CKO BUZEI O DE UIJQ TYHYWYTE Q DEIEJHEI",
+    "h": "12yfnf7tf0p"
+  },
+  {
+    "id": 99,
+    "type": "simbolos",
+    "theme": "detective",
+    "level": 1,
+    "title": "Símbolos en la libreta",
+    "clue": "Una libreta llena de símbolos en lugar de letras. La clave está dibujada en la última página.",
+    "hint": "Son cuatro palabras y la última es ESPEJO.",
+    "data": "ZVEN GENF RY RFCRWB",
+    "h": "14uz67u4itn"
+  },
+  {
+    "id": 100,
+    "type": "espejo",
+    "theme": "egipcio",
+    "level": 1,
+    "title": "Inscripción en el espejo",
+    "clue": "Una inscripción en espejo: el alfabeto está al revés y cada letra ocupa el lugar contrario.",
+    "hint": "Son cuatro palabras y la última es SAGRADO.",
+    "data": "VO IRL VH HZTIZWL",
+    "h": "2fs3vgritx4"
+  },
+  {
+    "id": 101,
+    "type": "anagrama",
+    "theme": "alien",
+    "level": 2,
+    "title": "Letras en el cielo",
+    "clue": "Las letras de una frase aparecen mezcladas en la pantalla del radar.",
+    "hint": "Son cuatro palabras y la primera es NOS.",
+    "data": {
+      "pool": "ROVNSNEBSADIAOAEBSRDER",
+      "lens": [
+        3,
+        8,
+        5,
+        6
+      ]
+    },
+    "h": "sgp473vjyt"
+  },
+  {
+    "id": 102,
+    "type": "teclado",
+    "theme": "policial",
+    "level": 2,
+    "title": "Mensaje en el móvil",
+    "clue": "Un móvil antiguo guarda un mensaje escrito a base de pulsaciones. Cada grupo es una letra.",
+    "hint": "Son cuatro palabras y la última es HABLARA.",
+    "data": "33 555 / 8 33 7777 8 444 4 666 / 66 666 / 44 2 22 555 2 777 2",
+    "h": "24786n4mp7p"
+  },
+  {
+    "id": 103,
+    "type": "morse",
+    "theme": "egipcio",
+    "level": 3,
+    "title": "Golpes en la cámara",
+    "clue": "Desde el otro lado del muro llegan golpes cortos y largos. Alguien intenta comunicarse.",
+    "hint": "Son siete palabras y la última es ESFINGE.",
+    "data": ".-.. .- / -.-. .- -- .- .-. .- / ... . -.-. .-. . - .- / . ... - .- / -... .- .--- --- / .-.. .- / . ... ..-. .. -. --. .",
+    "h": "1ps72lfshp1"
+  },
+  {
+    "id": 104,
+    "type": "criptico",
+    "theme": "detective",
+    "level": 4,
+    "title": "Vuelta atrás",
+    "clue": "Hay que leer una palabra de atrás hacia delante. La pista te dice cuál es, describiéndola con otras palabras.",
+    "data": {
+      "clue": "Roedor: unir con cuerda, devuelto",
+      "lens": [
+        4
+      ],
+      "def": "Roedor",
+      "kind": "reves",
+      "indicator": "devuelto",
+      "first": "R",
+      "explain": "LkFUQVIgbmUgZXRyZWl2bm9jIGVzIFJBVEEgOnPDqXZlciBsYSBlZWwgZXMgZXVxIGVkIGFzaXZhIMK7b3RsZXV2ZWTCqyB5ICxSQVRBIHNlIMK7YWRyZXVjIG5vYyByaW5VwqsgLsK7cm9kZW9ywqsgc2UgbsOzaWNpbmlmZWQgYUw="
+    },
+    "h": "1mpc2puzphy"
+  },
+  {
+    "id": 105,
+    "type": "anagrama",
+    "theme": "detective",
+    "level": 5,
+    "title": "Frase en la libreta",
+    "clue": "Todas las letras de una frase se mezclaron en un solo montón, sin separar las palabras.",
+    "hint": "Son cinco palabras y la última es LUGAR.",
+    "data": {
+      "pool": "ACPLARLLRLBOSUEGUREGLEAE",
+      "lens": [
+        2,
+        8,
+        7,
+        2,
+        5
+      ]
+    },
+    "h": "23osvc78bbt"
+  },
+  {
+    "id": 106,
+    "type": "cerradura",
+    "theme": "policial",
+    "level": 1,
+    "title": "El casillero de pruebas",
+    "clue": "El casillero de pruebas se cierra con tres cifras distintas. Un compañero anotó sus intentos.",
+    "hint": "La primera cifra es la menor.",
+    "data": [
+      {
+        "g": "418",
+        "bien": 0,
+        "mal": 0
+      },
+      {
+        "g": "834",
+        "bien": 0,
+        "mal": 1
+      },
+      {
+        "g": "168",
+        "bien": 0,
+        "mal": 1
+      },
+      {
+        "g": "057",
+        "bien": 0,
+        "mal": 1
+      },
+      {
+        "g": "803",
+        "bien": 0,
+        "mal": 1
+      }
+    ],
+    "h": "yu74gf24p9"
+  },
+  {
+    "id": 107,
+    "type": "cesar",
+    "theme": "alien",
+    "level": 1,
+    "title": "Aviso desde la órbita",
+    "clue": "Un aviso con las letras movidas. Cada una se ha desplazado del alfabeto. La A se escribe G.",
+    "hint": "Gira la rueda hasta que la A de dentro quede bajo la G de fuera.",
+    "data": "RG HGYK KYZG IKXIG",
+    "h": "1z12txsyb0q"
+  },
+  {
+    "id": 108,
+    "type": "simbolos",
+    "theme": "detective",
+    "level": 2,
+    "title": "Clave en el sobre",
+    "clue": "Un sobre sin remitente con símbolos en lugar de letras. La clave viene dibujada en la solapa.",
+    "hint": "Son cuatro palabras y la última es FALSO.",
+    "data": "RY GRFGNZRAGB RF SNYFB",
+    "h": "wjb6588ztk"
+  },
+  {
+    "id": 109,
+    "type": "espejo",
+    "theme": "policial",
+    "level": 2,
+    "title": "Plano al revés",
+    "clue": "Un plano escrito en espejo. Cada letra del texto es la que ocupa el lugar contrario en el alfabeto.",
+    "hint": "Son cinco palabras y la última es SOTANO.",
+    "data": "OZ VHXZOVIZ XLMWFXV ZO HLGZML",
+    "h": "8s125o54t8"
+  },
+  {
+    "id": 110,
+    "type": "teclado",
+    "theme": "egipcio",
+    "level": 3,
+    "title": "Pulsaciones en la excavación",
+    "clue": "Un teléfono antiguo guarda una frase escrita a pulsaciones. Cada grupo de pulsaciones es una letra.",
+    "hint": "Son cinco palabras y la última es TRAICIONADO.",
+    "data": "33 555 / 8 33 777 222 33 777 / 333 2 777 2 666 66 / 333 88 33 / 8 777 2 444 222 444 666 66 2 3 666",
+    "h": "a8uzdm3o50"
+  },
+  {
+    "id": 111,
+    "type": "criptico",
+    "theme": "policial",
+    "level": 4,
+    "title": "Oculto a plena vista",
+    "clue": "La respuesta ya está escrita en la pista, escondida entre dos palabras seguidas.",
+    "data": {
+      "clue": "Marca de lacre oculta cuando se llora",
+      "lens": [
+        5
+      ],
+      "def": "Marca de lacre",
+      "kind": "escondida",
+      "indicator": "oculta",
+      "first": "S",
+      "explain": "Lk9MTEVTIG5hbXJvZiBPLUwtTC1FLVMgc2FkaXVnZXMgc2FydGVsIHNhTCAuYXItT0xMLUVTIDrCu2Fyb2xsIGVzwqsgYXJpTSAub3R4ZXQgbGUgbmUgYWRpZG5vY3NlIMOhdHNlIGF0c2V1cHNlciBhbCBldXEgZWQgYXNpdmEgwrthdGx1Y0/CqyAuwrtlcmNhbCBlZCBhY3JhbcKrIHNlIG7Ds2ljaW5pZmVkIGFM"
+    },
+    "h": "222ye1or5ss"
+  },
+  {
+    "id": 112,
+    "type": "morse",
+    "theme": "alien",
+    "level": 5,
+    "title": "Baliza en el horizonte",
+    "clue": "Una baliza lejana emite un mensaje larguísimo con puntos y rayas.",
+    "hint": "Son diez palabras y la última es SUR.",
+    "data": ".-.. .- / ... . -. .- .-.. / ... . / .-. . .--. .. - . / -.-. .- -.. .- / - .-. . ... / .... --- .-. .- ... / -.. . ... -.. . / . .-.. / ... ..- .-.",
+    "h": "1qjdp6ibh3b"
+  },
+  {
+    "id": 113,
+    "type": "acrostico",
+    "theme": "detective",
+    "level": 1,
+    "title": "Carta del lunes",
+    "clue": "Una carta anónima llega a primera hora. Parece un relato corriente, pero fíjate en cómo empieza cada línea.",
+    "hint": "Cinco letras: marca las horas y a veces guarda un secreto.",
+    "data": [
+      "Recibió la carta un martes por la mañana.",
+      "En ella solo había una dirección y una hora.",
+      "Llegó puntual, aunque nadie salió a recibirlo.",
+      "Observó la calle desde el portal de enfrente.",
+      "Justo entonces empezaron a sonar las campanadas."
+    ],
+    "h": "1391xckhpd0"
+  },
+  {
+    "id": 114,
+    "type": "morse",
+    "theme": "egipcio",
+    "level": 1,
+    "title": "Golpes en la roca",
+    "clue": "Desde el interior de la roca llegan golpes cortos y largos. Alguien quiere salir.",
+    "hint": "Son tres palabras y la última es PIEDRA.",
+    "data": ".--. ..- . .-. - .- / -.. . / .--. .. . -.. .-. .-",
+    "h": "1knecyckhk6"
+  },
+  {
+    "id": 115,
+    "type": "cerradura",
+    "theme": "policial",
+    "level": 2,
+    "title": "La caja del comisario",
+    "clue": "La caja del comisario se abre con tres cifras distintas. Un agente apuntó sus intentos antes de irse.",
+    "hint": "La cifra del medio es la mayor.",
+    "data": [
+      {
+        "g": "641",
+        "bien": 2,
+        "mal": 0
+      },
+      {
+        "g": "741",
+        "bien": 1,
+        "mal": 0
+      },
+      {
+        "g": "732",
+        "bien": 0,
+        "mal": 0
+      },
+      {
+        "g": "218",
+        "bien": 0,
+        "mal": 2
+      }
+    ],
+    "h": "1zzy0kkzwst"
+  },
+  {
+    "id": 116,
+    "type": "anagrama",
+    "theme": "alien",
+    "level": 2,
+    "title": "Letras en el desierto",
+    "clue": "Una frase del cuaderno de campo quedó con las letras revueltas.",
+    "hint": "Son cinco palabras y la última es DESIERTO.",
+    "data": {
+      "pool": "TSLNDLORESREDNPAIADEEEIE",
+      "lens": [
+        5,
+        7,
+        2,
+        2,
+        8
+      ]
+    },
+    "h": "16w77fkzdjs"
+  },
+  {
+    "id": 117,
+    "type": "cesar",
+    "theme": "egipcio",
+    "level": 3,
+    "title": "Tablilla del sabio",
+    "clue": "Una tablilla con las letras movidas. Todas se desplazaron lo mismo, pero no sabes cuánto.",
+    "hint": "El desplazamiento es mayor que 8 y menor que 12.",
+    "data": "OV CKLSY QEKBNK OV ZKZSBY",
+    "h": "m5qq7fqqcb"
+  },
+  {
+    "id": 118,
+    "type": "criptico",
+    "theme": "policial",
+    "level": 4,
+    "title": "Piezas del rompecabezas",
+    "clue": "Dos piezas, una detrás de otra. Cada una viene descrita con otras palabras.",
+    "data": {
+      "clue": "Artículo femenino junto a aparato volador sin piloto: un delincuente",
+      "lens": [
+        6
+      ],
+      "def": "un delincuente",
+      "kind": "suma",
+      "indicator": "junto a",
+      "first": "L",
+      "explain": "Lk5PUkRBTCA9IE5PUkQgKyBBTCA6bmFnZXAgZXMgZXVxIGVkIGFzaXZhIMK7YSBvdG51asKrIDtOT1JEIHNlIMK7b3RvbGlwIG5pcyByb2RhbG92IG90YXJhcGHCqyB5IEFMIHNlIMK7b25pbmVtZWYgb2x1Y8OtdHJBwqsgLsK7ZXRuZXVjbmlsZWQgbnXCqyBzZSBuw7NpY2luaWZlZCBhTA=="
+    },
+    "h": "1z1bc3p2xpq"
+  },
+  {
+    "id": 119,
+    "type": "simbolos",
+    "theme": "detective",
+    "level": 5,
+    "title": "Declaración en símbolos",
+    "clue": "Una declaración larga escrita con símbolos. La clave estaba grapada al final del expediente.",
+    "hint": "Son nueve palabras y la segunda es PORTERO.",
+    "data": "RY CBEGREB IVB FNYVE NY FBPVB CBE YN IRAGNAN",
+    "h": "rart6zs7qt"
+  },
+  {
+    "id": 120,
+    "type": "espejo",
+    "theme": "alien",
+    "level": 1,
+    "title": "Mensaje en el espejo",
+    "clue": "Una señal con el alfabeto del revés. Cada letra es la contraria: mira la tabla.",
+    "hint": "Son cuatro palabras y la primera es LUCES.",
+    "data": "OFXVH VM VO XRVOL",
+    "h": "2b8ih7vzz3a"
+  },
+  {
+    "id": 121,
+    "type": "teclado",
+    "theme": "policial",
+    "level": 1,
+    "title": "Aviso en el móvil",
+    "clue": "Un papel con números de un móvil antiguo. Cada grupo es una letra.",
+    "hint": "Son tres palabras y la última es COMISARIO.",
+    "data": "555 555 2 6 2 / 2 555 / 222 666 6 444 7777 2 777 444 666",
+    "h": "qaxlctv7pr"
+  },
+  {
+    "id": 122,
+    "type": "cesar",
+    "theme": "detective",
+    "level": 2,
+    "title": "Recibo cifrado",
+    "clue": "Un recibo con letras desplazadas. Quien lo escribió movió todas lo mismo, pero no dice cuánto.",
+    "hint": "El desplazamiento está entre 10 y 14.",
+    "data": "QX DQOUNA QEFM QZ QX MNDUSA",
+    "h": "1hahdlpswm7"
+  },
+  {
+    "id": 123,
+    "type": "simbolos",
+    "theme": "egipcio",
+    "level": 2,
+    "title": "Símbolos en la orilla",
+    "clue": "Unos símbolos grabados en la orilla del río. La clave está dibujada al lado.",
+    "hint": "Son cinco palabras y la cuarta es NILO.",
+    "data": "RY NTHN QRY AVYB FHOR",
+    "h": "rs04gaxzzf"
+  },
+  {
+    "id": 124,
+    "type": "anagrama",
+    "theme": "policial",
+    "level": 3,
+    "title": "Orden en el tablón",
+    "clue": "Las letras de una orden quedaron mezcladas sobre el tablón de la comisaría.",
+    "hint": "Son tres palabras y la última es SOCIO.",
+    "data": {
+      "pool": "IEOCDTNLOSANEGA",
+      "lens": [
+        8,
+        2,
+        5
+      ]
+    },
+    "h": "1s96c7iezbf"
+  },
+  {
+    "id": 125,
+    "type": "criptico",
+    "theme": "egipcio",
+    "level": 4,
+    "title": "Una letra se cuela",
+    "clue": "Una letra pequeña entra dentro de una palabra. Descubre cuál es y dónde queda bien.",
+    "data": {
+      "clue": "Capital egipcia: caro con i dentro",
+      "lens": [
+        5
+      ],
+      "def": "Capital egipcia",
+      "kind": "contenedor",
+      "indicator": "dentro",
+      "first": "C",
+      "explain": "LnJvZGVuZXRub2MgZWQgb3NpdmEgbGUgc2UgwrtvcnRuZWTCqyBvc2Ugcm9QIC5PUi1JLUFDIDrCu29yYWPCqyBlZCBvcnRuZWQgSSBhcnRlbCBhbCBzZXRlTSAuwrthaWNwaWdlIGxhdGlwYWPCqyBzZSBuw7NpY2luaWZlZCBhTA=="
+    },
+    "h": "17pk2bg67fm"
+  },
+  {
+    "id": 126,
+    "type": "teclado",
+    "theme": "alien",
+    "level": 5,
+    "title": "Mensaje del portal",
+    "clue": "Un comunicador antiguo repite una secuencia larguísima de teclas. Cada grupo es una letra.",
+    "hint": "Son ocho palabras y la última es ECLIPSE.",
+    "data": "33 555 / 7 666 777 8 2 555 / 7777 33 / 222 33 777 777 2 777 2 / 222 88 2 66 3 666 / 8 33 777 6 444 66 33 / 33 555 / 33 222 555 444 7 7777 33",
+    "h": "qin59aa8bh"
+  },
+  {
+    "id": 127,
+    "type": "morse",
+    "theme": "detective",
+    "level": 1,
+    "title": "Golpes en la cañería",
+    "clue": "A través de las tuberías llegan golpes cortos y largos. Alguien intenta avisarte.",
+    "hint": "Son tres palabras y la última es CHOFER.",
+    "data": "... .. --. ..- . / .- .-.. / -.-. .... --- ..-. . .-.",
+    "h": "3zee8qg9z1"
+  },
+  {
+    "id": 128,
+    "type": "simbolos",
+    "theme": "policial",
+    "level": 1,
+    "title": "Nota en símbolos",
+    "clue": "Una nota con símbolos en lugar de letras. La clave está pegada en el reverso.",
+    "hint": "Son cuatro palabras y la segunda es Y.",
+    "data": "NYGB L ZNABF NEEVON",
+    "h": "2nmy0jd1bw"
+  },
+  {
+    "id": 129,
+    "type": "teclado",
+    "theme": "egipcio",
+    "level": 2,
+    "title": "Pulsaciones en la arena",
+    "clue": "Un móvil antiguo apareció enterrado. Muestra una frase escrita a base de pulsaciones.",
+    "hint": "Son cinco palabras y la segunda es PIRAMIDE.",
+    "data": "555 2 / 7 444 777 2 6 444 3 33 / 8 444 33 66 33 / 88 66 2 / 7 88 33 777 8 2",
+    "h": "1qzdrta91vk"
+  },
+  {
+    "id": 130,
+    "type": "cerradura",
+    "theme": "alien",
+    "level": 2,
+    "title": "El panel de la nave",
+    "clue": "El panel de mandos se desbloquea con tres cifras distintas. El piloto anotó sus intentos antes de salir.",
+    "hint": "Una de las cifras es el cero y otra es el cinco.",
+    "data": [
+      {
+        "g": "589",
+        "bien": 0,
+        "mal": 2
+      },
+      {
+        "g": "683",
+        "bien": 0,
+        "mal": 0
+      },
+      {
+        "g": "724",
+        "bien": 0,
+        "mal": 0
+      },
+      {
+        "g": "052",
+        "bien": 0,
+        "mal": 2
+      }
+    ],
+    "h": "2d5e19crr1r"
+  },
+  {
+    "id": 131,
+    "type": "espejo",
+    "theme": "detective",
+    "level": 3,
+    "title": "Informe en el espejo",
+    "clue": "Un informe escrito en espejo. Cada letra del texto ocupa el lugar contrario del alfabeto.",
+    "hint": "Son seis palabras y la segunda es VENTANA.",
+    "data": "OZ EVMGZMZ VHGZYZ ZYRVIGZ WVHWV ZMLXSV",
+    "h": "1t8rjfyejz5"
+  },
+  {
+    "id": 132,
+    "type": "criptico",
+    "theme": "alien",
+    "level": 4,
+    "title": "Señal del espacio profundo",
+    "clue": "Una palabra llegó desde muy lejos con las letras revueltas. Ordénalas y sabrás qué es.",
+    "data": {
+      "clue": "Transporte espacial: vena revuelta",
+      "lens": [
+        4
+      ],
+      "def": "Transporte espacial",
+      "kind": "anagrama",
+      "indicator": "revuelta",
+      "first": "N",
+      "explain": "LkVWQU4gb21vYyBhbmVkcm9lciBlcyBBLU4tRS1WIDphbWFyZ2FuYSBlZCBvc2l2YSAsYXRsZXV2ZXIgw6F0c2UgwrthbmVWwqsgLsK7bGFpY2Fwc2UgZXRyb3BzbmFydMKrIHNlIG7Ds2ljaW5pZmVkIGFM"
+    },
+    "h": "27mby3x8ntn"
+  },
+  {
+    "id": 133,
+    "type": "cesar",
+    "theme": "policial",
+    "level": 5,
+    "title": "Carta al juez",
+    "clue": "Una carta muy larga con las letras desplazadas. El abogado nunca dijo cuántos puestos movió el alfabeto.",
+    "hint": "Cada letra se movió más de 14 puestos.",
+    "data": "WD STGYSVG KSTAS IMW KM UDAWFLW WJS UMDHSTDW Q SMF SKA DG VWXWFVAG",
+    "h": "23cf8zsbd1p"
+  },
+  {
+    "id": 134,
+    "type": "anagrama",
+    "theme": "detective",
+    "level": 1,
+    "title": "Prueba revuelta",
+    "clue": "Las letras de una palabra del inventario quedaron mezcladas.",
+    "hint": "Se ponen en las manos para no dejar marcas.",
+    "data": {
+      "pool": "GUNASTE",
+      "lens": [
+        7
+      ]
+    },
+    "h": "z2awik81u7"
+  },
+  {
+    "id": 135,
+    "type": "acrostico",
+    "theme": "egipcio",
+    "level": 1,
+    "title": "Diario de la excavación",
+    "clue": "El diario de una excavación cuenta el hallazgo de una tumba. Parece un relato corriente, pero fíjate en cómo empieza cada línea.",
+    "hint": "Cinco letras: el cuerpo conservado de un faraón.",
+    "data": [
+      "Mucho antes de que amaneciera, el equipo ya excavaba.",
+      "Once metros bajo la arena apareció una puerta sellada.",
+      "Mientras la abrían, nadie se atrevió a hablar.",
+      "Intacta, en el centro de la sala, esperaba la tumba.",
+      "Al fondo, la luz de una linterna tembló un instante."
+    ],
+    "h": "zivdxss6ta"
+  },
+  {
+    "id": 136,
+    "type": "cerradura",
+    "theme": "alien",
+    "level": 2,
+    "title": "La escotilla trasera",
+    "clue": "La escotilla se abre con tres cifras distintas. El ordenador de la nave guarda los intentos anteriores.",
+    "hint": "Las tres cifras suman 13.",
+    "data": [
+      {
+        "g": "387",
+        "bien": 0,
+        "mal": 1
+      },
+      {
+        "g": "812",
+        "bien": 1,
+        "mal": 0
+      },
+      {
+        "g": "489",
+        "bien": 1,
+        "mal": 0
+      },
+      {
+        "g": "079",
+        "bien": 1,
+        "mal": 0
+      }
+    ],
+    "h": "jw19qnjjx6"
+  },
+  {
+    "id": 137,
+    "type": "espejo",
+    "theme": "policial",
+    "level": 2,
+    "title": "Nota urgente en el espejo",
+    "clue": "Una nota escrita en espejo: el alfabeto está del revés y cada letra ocupa el lugar contrario.",
+    "hint": "Son cinco palabras y la última es ARCHIVO.",
+    "data": "OZ KIFVYZ WVHZKZIVXRL WVO ZIXSREL",
+    "h": "w03zkbnfio"
+  },
+  {
+    "id": 138,
+    "type": "acrostico",
+    "theme": "alien",
+    "level": 3,
+    "title": "Cuaderno de la baliza",
+    "clue": "Un técnico anotó lo que vio una noche junto a la baliza. El texto parece normal, pero guarda un mensaje.",
+    "hint": "Cinco letras: lo que emite una baliza para avisar de algo.",
+    "data": [
+      "Sobre la cresta del monte parpadeó una luz roja.",
+      "El radar no registró ningún objeto en el cielo.",
+      "Nadie en la base supo explicar lo que vieron.",
+      "A medianoche, el parpadeo se repitió tres veces.",
+      "La última vez, desde la ventana, respondió una voz."
+    ],
+    "h": "1nc9zfltv3y"
+  },
+  {
+    "id": 139,
+    "type": "criptico",
+    "theme": "detective",
+    "level": 4,
+    "title": "El contenido del equipaje",
+    "clue": "Otra letra que se cuela dentro de una palabra de juego. Fíjate en cuál es y en dónde cabe.",
+    "data": {
+      "clue": "Accesorio para llevar cosas: bolo con ese dentro",
+      "lens": [
+        5
+      ],
+      "def": "Accesorio para llevar cosas",
+      "kind": "contenedor",
+      "indicator": "dentro",
+      "first": "B",
+      "explain": "LnJvZGVuZXRub2MgZWQgb3NpdmEgbGUgc2UgwrtvcnRuZWTCqyBvc2Ugcm9QIC5PLVMtTE9CIDrCu29sb2LCqyBlZCBvcnRuZWQgKVMgYXJ0ZWwgYWwoIMK7ZXNlwqsgYWwgc2V0ZU0gLsK7c2Fzb2MgcmF2ZWxsIGFyYXAgb2lyb3NlY2Nhwqsgc2UgbsOzaWNpbmlmZWQgYUw="
+    },
+    "h": "19raak9q8wq"
+  },
+  {
+    "id": 140,
+    "type": "morse",
+    "theme": "egipcio",
+    "level": 5,
+    "title": "Ritmo en la última cámara",
+    "clue": "Un golpeteo largo y rítmico llega de la cámara final. Es un mensaje con muchas palabras.",
+    "hint": "Son diez palabras y la primera es EL.",
+    "data": ". .-.. / ... . -.-. .-. . - --- / -.. . .-.. / ..-. .- .-. .- --- -. / . ... - .- / --. ..- .- .-. -.. .- -.. --- / . -. / .-.. .- / ..- .-.. - .. -- .- / -.-. .- -- .- .-. .-",
+    "h": "k8jhnmqw14"
   }
 ]
