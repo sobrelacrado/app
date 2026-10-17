@@ -118,7 +118,7 @@ button:disabled { opacity: .5; cursor: default; }
 
 /* Pestañas */
 .pestanas { display: flex; gap: 6px; margin: 4px 0 6px; }
-.pestanas button { flex: 1 1 0; min-width: 0; background: transparent; color: var(--tinta); border: 1px solid var(--linea); padding: 6px 2px; font-size: 11px; letter-spacing: .5px; }
+.pestanas button { flex: 1 1 0; min-width: 0; background: transparent; color: var(--tinta); border: 1px solid var(--linea); padding: 6px 2px; font-size: 10px; letter-spacing: .2px; }
 .pestanas button.activa { background: var(--tinta); color: var(--papel); }
 
 /* Estadísticas */
