@@ -135,11 +135,13 @@ export const nextKey = (key, n = 1) => {
   return `${t.getUTCFullYear()}-${String(t.getUTCMonth() + 1).padStart(2, '0')}-${String(t.getUTCDate()).padStart(2, '0')}`
 }
 
-// Días seguidos resueltos hasta hoy. Si hoy aún no se ha resuelto, la racha de ayer sigue viva.
+// Días seguidos resueltos hasta hoy, cada uno en su día (los jugados desde el archivo, "late", no cuentan).
+// Si hoy aún no se ha resuelto, la racha de ayer sigue viva.
+const onTimeDone = (d) => !!d?.done && !d.late
 export function streakOf(days, todayKey) {
-  let k = days[todayKey]?.done ? todayKey : nextKey(todayKey, -1)
+  let k = onTimeDone(days[todayKey]) ? todayKey : nextKey(todayKey, -1)
   let n = 0
-  while (days[k]?.done) { n++; k = nextKey(k, -1) }
+  while (onTimeDone(days[k])) { n++; k = nextKey(k, -1) }
   return n
 }
 

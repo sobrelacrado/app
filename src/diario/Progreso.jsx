@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { fmtTime } from './ciphers.js'
 import { TYPE_NAME } from './games.jsx'
 import Avisos from './Avisos.jsx'
+import { fmtMult, rankOf, todayMultiplier, totalPoints } from './points.js'
 import { diarioStats } from './stats.js'
 import PUZZLES from './puzzles.js'
 
@@ -12,11 +13,21 @@ export default function Progreso({ days, todayKey, user, status, onLogin, onLogo
   const s = diarioStats(days, todayKey, PUZZLES)
   const [sure, setSure] = useState(false)
   const maxAvg = Math.max(1, ...s.types.map((t) => t.avgMs))
+  const pts = totalPoints(days)
+  const rank = rankOf(pts)
+  const mult = todayMultiplier(days, todayKey)
   const big = (v, label) => <div className="dr-cifra"><b>{v}</b><small>{label}</small></div>
 
   return (
     <article className="dr-carta tema-detective">
       <h1>Mi progreso</h1>
+
+      <div className="dr-rango">
+        <p><b>{rank.name}</b> · ⭐ {pts} puntos</p>
+        <div className="dr-barra-rango" role="img" aria-label={`Progreso hacia el siguiente rango: ${Math.round(rank.fraction * 100)} %`}><i style={{ width: `${Math.round(rank.fraction * 100)}%` }} /></div>
+        <small>{rank.next ? `Te faltan ${rank.toNext} puntos para ${rank.next}.` : 'Has llegado al rango más alto.'}</small>
+        <small>Tu racha multiplica los puntos de hoy: <b>{fmtMult(mult)}</b>{mult < 2 ? ' (sube 0,1 por cada día seguido, hasta ×2)' : ' (el máximo)'}.</small>
+      </div>
 
       <div className="dr-cifras-grid">
         {big(`🔥 ${s.streak}`, 'racha actual')}
@@ -30,7 +41,7 @@ export default function Progreso({ days, todayKey, user, status, onLogin, onLogo
       <h2 className="dr-sub">Últimas 4 semanas</h2>
       <div className="dr-cal" role="img" aria-label={`${s.calendar.filter((c) => c.state === 'done').length} días resueltos en las últimas 4 semanas`}>
         {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((d) => <span className="dr-dia-sem" key={d}>{d}</span>)}
-        {s.calendar.map((c) => <span key={c.key} className={`dr-dia ${c.state}`} title={c.key}>{c.state === 'done' ? '✓' : ''}</span>)}
+        {s.calendar.map((c) => <span key={c.key} className={`dr-dia ${c.state}`} title={c.key}>{c.state === 'done' ? '✓' : c.state === 'late' ? '↺' : ''}</span>)}
       </div>
 
       {s.types.length > 0 && (

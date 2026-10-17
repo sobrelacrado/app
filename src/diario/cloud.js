@@ -20,7 +20,7 @@ export async function pullDays(uid) {
   const out = {}
   snap.forEach((d) => {
     const x = d.data()
-    out[d.id] = { done: !!x.done, tries: x.tries ?? 0, hint: !!x.hint, ms: x.ms ?? 0, type: x.type, level: x.level, n: x.n }
+    out[d.id] = { done: !!x.done, tries: x.tries ?? 0, hint: !!x.hint, ms: x.ms ?? 0, type: x.type, level: x.level, n: x.n, ...(x.late ? { late: true } : {}) }
   })
   return out
 }
@@ -29,6 +29,7 @@ export async function pullDays(uid) {
 export function pushDay(uid, key, d) {
   const data = { done: !!d.done, tries: d.tries ?? 0, hint: !!d.hint, ms: Math.min(Math.round(d.ms ?? 0), 86400000), type: d.type, level: d.level, at: serverTimestamp() }
   if (Number.isInteger(d.n)) data.n = d.n
+  if (d.late) data.late = true // resuelto desde el archivo: no suma racha y da la mitad de puntos
   return setDoc(doc(days(uid), key), data)
 }
 

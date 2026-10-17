@@ -293,3 +293,107 @@ test('Morse sonoro: el mensaje de cada acertijo tiene la duración esperada', as
     assert.ok(totalMs(signals) < 5 * 60000, 'dura menos de 5 minutos') // incluso el más largo
   }
 })
+
+// ---------- Puntos, racha y archivo ----------
+const D = (o = {}) => ({ done: true, tries: 0, hint: false, ms: 60000, level: 3, ...o })
+
+test('puntos: 10 por nivel, +50 % a la primera, +25 % sin pista', async () => {
+  const { dayPoints } = await import('../src/diario/points.js')
+  assert.equal(dayPoints(D(), 0).total, 53) // 30 × 1,75 = 52,5 -> 53
+  assert.equal(dayPoints(D({ level: 1 }), 0).total, 18) // 10 × 1,75 = 17,5 -> 18
+  assert.equal(dayPoints(D({ tries: 2 }), 0).total, 38) // 30 × 1,25 = 37,5 -> 38
+  assert.equal(dayPoints(D({ hint: true }), 0).total, 45) // 30 × 1,5
+  assert.equal(dayPoints(D({ tries: 1, hint: true, level: 5 }), 0).total, 50) // solo el nivel
+  const b = dayPoints(D(), 0)
+  assert.deepEqual([b.base, b.firstTry, b.noHint, b.multiplier, b.late], [30, true, true, 1, false])
+})
+
+test('puntos: la racha multiplica (+0,1 por día, tope ×2)', async () => {
+  const { dayPoints, multiplier, fmtMult } = await import('../src/diario/points.js')
+  assert.equal(multiplier(0), 1)
+  assert.equal(multiplier(3), 1.3)
+  assert.equal(multiplier(10), 2)
+  assert.equal(multiplier(50), 2)
+  assert.equal(multiplier(-4), 1)
+  assert.equal(dayPoints(D({ level: 2 }), 3).total, Math.round(Math.round(20 * 1.75) * 1.3)) // 35 × 1,3 = 45,5 -> 46
+  assert.equal(dayPoints(D({ level: 5 }), 99).total, Math.round(88 * 2)) // 50 × 1,75 = 87,5 -> 88 × 2
+  assert.equal(fmtMult(1.3), '×1,3')
+  assert.equal(fmtMult(2), '×2')
+})
+
+test('puntos: lo jugado desde el archivo da la mitad, sin multiplicador', async () => {
+  const { dayPoints } = await import('../src/diario/points.js')
+  const normal = dayPoints(D(), 0)
+  const arch = dayPoints(D({ late: true }), 9) // aunque la racha sea alta
+  assert.equal(arch.late, true)
+  assert.equal(arch.multiplier, 1)
+  assert.equal(arch.total, Math.round(normal.subtotal / 2))
+})
+
+test('racha: los días jugados desde el archivo no la suman ni la mantienen', async () => {
+  const { streakBefore, totalPoints, todayMultiplier } = await import('../src/diario/points.js')
+  const days = { '2026-10-12': D(), '2026-10-13': D(), '2026-10-14': D({ late: true }), '2026-10-15': D(), '2026-10-16': D() }
+  assert.equal(streakOf(days, '2026-10-16'), 2) // 15 y 16; el 14 es de archivo
+  assert.equal(streakBefore(days, '2026-10-16'), 1)
+  assert.equal(streakBefore(days, '2026-10-13'), 1)
+  assert.equal(streakBefore(days, '2026-10-15'), 0) // el 14 no cuenta
+  assert.equal(todayMultiplier(days, '2026-10-17'), 1.2)
+  assert.equal(bestStreak(days), 2)
+  // puntos: 12 -> ×1; 13 -> ×1,1; 14 (archivo) -> mitad; 15 -> ×1; 16 -> ×1,1
+  const p = (m) => Math.round(53 * m)
+  assert.equal(totalPoints(days), p(1) + p(1.1) + Math.round(53 / 2) + p(1) + p(1.1))
+  // rellenar un hueco desde el archivo no reconecta la racha
+  const hueco = { '2026-10-12': D(), '2026-10-14': D(), '2026-10-13': D({ late: true }) }
+  assert.equal(streakOf(hueco, '2026-10-14'), 1)
+})
+
+test('puntos: rangos', async () => {
+  const { rankOf, RANKS } = await import('../src/diario/points.js')
+  assert.equal(rankOf(0).name, 'Aprendiz')
+  assert.equal(rankOf(199).name, 'Aprendiz')
+  assert.equal(rankOf(200).name, 'Ayudante')
+  assert.equal(rankOf(199).toNext, 1)
+  assert.equal(rankOf(100).fraction, 0.5)
+  assert.equal(rankOf(7000).name, 'Maestro del código')
+  assert.equal(rankOf(99999).next, null)
+  assert.equal(rankOf(99999).fraction, 1)
+  assert.ok(RANKS.every((r, i) => i === 0 || r.from > RANKS[i - 1].from))
+})
+
+test('calendario de 4 semanas distingue lo resuelto en su día y desde el archivo', () => {
+  const cal = calendar({ '2026-10-15': D(), '2026-10-14': D({ late: true }) }, '2026-10-16')
+  const st = (k) => cal.find((c) => c.key === k).state
+  assert.equal(st('2026-10-15'), 'done')
+  assert.equal(st('2026-10-14'), 'late')
+  assert.equal(st('2026-10-16'), 'today')
+  assert.equal(st('2026-10-13'), 'miss')
+})
+
+test('archivo: meses desde el primer día hasta hoy, alineados por semana', async () => {
+  const { archiveMonths, archiveSummary, dayState } = await import('../src/diario/archive.js')
+  const days = { '2026-10-13': D(), '2026-10-14': D({ late: true }), '2026-10-15': { done: false, tries: 1, hint: false, ms: 0 } }
+  const m = archiveMonths(days, '2026-11-10')
+  assert.deepEqual(m.map((x) => x.key), ['2026-11', '2026-10']) // el más reciente primero
+  assert.equal(m[1].label, 'Octubre 2026')
+  assert.equal(m[1].cells.length, 31)
+  assert.equal(m[1].blanks, 3) // el 1 de octubre de 2026 fue jueves (lunes = 0)
+  assert.equal(m[0].blanks, 6) // el 1 de noviembre fue domingo
+  const oct = (d) => m[1].cells[d - 1].state
+  assert.equal(oct(5), 'before') // antes del primer día (12/10)
+  assert.equal(oct(12), 'miss')
+  assert.equal(oct(13), 'done')
+  assert.equal(oct(14), 'late')
+  assert.equal(oct(15), 'started')
+  assert.equal(m[0].cells[9].state, 'today') // 10 de noviembre
+  assert.equal(m[0].cells[10].state, 'future')
+  assert.equal(dayState({}, '2026-10-12', '2026-10-12'), 'today')
+  assert.deepEqual(archiveSummary(days, '2026-10-16'), { done: 2, total: 4 })
+  assert.deepEqual(archiveSummary({}, '2026-10-12'), { done: 0, total: 0 })
+})
+
+test('mezcla móvil/nube: lo resuelto en la nube manda también en la marca "late"', () => {
+  const r = mergeDays({ a: D({ late: true }) }, { a: D() })
+  assert.equal(r.merged.a.late, undefined)
+  assert.deepEqual(mergeDays({}, { a: D({ late: true }) }).merged.a.late, true)
+  assert.deepEqual(mergeDays({ a: D({ late: true }) }, {}).upload, ['a'])
+})

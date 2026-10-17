@@ -4,9 +4,11 @@ import { showText } from './criptico.js'
 import { GAMES, HOWTO, TYPE_NAME } from './games.jsx'
 import './diario.css'
 import PUZZLES from './puzzles.js'
+import Archivo from './Archivo.jsx'
 import Avisos from './Avisos.jsx'
 import Casos from './Casos.jsx'
 import Progreso from './Progreso.jsx'
+import { dayPoints, fmtMult, streakBefore, totalPoints } from './points.js'
 import { mergeDays } from './stats.js'
 
 const SITE_URL = 'https://app-sobre-lacrado.web.app/diario'
@@ -22,31 +24,37 @@ const hasFlag = () => { try { return localStorage.getItem(LOGIN_FLAG) === '1' } 
 // onExit: cuando el Diario se abre desde dentro del panel de administración, botón para volver a él.
 export default function Diario({ onExit }) {
   const [key, setKey] = useState(dateKey)
+  const [viewKey, setViewKey] = useState(null) // null = el acertijo de hoy; si no, un día del archivo
   const [store, setStore] = useState(load)
   const [wrong, setWrong] = useState(0) // fallos de esta visita, para animar el aviso
   const [copied, setCopied] = useState(false)
   const [now, setNow] = useState(Date.now)
-  const [vista, setVista] = useState('hoy') // 'hoy' | 'progreso' | 'casos'
+  const [vista, setVista] = useState('hoy') // 'hoy' | 'archivo' | 'progreso' | 'casos'
   const [user, setUser] = useState(null) // cuenta de Google (null = sin sesión)
   const [status, setStatus] = useState('') // '' | 'entrando' | 'sincronizando' | 'error'
   const cloud = useRef(null) // módulo de la nube, se carga solo cuando hace falta
   const storeRef = useRef(store)
   storeRef.current = store
 
-  const n = dayIndex(key) + 1
-  const puzzle = puzzleFor(PUZZLES, key)
+  const k = viewKey ?? key // día que se está jugando (hoy o uno del archivo)
+  const late = k !== key // jugado desde el archivo: no suma racha y da la mitad de puntos
+  const n = dayIndex(k) + 1
+  const puzzle = puzzleFor(PUZZLES, k)
   const days = store.days ?? {}
-  const day = days[key] ?? { tries: 0, hint: false, done: false, ms: 0 }
+  const day = days[k] ?? { tries: 0, hint: false, done: false, ms: 0 }
+  const act = useRef(null) // día y acertijo activos para el reloj y las escrituras (que viven en funciones antiguas)
+  act.current = { k, puzzle }
 
   // sync = false para el reloj (cada segundo): lo demás (pista, fallo, resuelto) se guarda también en la cuenta.
   const update = (patch, sync = true) => {
+    const { k: kk, puzzle: pz } = act.current
     const cur = storeRef.current
-    const d = { tries: 0, hint: false, done: false, ms: 0, type: puzzle.type, level: puzzle.level, ...(cur.days ?? {})[key], ...patch }
-    const next = { ...cur, days: { ...(cur.days ?? {}), [key]: d } }
+    const d = { tries: 0, hint: false, done: false, ms: 0, type: pz.type, level: pz.level, ...(cur.days ?? {})[kk], ...patch }
+    const next = { ...cur, days: { ...(cur.days ?? {}), [kk]: d } }
     storeRef.current = next
     setStore(next)
     save(next)
-    if (sync && userRef.current && cloud.current) cloud.current.pushDay(userRef.current.uid, key, d).catch(() => setStatus('error'))
+    if (sync && userRef.current && cloud.current) cloud.current.pushDay(userRef.current.uid, kk, d).catch(() => setStatus('error'))
   }
 
   // Cuenta: se carga al abrir si ya había entrado antes (o si el Diario va dentro del panel); al detectar sesión se mezcla el progreso.
@@ -89,9 +97,9 @@ export default function Diario({ onExit }) {
   useEffect(() => {
     const id = setInterval(() => {
       setNow(Date.now())
-      const k = dateKey()
-      if (k !== key) { setKey(k); return }
-      const d = (storeRef.current.days ?? {})[key]
+      const hoy = dateKey()
+      if (hoy !== key) { setKey(hoy); setViewKey((v) => (v === hoy ? null : v)); return }
+      const d = (storeRef.current.days ?? {})[act.current.k]
       if (document.visibilityState === 'visible' && !d?.done) update({ ms: (d?.ms ?? 0) + 1000 }, false)
     }, 1000)
     return () => clearInterval(id)
@@ -100,15 +108,18 @@ export default function Diario({ onExit }) {
 
   const check = (answer) => {
     if (day.done) return
-    if (isCorrect(puzzle, answer)) update({ done: true, ans: answer.toUpperCase().trim().replace(/\s+/g, ' '), n })
+    if (isCorrect(puzzle, answer)) update({ done: true, ans: answer.toUpperCase().trim().replace(/\s+/g, ' '), n, ...(late ? { late: true } : {}) })
     else { update({ tries: day.tries + 1 }); setWrong((w) => w + 1) }
   }
 
   // La explicación sale abierta la primera vez que aparece cada tipo; después queda plegada (se abre con un toque).
   const [howOpen, setHowOpen] = useState(() => !(store.seen ?? []).includes(puzzle.type))
+  useEffect(() => setWrong(0), [k])
   useEffect(() => {
     const cur = storeRef.current
-    if ((cur.seen ?? []).includes(puzzle.type)) return
+    const first = !(cur.seen ?? []).includes(puzzle.type)
+    setHowOpen(first)
+    if (!first) return
     const next = { ...cur, seen: [...(cur.seen ?? []), puzzle.type] }
     storeRef.current = next
     setStore(next)
@@ -116,6 +127,8 @@ export default function Diario({ onExit }) {
   }, [puzzle.type])
 
   const streak = streakOf(days, key)
+  const pts = totalPoints(days)
+  const gained = day.done ? dayPoints(day, streakBefore(days, k)) : null
   const solvedTotal = Object.values(days).filter((d) => d.done).length
   const Game = GAMES[puzzle.type]
   const multi = puzzle.type === 'criptico' // el críptico da la ayuda por pasos (0-3)
@@ -141,22 +154,35 @@ export default function Diario({ onExit }) {
       <header className="dr-cab">
         {onExit && <button type="button" className="suave dr-volver" onClick={onExit}>← Panel</button>}
         <div className="logo">SOBRE LACRADO</div>
-        <div className="dr-racha" title="Días seguidos resueltos">🔥 {streak}</div>
+        <div className="dr-racha" title="Racha de días seguidos · puntos">🔥 {streak} · ⭐ {pts}</div>
       </header>
 
       <nav className="dr-tabs" aria-label="Secciones">
-        <button type="button" className={vista === 'hoy' ? 'activa' : ''} onClick={() => setVista('hoy')}>Hoy</button>
+        <button type="button" className={vista === 'hoy' && !viewKey ? 'activa' : ''} onClick={() => { setViewKey(null); setVista('hoy') }}>Hoy</button>
+        <button type="button" className={vista === 'archivo' || (vista === 'hoy' && viewKey) ? 'activa' : ''} onClick={() => setVista('archivo')}>Archivo</button>
         <button type="button" className={vista === 'progreso' ? 'activa' : ''} onClick={() => setVista('progreso')}>
-          Mi progreso{user ? ' ✓' : ''}
+          Progreso{user ? ' ✓' : ''}
         </button>
-        <button type="button" className={vista === 'casos' ? 'activa' : ''} onClick={() => setVista('casos')}>Mis casos</button>
+        <button type="button" className={vista === 'casos' ? 'activa' : ''} onClick={() => setVista('casos')}>Casos</button>
       </nav>
+
+      {vista === 'archivo' && <Archivo days={days} todayKey={key} onPick={(dayKey) => { setViewKey(dayKey); setVista('hoy') }} />}
 
       {vista === 'progreso' && (
         <Progreso days={days} todayKey={key} user={user} status={status} onLogin={doLogin} onLogout={doLogout} onDelete={doDelete} />
       )}
 
       {vista === 'casos' && <Casos user={user} cloud={cloud.current} status={status} onLogin={doLogin} />}
+
+      {vista === 'hoy' && late && (
+        <div className="dr-archivo-aviso">
+          <p>📁 Archivo · <b>{new Date(k + 'T12:00:00').toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' })}</b>. Aquí no sube la racha y los puntos son la mitad.</p>
+          <div>
+            <button type="button" className="suave" onClick={() => setVista('archivo')}>← Archivo</button>
+            <button type="button" className="suave" onClick={() => setViewKey(null)}>Ir a hoy</button>
+          </div>
+        </div>
+      )}
 
       {vista === 'hoy' && (
       <article className={`dr-carta tema-${puzzle.theme}`}>
@@ -183,8 +209,24 @@ export default function Diario({ onExit }) {
             </p>
             <button type="button" onClick={share}>{copied ? '¡Copiado!' : 'Compartir resultado'}</button>
             {multi && <div className="dr-explica"><b>Cómo se resolvía</b><p>{showText(puzzle.data.explain)}</p></div>}
-            <p className="dr-proximo">Próximo acertijo en <b>{countdown}</b></p>
-            <Avisos compact />
+            {gained && (
+              <div className="dr-puntos" role="status">
+                <b>+{gained.total} puntos</b>
+                <small>
+                  {gained.late
+                    ? `Archivo: nivel ${puzzle.level} (${gained.base}) ${gained.firstTry ? '· a la primera ' : ''}${gained.noHint ? '· sin pista ' : ''}→ mitad`
+                    : [`nivel ${puzzle.level}: ${gained.base}`, gained.firstTry && 'a la primera +50 %', gained.noHint && 'sin pista +25 %', gained.multiplier > 1 && `racha ${fmtMult(gained.multiplier)}`].filter(Boolean).join(' · ')}
+                </small>
+              </div>
+            )}
+            {late
+              ? <button type="button" className="suave" onClick={() => setVista('archivo')}>← Volver al archivo</button>
+              : (
+                <>
+                  <p className="dr-proximo">Próximo acertijo en <b>{countdown}</b></p>
+                  <Avisos compact />
+                </>
+              )}
             {BRAND_URL && (
               <a className="boton dr-cta" href={BRAND_URL} target="_blank" rel="noopener noreferrer">
                 ¿Te gusta descifrar? Síguenos en Instagram @sobrelacrado
@@ -193,7 +235,7 @@ export default function Diario({ onExit }) {
           </div>
         ) : (
           <>
-            <Game puzzle={puzzle} onCheck={check} key={key} hintStep={step} />
+            <Game puzzle={puzzle} onCheck={check} key={k} hintStep={step} />
             <p className={`dr-aviso ${wrong ? 'dr-fallo' : ''}`} key={wrong} role="status">
               {wrong ? 'Esa no es. Vuelve a mirarlo.' : ''}
             </p>

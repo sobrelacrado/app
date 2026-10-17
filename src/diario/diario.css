@@ -178,3 +178,35 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-audio { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0; }
 .dr-audio button { flex: 1 1 auto; }
 .dr-vibrar { flex: 1 1 100%; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+
+/* Archivo, puntos y rango */
+.dr-racha { white-space: nowrap; }
+.dr-dia.late { background: #7fb592; color: #fff; }
+.dr-dia.started { background: rgba(185, 130, 42, .25); }
+.dr-izq { text-align: left; line-height: 1.5; margin-bottom: 8px; }
+.dr-mes { margin-top: 14px; }
+.dr-arch .dr-dia { padding: 0; border: 0; font: inherit; font-weight: 700; font-size: 13px; flex-direction: column; gap: 0; line-height: 1.1; color: inherit; }
+.dr-arch .dr-dia i { font-style: normal; font-size: 11px; }
+.dr-arch .dr-dia.done, .dr-arch .dr-dia.late { color: #fff; }
+.dr-arch .dr-dia.before { opacity: .25; background: transparent; }
+.dr-arch button.dr-dia { cursor: pointer; }
+.dr-arch .dr-dia.today { outline: 2px solid currentColor; }
+.dr-archivo-aviso { margin: 0 0 12px; padding: 10px 12px; background: #f3eee2; color: #1d1d1d; border-radius: 8px; }
+.dr-archivo-aviso p { margin: 0 0 8px; font-size: 14px; line-height: 1.4; }
+.dr-archivo-aviso div { display: flex; gap: 8px; }
+.dr-archivo-aviso button { flex: 1; }
+.dr-puntos { margin: 12px 0 6px; padding: 8px 10px; background: rgba(29, 106, 58, .12); border-radius: 8px; text-align: center; }
+.dr-puntos b { display: block; font-size: 20px; }
+.dr-puntos small { display: block; margin-top: 2px; font-size: 12px; opacity: .85; line-height: 1.4; }
+.dr-rango { margin: 4px 0 12px; padding: 10px 12px; background: rgba(0, 0, 0, .06); border-radius: 8px; }
+.dr-rango p { margin: 0 0 6px; font-size: 16px; }
+.dr-rango small { display: block; margin-top: 6px; font-size: 12px; line-height: 1.4; opacity: .85; }
+.dr-barra-rango { height: 8px; background: rgba(0, 0, 0, .12); border-radius: 4px; overflow: hidden; }
+.dr-barra-rango i { display: block; height: 100%; background: #1d6a3a; border-radius: 4px; }
+.dr-tabs button { font-size: 11px; letter-spacing: .02em; }
+
+/* Archivo: la rejilla no puede ensancharse más que la tarjeta y los botones de día no heredan el tamaño de los botones normales */
+.dr-cal.dr-arch { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.dr-arch .dr-dia { min-width: 0; min-height: 0; width: 100%; box-sizing: border-box; overflow: hidden; letter-spacing: 0; text-transform: none; color: inherit; }
+.dr-arch .dr-dia.miss { background: rgba(0, 0, 0, .08); }
+.dr-arch .dr-dia.done, .dr-arch .dr-dia.late { color: #fff; }

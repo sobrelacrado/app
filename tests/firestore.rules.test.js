@@ -367,3 +367,10 @@ test('Diario: el tipo críptico se puede guardar y uno inventado no', async () =
   await assertSucceeds(setDoc(doc(ana, 'users/ana/diario/2026-10-17'), dia({ type: 'criptico', level: 4 })))
   await assertFails(setDoc(doc(ana, 'users/ana/diario/2026-10-18'), dia({ type: 'inventado' })))
 })
+test('Diario: la marca "late" (resuelto desde el archivo) es opcional y solo booleana', async () => {
+  const ana = persona('ana')
+  await assertSucceeds(setDoc(doc(ana, 'users/ana/diario/2026-10-17'), dia({ late: true })))
+  await assertSucceeds(setDoc(doc(ana, 'users/ana/diario/2026-10-18'), dia()))
+  await assertFails(setDoc(doc(ana, 'users/ana/diario/2026-10-19'), dia({ late: 'si' })))
+  await assertFails(setDoc(doc(ana, 'users/ana/diario/2026-10-20'), dia({ puntos: 9999 }))) // los puntos no se guardan
+})

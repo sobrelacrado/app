@@ -3,7 +3,7 @@ import { dayIndex, nextKey, puzzleFor, streakOf } from './ciphers.js'
 
 // Mejor racha de días seguidos resueltos de todo el historial.
 export function bestStreak(days) {
-  const keys = Object.keys(days).filter((k) => days[k]?.done).sort()
+  const keys = Object.keys(days).filter((k) => days[k]?.done && !days[k].late).sort() // los del archivo no cuentan
   let best = 0, run = 0, prev = null
   for (const k of keys) {
     run = prev && nextKey(prev) === k ? run + 1 : 1
@@ -14,13 +14,13 @@ export function bestStreak(days) {
 }
 
 // Cuatro semanas completas (lunes a domingo) que terminan en la semana de hoy: [{ key, state }]
-// state: 'done' (resuelto) · 'miss' (pasó sin resolver) · 'today' (hoy, sin resolver) · 'future'
+// state: 'done' (resuelto en su día) · 'late' (resuelto desde el archivo) · 'miss' (pasó sin resolver) · 'today' (hoy, sin resolver) · 'future'
 export function calendar(days, todayKey, weeks = 4) {
   const dow = ((dayIndex(todayKey) % 7) + 7) % 7 // 0 = lunes (DAY_ONE es lunes)
   const first = nextKey(todayKey, -(dow + 7 * (weeks - 1)))
   return Array.from({ length: weeks * 7 }, (_, i) => {
     const key = nextKey(first, i)
-    const state = days[key]?.done ? 'done' : key === todayKey ? 'today' : key > todayKey ? 'future' : 'miss'
+    const state = days[key]?.done ? (days[key].late ? 'late' : 'done') : key === todayKey ? 'today' : key > todayKey ? 'future' : 'miss'
     return { key, state }
   })
 }
@@ -58,7 +58,12 @@ export function mergeDays(local = {}, remote = {}) {
     const l = local[key], r = remote[key]
     if (!l) { merged[key] = r; continue }
     if (!r) { merged[key] = l; upload.push(key); continue }
-    if (r.done) { merged[key] = { ...l, ...r }; continue } // resuelto en la nube: manda la nube
+    if (r.done) { // resuelto en la nube: manda la nube (también si fue en su día o desde el archivo)
+      const m = { ...l, ...r }
+      if (!r.late) delete m.late
+      merged[key] = m
+      continue
+    }
     if (l.done) { merged[key] = l; upload.push(key); continue } // resuelto solo en el móvil: se sube
     // ninguno resuelto: se conservan los fallos y la pista de ambos
     const m = { ...l, ...r, hint: !!(l.hint || r.hint), tries: Math.max(l.tries ?? 0, r.tries ?? 0) }

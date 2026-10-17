@@ -127,7 +127,7 @@ service cloud.firestore {
       allow delete: if request.auth != null && request.auth.uid == uid;
 
       function isValidDiaryDay(d) {
-        return d.keys().hasOnly(['done', 'tries', 'hint', 'ms', 'type', 'level', 'n', 'at'])
+        return d.keys().hasOnly(['done', 'tries', 'hint', 'ms', 'type', 'level', 'n', 'late', 'at'])
           && d.keys().hasAll(['done', 'tries', 'hint', 'ms', 'type', 'level', 'at'])
           && d.done is bool
           && d.hint is bool
@@ -136,6 +136,7 @@ service cloud.firestore {
           && d.type in ['cesar', 'morse', 'teclado', 'cerradura', 'anagrama', 'acrostico', 'simbolos', 'espejo', 'criptico']
           && d.level is int && d.level >= 1 && d.level <= 5
           && (!('n' in d) || d.n is int)
+          && (!('late' in d) || d.late is bool)
           && d.at == request.time;
       }
     }
