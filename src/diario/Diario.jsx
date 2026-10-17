@@ -195,7 +195,7 @@ export default function Diario({ onExit }) {
         <p className="dr-pista">{puzzle.clue}</p>
 
         <details className="dr-como" open={howOpen} onToggle={(e) => setHowOpen(e.currentTarget.open)}>
-          <summary>Cómo se juega</summary>
+          <summary>¿Cómo se juega?</summary>
           <p>{HOWTO[puzzle.type]}</p>
         </details>
 

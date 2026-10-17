@@ -16,7 +16,6 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-como { margin: 0 0 6px; }
 .dr-como summary { display: inline-flex; align-items: center; gap: 6px; list-style: none; cursor: pointer; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 5px 12px; border: 1px solid currentColor; border-radius: 999px; opacity: .85; }
 .dr-como summary::-webkit-details-marker { display: none; }
-.dr-como summary::before { content: '?'; font-weight: 700; }
 .dr-como p { margin: 10px 0 2px; padding: 12px 14px; font-size: 14px; line-height: 1.6; background: rgba(0, 0, 0, .06); border-radius: 6px; }
 .dr-juego { margin-top: 18px; padding-top: 20px; border-top: 1px dashed currentColor; }
 .dr-carta button { background: var(--t-etq-bg); color: var(--t-etq-color); border-color: var(--t-etq-bg); font-family: var(--t-titulo); width: 100%; margin-top: 16px; min-height: 48px; }
