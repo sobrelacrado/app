@@ -63,6 +63,7 @@ export default function Diario({ onExit }) {
   const loadCloud = async () => {
     if (cloud.current) return cloud.current
     cloud.current = await import('./cloud.js')
+    cloud.current.finishRedirect().catch(() => setStatus('error'))
     cloud.current.watchUser(async (u) => {
       userRef.current = u
       setUser(u)
@@ -89,6 +90,7 @@ export default function Diario({ onExit }) {
   useEffect(() => { if (onExit || hasFlag()) loadCloud().catch(() => {}) }, []) // eslint-disable-line react-hooks/exhaustive-deps
   const doLogin = async () => {
     setStatus('entrando')
+    flag(true) // si se entra por redirección (iPhone), al volver hay que cargar la cuenta aunque aún no haya sesión
     try { await (await loadCloud()).login(); setStatus('') } catch { setStatus('error') }
   }
   const doLogout = async () => { await cloud.current?.logout(); flag(false); setUser(null); userRef.current = null; setStatus('') }

@@ -1,16 +1,22 @@
 // Cuenta de jugador y progreso del Diario en la nube. Se carga solo cuando hace falta (no pesa en la primera pantalla).
-import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
+import { GoogleAuthProvider, getRedirectResult, onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut } from 'firebase/auth'
 import { collection, deleteDoc, deleteField, doc, getDoc, getDocs, query, serverTimestamp, setDoc, updateDoc, where, writeBatch } from 'firebase/firestore'
 import { auth } from '../auth.js'
 import { db } from '../firebase.js'
 
 export const watchUser = (cb) => onAuthStateChanged(auth, cb)
 
+// En iPhone/iPad la ventana emergente se queda colgada ("Entrando…" sin fin): ahí se entra por redirección, que ahora funciona
+// porque el acceso usa la misma dirección que la web. En el resto se mantiene la ventana emergente.
+const isIOS = () => /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
 export async function login() {
   const provider = new GoogleAuthProvider()
   provider.setCustomParameters({ prompt: 'select_account' })
-  await signInWithPopup(auth, provider)
+  if (isIOS()) await signInWithRedirect(auth, provider)
+  else await signInWithPopup(auth, provider)
 }
+// Al volver de Google (redirección) se completa el acceso; si falla, se lanza el error.
+export const finishRedirect = () => getRedirectResult(auth)
 export const logout = () => signOut(auth)
 
 const days = (uid) => collection(db, 'users', uid, 'diario')
