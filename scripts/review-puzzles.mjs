@@ -7,6 +7,8 @@ import { fileURLToPath } from 'node:url'
 import { DAY_ONE, levelStars, nextKey } from '../src/diario/ciphers.js'
 import { KIND_NAME } from '../src/diario/criptico.js'
 import { loadSources } from './load-sources.mjs'
+import { clueText, coartadaClues } from '../src/diario/coartada.js'
+import { sinVocales } from '../src/diario/codigos.js'
 
 const src = await loadSources()
 const from = Number(process.argv[2] ?? 29)
@@ -14,6 +16,7 @@ const to = Number(process.argv[3] ?? src.length)
 const TYPE_NAME = { // mismos nombres que games.jsx (Node no puede importar archivos .jsx)
   cesar: 'Rueda de César', morse: 'Código Morse', teclado: 'Teclado antiguo', cerradura: 'Cerradura de 3 cifras', anagrama: 'Anagrama',
   acrostico: 'Mensaje escondido', simbolos: 'Alfabeto de símbolos', espejo: 'Alfabeto en espejo', criptico: 'Críptico', vigenere: 'Cifrado Vigenère', golpes: 'Golpes en la pared', interrogatorio: 'El interrogatorio', escitala: 'Escítala', sopa: 'Sopa de letras escondidas',
+  numeros: 'Números a letras', rebus: 'Rebus de emojis', sinvocales: 'Texto sin vocales', intruso: 'El intruso', coartada: 'La coartada', binario: 'Binario a letras',
 }
 const DIAS = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo']
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
@@ -25,12 +28,21 @@ for (let n = from; n <= Math.min(to, src.length); n++) {
   if ((n - 1) % 7 === 0) cards.push(`<h2>Semana ${(n - 1) / 7 + 1}</h2>`)
   const solucion = p.type === 'cesar' ? `${esc(p.text)} <small>(desplazamiento ${p.shift})</small>`
     : p.type === 'vigenere' ? `${esc(p.text)} <small>(clave ${esc(p.key)} · ${p.keyGiven ? 'la clave se enseña' : 'clave secreta, se adivina con la pista'})</small>`
+    : p.type === 'numeros' ? `${esc(p.text)} <small>(${p.mode === 'inverso' ? 'A=26, al revés' : 'A=1'})</small>`
     : p.type === 'escitala' ? `${esc(p.text)} <small>(grosor correcto: ${p.rows} filas)</small>`
     : p.type === 'acrostico' ? `${esc(p.text)} <small>(iniciales de las líneas)</small>` : esc(p.text)
   const cuerpo = p.type === 'sopa'
     ? `<p><b>Pista:</b> ${esc(p.hint)}</p><pre>${sopaBuild(p).rows.join('<br>')}</pre><p><b>Palabras:</b> ${p.words.map((w) => esc(typeof w === 'string' ? w : `${w.w} (${w.c})`)).join(' · ')}</p>`
     : p.type === 'interrogatorio'
     ? `<p><b>Regla:</b> ${esc(p.rule)} · <b>Pista:</b> ${esc(p.hint)}</p><ul>${p.statements.map((st) => `<li><b>${esc(st.by)}:</b> «${esc(st.says)}»</li>`).join('')}</ul>`
+    : p.type === 'rebus'
+    ? `<p class="cripti">${p.parts.map(esc).join(' + ')}</p><p><b>Pista:</b> ${esc(p.hint)}</p>`
+    : p.type === 'intruso'
+    ? `<p><b>Pista:</b> ${esc(p.hint)}</p><p>${p.items.map((x) => esc((x.e ?? '') + ' ' + x.n)).join(' · ')}</p><p><b>Qué tienen en común (menos el intruso):</b> ${esc(p.why)}</p>`
+    : p.type === 'sinvocales'
+    ? `<p><b>Pista:</b> ${esc(p.hint)}</p><p class="cripti">${sinVocales(p.text).map((w) => w.c + ' (' + w.len + ')').join('  ')}</p>`
+    : p.type === 'coartada'
+    ? `<p><b>Pista:</b> ${esc(p.hint)}</p>${p.ordered ? '<p>Salas en orden: ' + p.places.map(esc).join(' → ') + '</p>' : ''}<ul>${coartadaClues(p.people.length, p.solution, !!p.ordered, n).map((c) => '<li>' + esc(clueText(c, p.people, p.places)) + '</li>').join('')}</ul><p><b>Solución completa:</b> ${p.people.map((q, k) => esc(q) + ' → ' + esc(p.places[p.solution[k]])).join(' · ')}</p>`
     : p.type === 'criptico'
     ? `<p class="cripti">${esc(p.cryptic.clue)}</p><p><b>Tipo de juego:</b> ${esc(KIND_NAME[p.cryptic.kind])}</p><p><b>Cómo se resuelve:</b> ${esc(p.cryptic.explain)}</p>`
     : `<p><b>Pista:</b> ${esc(p.hint)}</p>${p.lines ? `<ul>${p.lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ul>` : ''}`

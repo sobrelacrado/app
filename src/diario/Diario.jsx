@@ -254,7 +254,7 @@ export default function Diario({ onExit }) {
           </div>
         ) : (
           <>
-            <Game puzzle={puzzle} onCheck={check} key={k} hintStep={step} />
+            <Game puzzle={puzzle} onCheck={check} key={k} hintStep={step} hinted={!!day.hint} />
             <p className={`dr-aviso ${wrong ? 'dr-fallo' : ''}`} key={wrong} role="status">
               {wrong ? 'Esa no es. Vuelve a mirarlo.' : ''}
             </p>

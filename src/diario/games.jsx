@@ -6,12 +6,14 @@ import { GOLPES_SPEEDS, SQUARE, golpesSignals } from './golpes.js'
 import { MAX_ROWS, MIN_ROWS, escitalaGrid, escitalaRead } from './escitala.js'
 import { sopaLeftover, sopaLine, sopaRead } from './sopa.js'
 import { RULES } from './interrogatorio.js'
+import { BINARY_TABLE, codeWords } from './codigos.js'
 import { SPEEDS, canVibrate, playMorse, playSignals } from './morseSound.js'
 
 export const TYPE_NAME = {
   cesar: 'Rueda de César', morse: 'Código Morse', teclado: 'Teclado antiguo', cerradura: 'Cerradura de 3 cifras',
   anagrama: 'Anagrama', acrostico: 'Mensaje escondido', simbolos: 'Alfabeto de símbolos', espejo: 'Alfabeto en espejo', criptico: 'Críptico',
   vigenere: 'Cifrado Vigenère', golpes: 'Golpes en la pared', interrogatorio: 'El interrogatorio', escitala: 'Escítala', sopa: 'Sopa de letras escondidas',
+  numeros: 'Números a letras', rebus: 'Rebus de emojis', sinvocales: 'Texto sin vocales', intruso: 'El intruso', coartada: 'La coartada', binario: 'Binario a letras',
 }
 export const HOWTO = {
   cesar: 'Cada letra del mensaje se ha movido varios puestos en el alfabeto. Gira la rueda: la fila de dentro te dice qué letra es cada una. Cuando el texto se lea con sentido, pulsa "Es esta".',
@@ -27,6 +29,12 @@ export const HOWTO = {
   escitala: 'Los espartanos enrollaban una tira de cuero en un palo y escribían a lo largo: sin el palo del grosor justo, las letras no tenían sentido. La tira de arriba es el mensaje tal como llega. Con + y − eliges cuántas filas tiene el palo: la tira se enrolla rellenando columna a columna y el mensaje se lee por filas. Cuando el grosor es el correcto, el texto se lee con sentido. Escríbelo.',
   interrogatorio: 'Cada sospechoso hace una declaración, y la regla de arriba dice quién miente y quién dice la verdad. Prueba con cada uno: "¿y si él fuera el culpable?" ¿Cuadran las declaraciones con la regla? Solo uno encaja. Puedes apuntar quién crees que miente. Cuando lo sepas, toca al culpable y acúsalo.',
   vigenere: 'Es como el cifrado de César, pero el desplazamiento cambia en cada letra. Una palabra clave se repite debajo del mensaje (los espacios se saltan) y cada letra de la clave mueve la de arriba: la A no la mueve, la B la mueve 1 puesto, la C 2... Para descifrar hay que retroceder esos puestos. Toca el par de letras de una casilla y la tabla te dice qué letra real es. Ejemplo con la clave SOL: la H se cifra como Z (la S mueve 18 puestos). Si la clave no se da, la historia te describe la palabra: adivínala y escríbela para activar la ayuda.',
+  numeros: 'Cada número es una letra del alfabeto. Con la tabla de arriba sabes qué letra es cada número: rellena las casillas. Los números separados por una barra son palabras distintas.',
+  rebus: 'Cada emoji es una palabra (o una parte de ella). Júntalas y obtendrás la respuesta: puede ser una palabra o varias. Debajo te decimos cuántas letras tiene. Escríbela sin preocuparte por las tildes.',
+  sinvocales: 'A cada palabra le hemos quitado las vocales (A, E, I, O, U) y solo quedan las consonantes. En los niveles fáciles, debajo de cada grupo ves cuántas letras tenía la palabra completa; en los difíciles no, y solo la pista te lo dirá. Piensa qué frase tiene sentido con la historia y escríbela entera.',
+  intruso: 'Entre estas opciones, una no encaja con las demás: todas comparten algo menos una. Descubre qué tienen en común, toca la que sobra y pulsa el botón.',
+  coartada: 'Cada sospechoso estaba en un sitio distinto y no hay dos en el mismo. Las pistas te dicen dónde NO estaba alguien, dónde podía estar y, a veces, quién estaba más cerca de la entrada o junto a quién. Usa la tabla para apuntar (toca una casilla: ✗ = no estaba, ✓ = sí estaba) y cuando lo tengas claro, responde quién estaba en el sitio del crimen.',
+  binario: 'Los ordenadores solo conocen el 0 y el 1. Aquí cada letra se escribe con cinco cifras: la tabla te dice cuál es cada una (A = 00001, B = 00010...). Busca cada grupo en la tabla y rellena las casillas.',
   espejo: 'Aquí el alfabeto está del revés: la A es la Z, la B es la Y... Cada letra del mensaje es su "reflejo". Usa la tabla y escribe el mensaje.',
 }
 
@@ -580,6 +588,124 @@ function Interrogatorio({ puzzle, onCheck }) {
   )
 }
 
+/* ---------- Números a letras ---------- */
+function Numeros({ puzzle, onCheck }) {
+  const { code, mode } = puzzle.data
+  const nums = ALPHA.map((l, i) => [l, mode === 'inverso' ? 26 - i : i + 1])
+  return (
+    <>
+      <div className="dr-numtabla" aria-label="Tabla de números y letras">
+        {nums.map(([l, n]) => <span key={l}><b>{l}</b><small>{n}</small></span>)}
+      </div>
+      <p className="dr-nota">{mode === 'inverso' ? 'Aquí la cuenta va al revés: A = 26 y Z = 1.' : 'A = 1, B = 2... hasta Z = 26.'}</p>
+      <Casillas words={codeWords(code)} onCheck={onCheck} />
+    </>
+  )
+}
+
+/* ---------- Binario a letras ---------- */
+function Binario({ puzzle, onCheck }) {
+  const [sel, setSel] = useState(null)
+  return (
+    <>
+      <div className="dr-bintabla" aria-label="Tabla de letras en binario">
+        {BINARY_TABLE.map(([l, b]) => (
+          <button type="button" key={l} className={'dr-bin ' + (sel === b ? 'dr-sel' : '')} onClick={() => setSel(sel === b ? null : b)}><b>{l}</b><small>{b}</small></button>
+        ))}
+      </div>
+      <Casillas words={codeWords(puzzle.data)} onCheck={onCheck} />
+    </>
+  )
+}
+
+/* ---------- Texto sin vocales ---------- */
+// En los niveles fáciles (1-2) se ve cuántas letras tenía cada palabra; en los difíciles solo si se pide la pista.
+function SinVocales({ puzzle, onCheck, hinted = false }) {
+  const verLargo = puzzle.level <= 2 || hinted
+  return (
+    <>
+      <div className="dr-sinv" aria-label="Palabras sin vocales">
+        {puzzle.data.map((w, i) => <span key={i}><b>{w.c}</b>{verLargo && <small>{w.len} letras</small>}</span>)}
+      </div>
+      {!verLargo && <p className="dr-nota">Aquí no se dice cuántas letras tiene cada palabra: si te atascas, pide la pista.</p>}
+      <CajaRespuesta onCheck={onCheck} label="La frase completa" />
+    </>
+  )
+}
+
+/* ---------- Rebus de emojis ---------- */
+function Rebus({ puzzle, onCheck }) {
+  const { parts, lens } = puzzle.data
+  return (
+    <>
+      <p className="dr-rebus" aria-label="Los emojis">
+        {parts.map((e, i) => <span key={i}>{i > 0 && <i>+</i>}{e}</span>)}
+      </p>
+      <p className="dr-nota">La respuesta tiene {lens.length > 1 ? lens.join(' + ') + ' letras' : lens[0] + ' letras'}.</p>
+      <CajaRespuesta onCheck={onCheck} label="Lo que forman juntos" />
+    </>
+  )
+}
+
+/* ---------- El intruso ---------- */
+function Intruso({ puzzle, onCheck }) {
+  const [sel, setSel] = useState('')
+  return (
+    <>
+      <div className="dr-intr" role="group" aria-label="Opciones">
+        {puzzle.data.map((it) => (
+          <button type="button" key={it.n} className={'dr-intruso ' + (sel === it.n ? 'dr-sel' : '')} aria-pressed={sel === it.n} onClick={() => setSel(it.n)}>
+            {it.e && <span className="dr-emo">{it.e}</span>}<span>{it.n}</span>
+          </button>
+        ))}
+      </div>
+      <button type="button" disabled={!sel} onClick={() => onCheck(sel)}>{sel ? sel + ' es el intruso' : 'Toca el que no encaja'}</button>
+    </>
+  )
+}
+
+/* ---------- La coartada ---------- */
+const COART_MARCAS = ['', '✗', '✓']
+function Coartada({ puzzle, onCheck }) {
+  const { people, places, ordered, clues, ask } = puzzle.data
+  const [marks, setMarks] = useState({})
+  const [sel, setSel] = useState('')
+  const cycle = (k) => setMarks((m) => ({ ...m, [k]: ((m[k] ?? 0) + 1) % 3 }))
+  return (
+    <>
+      {ordered && <p className="dr-nota">Las salas, desde la entrada hacia dentro: {places.join(' → ')}.</p>}
+      <ul className="dr-pistas">
+        {clues.map((c, i) => <li key={i}>{c}</li>)}
+      </ul>
+      <div className="dr-tabla-scroll">
+        <table className="dr-coart" aria-label="Tu cuaderno de apuntes">
+          <thead><tr><th />{places.map((p) => <th key={p}>{p.replace(/^(el|la|los|las) /, '')}</th>)}</tr></thead>
+          <tbody>
+            {people.map((n, r) => (
+              <tr key={n}>
+                <th>{n}</th>
+                {places.map((p, c) => {
+                  const k = r + '-' + c, v = marks[k] ?? 0
+                  return <td key={p}><button type="button" className={'dr-marca m' + v} onClick={() => cycle(k)} aria-label={`${n}, ${p}: ${['sin apuntar', 'no estaba', 'estaba'][v]}`}>{COART_MARCAS[v] || '·'}</button></td>
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="dr-nota">Toca una casilla para apuntar: ✗ no estaba, ✓ estaba (es solo para ti).</p>
+      <p className="dr-pregunta">¿Quién estaba en {places[ask]}?</p>
+      <div className="dr-acusar">
+        {people.map((n) => (
+          <button type="button" key={n} className={'dr-sospechoso ' + (sel === n ? 'dr-sel' : '')} aria-pressed={sel === n} onClick={() => setSel(n)}>{n}</button>
+        ))}
+      </div>
+      <button type="button" disabled={!sel} onClick={() => onCheck(sel)}>{sel ? 'Fue ' + sel : 'Elige a alguien'}</button>
+    </>
+  )
+}
+
 export const GAMES = {
   cesar: Cesar, morse: Morse, teclado: Teclado, cerradura: Cerradura, anagrama: Anagrama, acrostico: Acrostico, simbolos: Simbolos, espejo: Espejo, criptico: Criptico, vigenere: Vigenere, golpes: Golpes, interrogatorio: Interrogatorio, escitala: Escitala, sopa: Sopa,
+  numeros: Numeros, rebus: Rebus, sinvocales: SinVocales, intruso: Intruso, coartada: Coartada, binario: Binario,
 }

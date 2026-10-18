@@ -10,6 +10,8 @@ import { golpesDecode, golpesEncode } from '../src/diario/golpes.js'
 import { sopaBuild } from './sopa-build.mjs'
 import { escitalaFits, escitalaRead, escitalaEncode } from '../src/diario/escitala.js'
 import { validateCase } from '../src/diario/interrogatorio.js'
+import { binarioDecode, binarioEncode, numerosDecode, numerosEncode, sinVocales } from '../src/diario/codigos.js'
+import { clueText, coartadaClues, coartadaSolve, validateCoartada } from '../src/diario/coartada.js'
 
 // Cerradura: elige intentos al azar (siempre los mismos para el mismo acertijo) hasta que solo quede un código posible.
 function lockClues(code, seed) {
@@ -86,6 +88,44 @@ const encode = {
     if (errs.length) throw new Error(`Interrogatorio "${p.title}": ${errs.join('; ')}`)
     return { suspects: p.suspects, statements: p.statements.map(({ by, says }) => ({ by, says })), rule: p.rule }
   },
+  numeros: (p) => {
+    if (!/^[A-Z ]+$/.test(p.text)) throw new Error(`Números "${p.title}": la respuesta solo admite A-Z y espacios`)
+    const mode = p.mode ?? 'directo'
+    const code = numerosEncode(p.text, mode)
+    if (numerosDecode(code, mode) !== p.text) throw new Error(`Números "${p.title}": el código no se deshace bien`)
+    return { code, mode }
+  },
+  binario: (p) => {
+    if (!/^[A-Z ]+$/.test(p.text)) throw new Error(`Binario "${p.title}": la respuesta solo admite A-Z y espacios`)
+    const code = binarioEncode(p.text)
+    if (binarioDecode(code) !== p.text) throw new Error(`Binario "${p.title}": el código no se deshace bien`)
+    return code
+  },
+  sinvocales: (p) => {
+    if (!/^[A-Z ]+$/.test(p.text)) throw new Error(`Sin vocales "${p.title}": la respuesta solo admite A-Z y espacios`)
+    return sinVocales(p.text)
+  },
+  rebus: (p) => {
+    if (!/^[A-Z ]+$/.test(p.text)) throw new Error(`Rebus "${p.title}": la respuesta solo admite A-Z y espacios`)
+    if (!Array.isArray(p.parts) || p.parts.length < 2 || p.parts.length > 4) throw new Error(`Rebus "${p.title}": debe llevar de 2 a 4 emojis (parts)`)
+    return { parts: p.parts, lens: p.text.split(' ').map((w) => w.length) }
+  },
+  intruso: (p, i) => {
+    if (!Array.isArray(p.items) || p.items.length < 5 || p.items.length > 6) throw new Error(`Intruso "${p.title}": debe haber 5 o 6 opciones (items)`)
+    const names = p.items.map((x) => normalize(x.n))
+    if (new Set(names).size !== names.length) throw new Error(`Intruso "${p.title}": hay opciones repetidas`)
+    if (names.filter((n) => n === normalize(p.text)).length !== 1) throw new Error(`Intruso "${p.title}": la respuesta "${p.text}" debe ser una de las opciones`)
+    return shuffled(p.items, i + 1).map(({ e, n }) => (e ? { e, n } : { n }))
+  },
+  coartada: (p, i) => {
+    const errs = validateCoartada(p)
+    if (errs.length) throw new Error(`Coartada "${p.title}": ${errs.join('; ')}`)
+    const n = p.people.length
+    const clues = coartadaClues(n, p.solution, !!p.ordered, i + 1)
+    const sols = coartadaSolve(n, clues)
+    if (sols.length !== 1 || sols[0].join() !== p.solution.join()) throw new Error(`Coartada "${p.title}": las pistas no dejan una única solución`)
+    return { people: p.people, places: p.places, ordered: !!p.ordered, clues: clues.map((c) => clueText(c, p.people, p.places)), ask: p.ask }
+  },
   vigenere: (p) => {
     if (!/^[A-Z ]+$/.test(p.text)) throw new Error(`Vigenère "${p.title}": el texto solo admite A-Z y espacios`)
     if (!/^[A-Z]{3,8}$/.test(p.key ?? '')) throw new Error(`Vigenère "${p.title}": la clave debe ser una palabra de 3 a 8 letras A-Z`)
@@ -120,9 +160,11 @@ src.forEach((p, i) => {
   if (titles.has(p.title)) throw new Error(`Acertijo ${n}: el título "${p.title}" ya existe`)
   titles.add(p.title)
   const key = normalize(p.text)
-  if (answers.has(key)) throw new Error(`Acertijo ${n}: la respuesta "${p.text}" ya existe`)
-  answers.add(key)
-  if (['morse', 'teclado', 'espejo', 'simbolos', 'anagrama', 'vigenere', 'golpes', 'escitala', 'sopa'].includes(p.type) && /[^A-Z ]/.test(p.text)) throw new Error(`Acertijo ${n}: ${p.type} solo admite A-Z y espacios`)
+  if (!['intruso', 'coartada'].includes(p.type)) { // sus respuestas son nombres u objetos que pueden repetirse entre acertijos
+    if (answers.has(key)) throw new Error(`Acertijo ${n}: la respuesta "${p.text}" ya existe`)
+    answers.add(key)
+  }
+  if (['morse', 'teclado', 'espejo', 'simbolos', 'anagrama', 'vigenere', 'golpes', 'escitala', 'sopa', 'numeros', 'binario', 'sinvocales', 'rebus'].includes(p.type) && /[^A-Z ]/.test(p.text)) throw new Error(`Acertijo ${n}: ${p.type} solo admite A-Z y espacios`)
   const words = p.text.split(' ')
   const count = /Son (\w+) palabras/.exec(p.hint ?? '')
   if (count && NUM[count[1]] !== words.length) throw new Error(`Acertijo ${n}: la pista dice ${count[1]} palabras y hay ${words.length}`)

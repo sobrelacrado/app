@@ -7,6 +7,8 @@ import {
   shareText, shuffled, streakOf, vigenereDecode, vigenereEncode, vigenereKeyFor, vigenereLetter,
 } from '../src/diario/ciphers.js'
 import { golpesDecode } from '../src/diario/golpes.js'
+import { binarioDecode, numerosDecode } from '../src/diario/codigos.js'
+import { clueText, coartadaClues, coartadaSolve, validateCoartada } from '../src/diario/coartada.js'
 import { escitalaRead } from '../src/diario/escitala.js'
 import { bestStreak, calendar, diarioStats, mergeDays } from '../src/diario/stats.js'
 import PUZZLES from '../src/diario/puzzles.js'
@@ -52,7 +54,8 @@ test('cada acertijo se resuelve con su solución (necesita el archivo fuente)', 
     const s = SRC[i]
     assert.ok(isCorrect(p, s.text), `acertijo ${i + 1}: la huella no coincide con la solución`)
     assert.ok(p.level >= 1 && p.level <= 5)
-    assert.ok(!JSON.stringify(p).includes(s.text), `acertijo ${i + 1}: la solución está en claro`)
+    // en el intruso y en la coartada la respuesta es una de las opciones que se ven (lo que no se ve es cuál es la buena)
+    if (!['intruso', 'coartada'].includes(s.type)) assert.ok(!JSON.stringify(p).includes(s.text), `acertijo ${i + 1}: la solución está en claro`)
     if (s.type === 'cesar') {
       assert.ok(!/[ÑÁÉÍÓÚ]/.test(s.text), 'César solo admite A-Z')
       assert.ok(isCorrect(p, caesarDecode(p.data, s.shift)))
@@ -65,6 +68,45 @@ test('cada acertijo se resuelve con su solución (necesita el archivo fuente)', 
       else assert.equal(p.data.key, undefined, 'la clave secreta no viaja en claro')
       assert.equal(p.level, 5)
       assert.equal(i % 7, 6, 'solo los domingos')
+    }
+    if (s.type === 'numeros') {
+      assert.ok(isCorrect(p, numerosDecode(p.data.code, p.data.mode)))
+      assert.ok(i % 7 <= 3, 'números entre lunes y jueves (niveles 1-2)')
+      if (p.data.mode === 'inverso') assert.ok(s.level >= 2, 'el modo al revés, desde el nivel 2')
+    }
+    if (s.type === 'binario') {
+      assert.ok(isCorrect(p, binarioDecode(p.data)))
+      assert.ok([4, 5, 6].includes(i % 7), 'binario de viernes a domingo (niveles 3-5)')
+      assert.ok(/^[01 /]+$/.test(p.data))
+    }
+    if (s.type === 'sinvocales') {
+      assert.ok(p.data.every((w) => !/[AEIOU]/.test(w.c) && w.c.length > 0 && w.len >= w.c.length), 'solo consonantes y el largo de la palabra')
+      assert.equal(p.data.map((w) => w.len).reduce((a, b) => a + b, 0), normalize(s.text).length)
+    }
+    if (s.type === 'rebus') {
+      assert.ok(p.data.parts.length >= 2 && p.data.parts.length <= 4)
+      assert.equal(p.data.lens.reduce((a, b) => a + b, 0), normalize(s.text).length)
+      assert.ok(i % 7 <= 3, 'rebus entre lunes y jueves (niveles 1-2)')
+    }
+    if (s.type === 'intruso') {
+      assert.ok(isCorrect(p, s.text), 'la huella es la del intruso')
+      assert.ok(p.data.some((x) => normalize(x.n) === normalize(s.text)), 'el intruso está entre las opciones')
+      assert.ok(p.data.every((x) => Object.keys(x).every((k) => ['e', 'n'].includes(k))), 'no viaja cuál es el intruso ni por qué')
+      assert.ok(s.level >= 1 && s.level <= 5)
+      if (['Zanahoria', 'León', 'Cuchara', 'Casa'].some((x) => normalize(x) === normalize(s.text))) assert.equal(s.level, 1, 'los intrusos de categoría obvia son de nivel 1 (lunes y martes)')
+    }
+    if (s.type === 'coartada') {
+      assert.deepEqual(validateCoartada(s), [])
+      assert.ok(isCorrect(p, s.text), 'la huella es la del culpable')
+      assert.ok([5, 6].includes(i % 7), 'coartada de sábado y domingo (niveles 4-5)')
+      assert.equal(s.people.length, s.level === 4 ? 3 : 4, 'sábado 3 sospechosos, domingo 4')
+      assert.ok(p.data.clues.length >= 3 && p.data.clues.length <= 7)
+      assert.ok(!('solution' in p.data) && !JSON.stringify(p.data).includes('"at"'), 'la solución no viaja')
+      const clues = coartadaClues(s.people.length, s.solution, !!s.ordered, i + 1)
+      const sols = coartadaSolve(s.people.length, clues)
+      assert.equal(sols.length, 1, 'una sola solución posible')
+      assert.deepEqual(clues.map((c) => clueText(c, s.people, s.places)), p.data.clues, 'las pistas de la web son las generadas')
+      assert.equal(s.people[sols[0].indexOf(s.ask)], s.text)
     }
     if (s.type === 'golpes') {
       assert.ok(isCorrect(p, golpesDecode(p.data)))
@@ -464,9 +506,10 @@ test('Vigenère: la letra de clave de cada casilla y la tabla de ayuda', () => {
   assert.equal(vigenereLetter('A', 'B'), 'Z')
 })
 
-test('Vigenère: solo hay acertijos en domingo, con nivel 5, y la clave secreta no viaja en claro', () => {
+test('Vigenère: solo queda el del día 7 (se retiró para el resto), en domingo, con nivel 5, y la clave secreta no viaja en claro', () => {
   const V = PUZZLES.filter((p) => p.type === 'vigenere')
-  assert.ok(V.length >= 16)
+  assert.equal(V.length, 1)
+  assert.equal(PUZZLES.indexOf(V[0]), 6, 'es el domingo 18/10/2026, que ya se jugó')
   PUZZLES.forEach((p, i) => { if (p.type === 'vigenere') { assert.equal(i % 7, 6); assert.equal(p.level, 5) } })
   for (const p of V) {
     assert.ok(/^[A-Z ]+$/.test(p.data.cipher))
@@ -474,7 +517,6 @@ test('Vigenère: solo hay acertijos en domingo, con nivel 5, y la clave secreta 
     assert.equal(typeof p.data.kh, 'string')
     if (p.data.key) assert.equal(p.data.key.length, p.data.len) // clave visible: solo en los de aprender
   }
-  assert.ok(V.filter((p) => p.data.key).length <= 6, 'la mayoría no enseña la clave')
 })
 
 // ---------- Golpes en la pared ----------
@@ -613,4 +655,58 @@ test('Sopa: todas las sopas de la lista se resuelven, cada palabra sale una vez 
     if (SO[i].level === 1) assert.equal(atras, 0, 'nivel 1 sin palabras al revés')
     else assert.ok(atras >= 1, SO[i].title + ': nivel 2-3 con palabras al revés')
   })
+})
+
+// ---------- Tipos nuevos (18/10/2026): números, binario, sin vocales, coartada ----------
+test('Números a letras: A=1 (o A=26 al revés), ida y vuelta y palabras separadas por barra', async () => {
+  const { numerosEncode, numerosDecode, numberOf, letterOf } = await import('../src/diario/codigos.js')
+  assert.equal(numerosEncode('HOLA MUNDO'), '8 15 12 1 / 13 21 14 4 15')
+  assert.equal(numerosDecode('8 15 12 1 / 13 21 14 4 15'), 'HOLA MUNDO')
+  assert.equal(numberOf('A'), 1); assert.equal(numberOf('Z'), 26)
+  assert.equal(numberOf('A', 'inverso'), 26); assert.equal(numberOf('Z', 'inverso'), 1)
+  assert.equal(letterOf(26, 'inverso'), 'A')
+  const t = 'EL FARAON DUERME'
+  for (const m of ['directo', 'inverso']) assert.equal(numerosDecode(numerosEncode(t, m), m), t)
+  assert.throws(() => numerosEncode('HOLA', 'raro'))
+})
+
+test('Binario a letras: cada letra son 5 cifras (su número en binario) y se deshace', async () => {
+  const { binarioEncode, binarioDecode, binaryOf, BINARY_TABLE } = await import('../src/diario/codigos.js')
+  assert.equal(binaryOf('A'), '00001'); assert.equal(binaryOf('B'), '00010'); assert.equal(binaryOf('Z'), '11010')
+  assert.equal(binarioEncode('SOL AL'), '10011 01111 01100 / 00001 01100')
+  assert.equal(binarioDecode('10011 01111 01100 / 00001 01100'), 'SOL AL')
+  assert.equal(BINARY_TABLE.length, 26)
+  assert.equal(new Set(BINARY_TABLE.map(([, b]) => b)).size, 26, 'ninguna se repite')
+})
+
+test('Texto sin vocales: quita las vocales, anota el largo y rechaza palabras que solo tengan vocales', async () => {
+  const { sinVocales } = await import('../src/diario/codigos.js')
+  assert.deepEqual(sinVocales('el ladron huyo'), [{ c: 'L', len: 2 }, { c: 'LDRN', len: 6 }, { c: 'HY', len: 4 }])
+  assert.deepEqual(sinVocales('La Pared'), [{ c: 'L', len: 2 }, { c: 'PRD', len: 5 }])
+  assert.throws(() => sinVocales('voy a casa')) // "a" no deja ninguna consonante
+})
+
+test('Coartada: las pistas dejan una sola solución, siempre las mismas, y no hay pistas falsas', async () => {
+  const { coartadaClues, coartadaSolve, holds, clueText, validateCoartada } = await import('../src/diario/coartada.js')
+  const people = ['Marta', 'Luis', 'Ana', 'Pablo'], places = ['la cocina', 'el salón', 'la biblioteca', 'el despacho']
+  const sol = [2, 0, 3, 1]
+  for (const ordered of [false, true]) {
+    for (let seed = 1; seed <= 30; seed++) {
+      const clues = coartadaClues(4, sol, ordered, seed)
+      assert.ok(clues.length >= 4 && clues.length <= 7)
+      assert.ok(clues.every((c) => holds(c, sol)), 'todas las pistas son verdad para la solución')
+      assert.deepEqual(coartadaSolve(4, clues), [sol], 'solo una forma de colocarlos')
+      assert.ok(clues.filter((c) => c.t === 'es').length <= 1)
+      if (!ordered) assert.ok(clues.every((c) => !['antes', 'junto'].includes(c.t)))
+      assert.deepEqual(clues, coartadaClues(4, sol, ordered, seed), 'mismas pistas para el mismo acertijo')
+    }
+  }
+  assert.equal(clueText({ t: 'no', p: 0, pl: 1 }, people, places), 'Marta no estaba en el salón.')
+  assert.equal(clueText({ t: 'o', p: 2, a: 0, b: 3 }, people, places), 'Ana estaba en la cocina o en el despacho.')
+  assert.equal(clueText({ t: 'antes', p: 1, q: 3 }, people, places), 'Luis estaba más cerca de la entrada que Pablo.')
+  assert.equal(coartadaSolve(3, []).length, 6) // sin pistas: 3! formas
+  assert.deepEqual(validateCoartada({ people, places, solution: sol, ask: 3, text: 'Ana' }), [])
+  assert.match(validateCoartada({ people, places, solution: sol, ask: 3, text: 'Luis' }).join('|'), /el culpable según la solución es Ana/)
+  assert.match(validateCoartada({ people, places, solution: [0, 0, 1, 2], ask: 0, text: 'Marta' }).join('|'), /sitio distinto/)
+  assert.match(validateCoartada({ people: ['A', 'B'], places: ['x', 'y'], solution: [0, 1], ask: 0, text: 'A' }).join('|'), /3 a 5/)
 })

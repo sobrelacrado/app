@@ -299,3 +299,34 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-guardar > button:first-of-type { font-size: 16px; padding: 12px 14px; }
 .dr-guardar .dr-ahora-no { justify-self: center; border: none; text-decoration: underline; padding: 4px 8px; }
 .dr-guardar small { font-size: 11px; opacity: .75; line-height: 1.4; }
+
+/* ---------- Números a letras, binario, sin vocales, rebus, intruso, coartada ---------- */
+.dr-numtabla { display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); gap: 3px; margin: 8px 0; font-family: 'Space Mono', monospace; }
+.dr-numtabla span { display: flex; flex-direction: column; align-items: center; background: rgba(0, 0, 0, .08); border-radius: 4px; padding: 3px 0; line-height: 1.1; }
+.dr-numtabla b { font-size: 13px; }
+.dr-numtabla small { font-size: 10px; opacity: .8; }
+.dr-bintabla { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin: 8px 0; }
+.dr-carta button.dr-bin { display: flex; flex-direction: column; align-items: center; margin: 0; min-height: 0; padding: 4px 0; background: rgba(0, 0, 0, .08); color: var(--t-tinta); border: 1px solid transparent; font-family: 'Space Mono', monospace; line-height: 1.15; }
+.dr-bin b { font-size: 14px; }
+.dr-bin small { font-size: 10px; letter-spacing: 1px; }
+.dr-carta button.dr-bin.dr-sel { background: var(--t-etq-bg); color: var(--t-etq-color); }
+.dr-sinv { display: flex; flex-wrap: wrap; gap: 8px 12px; justify-content: center; margin: 10px 0 14px; }
+.dr-sinv span { display: flex; flex-direction: column; align-items: center; }
+.dr-sinv b { font: 700 22px 'Space Mono', monospace; letter-spacing: 3px; background: rgba(0, 0, 0, .08); border-radius: 6px; padding: 4px 8px; }
+.dr-sinv small { font-size: 11px; opacity: .75; margin-top: 2px; }
+.dr-rebus { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; font-size: 52px; line-height: 1.1; margin: 10px 0 4px; }
+.dr-rebus i { font-style: normal; font-size: 26px; opacity: .6; margin-right: 6px; vertical-align: middle; }
+.dr-intr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 10px 0 4px; }
+.dr-carta button.dr-intruso { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; margin: 0; min-height: 64px; padding: 8px 6px; background: transparent; color: inherit; border: 2px solid currentColor; font-size: 15px; line-height: 1.15; }
+.dr-emo { font-size: 30px; }
+.dr-carta button.dr-intruso.dr-sel { background: #1d1d1d; color: #f3eee2; }
+.dr-pistas { margin: 10px 0 6px; padding-left: 18px; font-size: 14px; line-height: 1.5; }
+.dr-pistas li { margin-bottom: 4px; }
+.dr-tabla-scroll { overflow-x: auto; margin: 8px 0 0; }
+.dr-coart { border-collapse: collapse; width: 100%; font-size: 12px; }
+.dr-coart th { font-weight: 700; padding: 3px 2px; text-align: center; }
+.dr-coart tbody th { text-align: left; white-space: nowrap; padding-right: 6px; }
+.dr-coart td { padding: 2px; text-align: center; }
+.dr-carta button.dr-marca { width: 100%; min-width: 34px; min-height: 34px; margin: 0; padding: 0; background: rgba(0, 0, 0, .08); color: inherit; border: 1px solid rgba(0, 0, 0, .25); font: 700 16px 'Space Mono', monospace; }
+.dr-carta button.dr-marca.m1 { background: rgba(160, 40, 40, .2); color: #8a1f1f; }
+.dr-carta button.dr-marca.m2 { background: rgba(29, 106, 58, .25); color: #1d6a3a; }
