@@ -3,15 +3,13 @@ import {
   getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, connectFirestoreEmulator,
 } from 'firebase/firestore'
 
-// En la app instalada el acceso con Google va por redirección, y Chrome aísla el almacenamiento entre
-// dominios distintos: la página de acceso tiene que estar en el MISMO dominio que la app (web.app).
-// En el navegador se mantiene el dominio de siempre, que funciona con la ventana emergente.
-const installed = typeof window !== 'undefined' && window.matchMedia?.('(display-mode: standalone)').matches
+// El acceso con Google usa la MISMA dirección que la web (web.app): el iPhone (Safari y Chrome) aísla el almacenamiento entre
+// direcciones distintas y con firebaseapp.com daba "missing initial state". Autorizada en Google Cloud (cliente web) el 18/10/2026.
 
 // Estos datos son públicos por diseño: la seguridad la dan las reglas de Firestore.
 export const app = initializeApp({
   apiKey: 'AIzaSyCksj_fxBiDwFaGiXHpSgVKI0gi6uV-Cj8',
-  authDomain: 'app-sobre-lacrado.firebaseapp.com',
+  authDomain: 'app-sobre-lacrado.web.app',
   projectId: 'app-sobre-lacrado',
   storageBucket: 'app-sobre-lacrado.firebasestorage.app',
   messagingSenderId: '656901903049',

@@ -137,3 +137,7 @@ App web instalable (PWA) para gestionar partidas de casos de misterio imprimible
 - Pestaña **Jugadores** del panel (`src/components/Players.jsx`, carga perezosa): resumen, tarjetas por jugador (puntos, racha, rango…), detalle día a día y CSV. Quien entró antes de esta versión aparece al volver a abrir el Diario; el listado completo está en la consola de Firebase (Authentication).
 - Privacidad: el texto de `Progreso.jsx` avisa de que el creador ve nombre, correo y resultados; "Borrar mis datos" borra también el perfil y cierra la sesión.
 - Invitación opcional a entrar con Google (`.dr-guardar` en `Diario.jsx`): sale debajo del resultado del día si no hay sesión; botón grande "Entrar con Google" y "Ahora no" (se oculta hasta mañana, `sl_login_ahora`).
+
+## Login con Google en iPhone — 18/10/2026
+- Error "missing initial state" en iPhone: el acceso pasaba por firebaseapp.com y iOS aísla el almacenamiento entre direcciones. Alberto autorizó `https://app-sobre-lacrado.web.app` (origen) y `/__/auth/handler` (redirección) en Google Cloud → Credenciales → cliente web, y `authDomain` ahora es `app-sobre-lacrado.web.app` (src/firebase.js). Se mantiene la ventana emergente.
+- Caso 2 gratis (MailerLite): el correo enlaza al PDF de Drive id 1husrMS2lvwHqnEcbMv-EgRMeghcmZmM-, ya sustituido por la v3 (QR a la app) el 18/10/2026.
