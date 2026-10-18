@@ -43,10 +43,9 @@ export function pushDay(uid, key, d) {
 export async function saveProfile(u) {
   const ref = doc(db, 'users', u.uid)
   const data = { name: String(u.displayName ?? '').slice(0, 120), email: u.email ?? '', last: serverTimestamp() }
-  try { await updateDoc(ref, data) } catch (e) {
-    if (e?.code !== 'not-found') throw e
-    await setDoc(ref, { ...data, first: serverTimestamp() })
-  }
+  // Primero se mira si existe: actualizar un perfil que no existe lo rechazan las reglas (permission-denied), no da not-found.
+  if ((await getDoc(ref)).exists()) await updateDoc(ref, data)
+  else await setDoc(ref, { ...data, first: serverTimestamp() })
 }
 
 export async function deleteAll(uid) {

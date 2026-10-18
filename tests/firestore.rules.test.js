@@ -405,3 +405,12 @@ test('Diario: la marca "late" (resuelto desde el archivo) es opcional y solo boo
   await assertFails(setDoc(doc(ana, 'users/ana/diario/2026-10-19'), dia({ late: 'si' })))
   await assertFails(setDoc(doc(ana, 'users/ana/diario/2026-10-20'), dia({ puntos: 9999 }))) // los puntos no se guardan
 })
+
+test('Perfil: la primera vez no se puede actualizar un perfil que no existe; hay que mirar y crear (cómo lo hace saveProfile)', async () => {
+  const ana = persona('ana')
+  const datos = () => ({ name: 'Ana', email: 'ana@gmail.com', last: serverTimestamp() })
+  await assertFails(updateDoc(doc(ana, 'users/ana'), datos())) // no existe: las reglas lo rechazan (permission-denied, no not-found)
+  assert.equal((await assertSucceeds(getDoc(doc(ana, 'users/ana')))).exists(), false) // pero mirar si existe sí se puede
+  await assertSucceeds(setDoc(doc(ana, 'users/ana'), { ...datos(), first: serverTimestamp() }))
+  await assertSucceeds(updateDoc(doc(ana, 'users/ana'), datos()))
+})
