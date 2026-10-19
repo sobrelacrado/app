@@ -8,7 +8,9 @@ import Archivo from './Archivo.jsx'
 import Avisos from './Avisos.jsx'
 import Casos from './Casos.jsx'
 import Progreso from './Progreso.jsx'
-import { dayPoints, fmtMult, streakBefore, totalPoints } from './points.js'
+import { dayPoints, fmtMult, rankOf, retoPoints, streakBefore, totalPoints } from './points.js'
+import { retoFor, retoPuzzle } from './reto.js'
+import BANCO from './banco.js'
 import { mergeDays } from './stats.js'
 
 const SITE_URL = 'https://app-sobre-lacrado.web.app/diario'
@@ -31,31 +33,39 @@ export default function Diario({ onExit }) {
   const [laterLogin, setLaterLogin] = useState(() => { try { return localStorage.getItem('sl_login_ahora') === dateKey() } catch { return false } }) // "Ahora no" vale hasta mañana
   const [now, setNow] = useState(Date.now)
   const [vista, setVista] = useState('hoy') // 'hoy' | 'archivo' | 'progreso' | 'casos'
+  const [retoOn, setRetoOn] = useState(false) // jugando el reto de nivel de hoy (en vez del acertijo del día)
+  const [retoLogin, setRetoLogin] = useState(false) // se pulsó el reto sin sesión: se enseña la invitación a entrar con Google
+  const retoRef = useRef(null)
   const [user, setUser] = useState(null) // cuenta de Google (null = sin sesión)
   const [status, setStatus] = useState('') // '' | 'entrando' | 'sincronizando' | 'error'
   const cloud = useRef(null) // módulo de la nube, se carga solo cuando hace falta
   const storeRef = useRef(store)
   storeRef.current = store
 
-  const k = viewKey ?? key // día que se está jugando (hoy o uno del archivo)
-  const late = k !== key // jugado desde el archivo: no suma racha y da la mitad de puntos
-  const n = dayIndex(k) + 1
-  const puzzle = puzzleFor(PUZZLES, k)
   const days = store.days ?? {}
-  const day = days[k] ?? { tries: 0, hint: false, done: false, ms: 0 }
+  const retos = store.retos ?? {} // retos de nivel, uno por fecha
+  const playReto = retoOn && vista === 'hoy' && !viewKey && !!user // el reto exige cuenta de Google: así su progreso queda guardado
+  const retoToday = retos[key] ?? null // el que ya se empezó hoy (queda fijo aunque cambien los puntos)
+  const retoPick = retoToday ?? retoFor(PUZZLES, BANCO, key, totalPoints(days, retos), days, retos)
+  const k = playReto ? key : (viewKey ?? key) // día que se está jugando (hoy o uno del archivo)
+  const late = !playReto && k !== key // jugado desde el archivo: no suma racha y da la mitad de puntos
+  const n = dayIndex(k) + 1
+  const puzzle = playReto ? retoPuzzle(PUZZLES, BANCO, retoPick.i) : puzzleFor(PUZZLES, k)
+  const day = (playReto ? retos[key] : days[k]) ?? { tries: 0, hint: false, done: false, ms: 0 }
   const act = useRef(null) // día y acertijo activos para el reloj y las escrituras (que viven en funciones antiguas)
-  act.current = { k, puzzle }
+  act.current = { k, puzzle, reto: playReto ? retoPick.i : null }
 
   // sync = false para el reloj (cada segundo): lo demás (pista, fallo, resuelto) se guarda también en la cuenta.
   const update = (patch, sync = true) => {
-    const { k: kk, puzzle: pz } = act.current
+    const { k: kk, puzzle: pz, reto: ri } = act.current
     const cur = storeRef.current
-    const d = { tries: 0, hint: false, done: false, ms: 0, type: pz.type, level: pz.level, ...(cur.days ?? {})[kk], ...patch }
-    const next = { ...cur, days: { ...(cur.days ?? {}), [kk]: d } }
+    const area = ri === null ? 'days' : 'retos'
+    const d = { tries: 0, hint: false, done: false, ms: 0, type: pz.type, level: pz.level, ...(ri === null ? {} : { i: ri }), ...(cur[area] ?? {})[kk], ...patch }
+    const next = { ...cur, [area]: { ...(cur[area] ?? {}), [kk]: d } }
     storeRef.current = next
     setStore(next)
     save(next)
-    if (sync && userRef.current && cloud.current) cloud.current.pushDay(userRef.current.uid, kk, d).catch(() => setStatus('error'))
+    if (sync && userRef.current && cloud.current) (ri === null ? cloud.current.pushDay : cloud.current.pushReto)(userRef.current.uid, kk, d).catch(() => setStatus('error'))
   }
 
   // Cuenta: se carga al abrir si ya había entrado antes (o si el Diario va dentro del panel); al detectar sesión se mezcla el progreso.
@@ -77,11 +87,14 @@ export default function Diario({ onExit }) {
         const remote = await cloud.current.pullDays(u.uid)
         const cur = storeRef.current
         const { merged, upload } = mergeDays(cur.days ?? {}, remote)
-        const next = { ...cur, days: merged }
+        const remoteRetos = await cloud.current.pullRetos(u.uid).catch(() => ({}))
+        const mr = mergeDays(cur.retos ?? {}, remoteRetos)
+        const next = { ...cur, days: merged, retos: mr.merged }
         storeRef.current = next
         setStore(next)
         save(next)
         await Promise.all(upload.map((k) => cloud.current.pushDay(u.uid, k, { type: puzzleFor(PUZZLES, k).type, level: puzzleFor(PUZZLES, k).level, ...merged[k] })))
+        await Promise.all(mr.upload.map((k) => cloud.current.pushReto(u.uid, k, mr.merged[k])))
         setStatus('')
       } catch { setStatus('error') }
     })
@@ -107,23 +120,37 @@ export default function Diario({ onExit }) {
     const id = setInterval(() => {
       setNow(Date.now())
       const hoy = dateKey()
-      if (hoy !== key) { setKey(hoy); setViewKey((v) => (v === hoy ? null : v)); return }
-      const d = (storeRef.current.days ?? {})[act.current.k]
+      if (hoy !== key) { setKey(hoy); setViewKey((v) => (v === hoy ? null : v)); setRetoOn(false); return }
+      const d = (storeRef.current[act.current.reto === null ? 'days' : 'retos'] ?? {})[act.current.k]
       if (document.visibilityState === 'visible' && !d?.done) update({ ms: (d?.ms ?? 0) + 1000 }, false)
     }, 1000)
     return () => clearInterval(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key])
 
+  // Pulsar el reto: con sesión se abre; sin sesión se enseña la invitación a entrar con Google (y al entrar se abre solo).
+  const openReto = () => {
+    if (!userRef.current) {
+      setRetoLogin(true)
+      setTimeout(() => retoRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 60)
+      return
+    }
+    setRetoOn(true)
+    window.scrollTo({ top: 0 })
+  }
+  useEffect(() => {
+    if (user && retoLogin) { setRetoLogin(false); setRetoOn(true); window.scrollTo({ top: 0 }) }
+  }, [user, retoLogin])
+
   const check = (answer) => {
     if (day.done) return
-    if (isCorrect(puzzle, answer)) update({ done: true, ans: answer.toUpperCase().trim().replace(/\s+/g, ' '), n, ...(late ? { late: true } : {}) })
+    if (isCorrect(puzzle, answer)) update({ done: true, ans: answer.toUpperCase().trim().replace(/\s+/g, ' '), ...(playReto ? {} : { n }), ...(late ? { late: true } : {}) })
     else { update({ tries: day.tries + 1 }); setWrong((w) => w + 1) }
   }
 
   // La explicación sale abierta la primera vez que aparece cada tipo; después queda plegada (se abre con un toque).
   const [howOpen, setHowOpen] = useState(() => !(store.seen ?? []).includes(puzzle.type))
-  useEffect(() => setWrong(0), [k])
+  useEffect(() => setWrong(0), [k, playReto])
   useEffect(() => {
     const cur = storeRef.current
     const first = !(cur.seen ?? []).includes(puzzle.type)
@@ -136,8 +163,8 @@ export default function Diario({ onExit }) {
   }, [puzzle.type])
 
   const streak = streakOf(days, key)
-  const pts = totalPoints(days)
-  const gained = day.done ? dayPoints(day, streakBefore(days, k)) : null
+  const pts = totalPoints(days, retos)
+  const gained = day.done ? (playReto ? retoPoints(day) : dayPoints(day, streakBefore(days, k))) : null
   const solvedTotal = Object.values(days).filter((d) => d.done).length
   const Game = GAMES[puzzle.type]
   const multi = puzzle.type === 'criptico' // el críptico da la ayuda por pasos (0-3)
@@ -167,7 +194,7 @@ export default function Diario({ onExit }) {
       </header>
 
       <nav className="dr-tabs" aria-label="Secciones">
-        <button type="button" className={vista === 'hoy' && !viewKey ? 'activa' : ''} onClick={() => { setViewKey(null); setVista('hoy') }}>Hoy</button>
+        <button type="button" className={vista === 'hoy' && !viewKey && !playReto ? 'activa' : ''} onClick={() => { setViewKey(null); setRetoOn(false); setVista('hoy') }}>Hoy</button>
         <button type="button" className={vista === 'archivo' || (vista === 'hoy' && viewKey) ? 'activa' : ''} onClick={() => setVista('archivo')}>Archivo</button>
         <button type="button" className={vista === 'progreso' ? 'activa' : ''} onClick={() => setVista('progreso')}>
           Progreso
@@ -175,10 +202,10 @@ export default function Diario({ onExit }) {
         <button type="button" className={vista === 'casos' ? 'activa' : ''} onClick={() => setVista('casos')}>Casos</button>
       </nav>
 
-      {vista === 'archivo' && <Archivo days={days} todayKey={key} onPick={(dayKey) => { setViewKey(dayKey); setVista('hoy') }} />}
+      {vista === 'archivo' && <Archivo days={days} todayKey={key} onPick={(dayKey) => { setViewKey(dayKey); setRetoOn(false); setVista('hoy') }} />}
 
       {vista === 'progreso' && (
-        <Progreso days={days} todayKey={key} user={user} status={status} onLogin={doLogin} onLogout={doLogout} onDelete={doDelete} />
+        <Progreso days={days} retos={retos} todayKey={key} user={user} status={status} onLogin={doLogin} onLogout={doLogout} onDelete={doDelete} />
       )}
 
       {vista === 'casos' && <Casos user={user} cloud={cloud.current} status={status} onLogin={doLogin} />}
@@ -195,8 +222,14 @@ export default function Diario({ onExit }) {
 
       {vista === 'hoy' && (
       <article className={`dr-carta tema-${puzzle.theme}`}>
+        {playReto && (
+          <div className="dr-reto-aviso">
+            <span>🎯 Reto de tu nivel · <b>{rankOf(pts).name}</b></span>
+            <button type="button" className="suave" onClick={() => setRetoOn(false)}>← Hoy</button>
+          </div>
+        )}
         <div className="dr-meta">
-          <span>Diario nº {n}</span>
+          <span>{playReto ? 'Reto' : `Diario nº ${n}`}</span>
           <span aria-label={`Dificultad ${puzzle.level} de 5`}>{levelStars(puzzle.level)}</span>
         </div>
         <h1>{puzzle.title}</h1>
@@ -216,16 +249,24 @@ export default function Diario({ onExit }) {
             <p className="dr-datos">
               {day.tries === 0 ? 'A la primera' : `${day.tries} ${day.tries === 1 ? 'fallo' : 'fallos'}`} · {fmtTime(day.ms)}{day.hint ? ' · con pista' : ''}
             </p>
-            <button type="button" onClick={share}>{copied ? '¡Copiado!' : 'Compartir resultado'}</button>
+            {!playReto && <button type="button" onClick={share}>{copied ? '¡Copiado!' : 'Compartir resultado'}</button>}
             {multi && <div className="dr-explica"><b>Cómo se resolvía</b><p>{showText(puzzle.data.explain)}</p></div>}
             {gained && (
               <div className="dr-puntos" role="status">
                 <b>+{gained.total} puntos</b>
                 <small>
-                  {gained.late
+                  {playReto
+                    ? `Reto nivel ${puzzle.level}: ${gained.base} ${gained.firstTry ? '· a la primera +50 % ' : ''}${gained.noHint ? '· sin pista +25 % ' : ''}· extra de reto ×${String(gained.extra).replace('.', ',')}`
+                    : gained.late
                     ? `Archivo: nivel ${puzzle.level} (${gained.base}) ${gained.firstTry ? '· a la primera ' : ''}${gained.noHint ? '· sin pista ' : ''}→ mitad`
                     : [`nivel ${puzzle.level}: ${gained.base}`, gained.firstTry && 'a la primera +50 %', gained.noHint && 'sin pista +25 %', gained.multiplier > 1 && `racha ${fmtMult(gained.multiplier)}`].filter(Boolean).join(' · ')}
                 </small>
+              </div>
+            )}
+            {!playReto && !late && retoPick && !retoToday?.done && (
+              <div className="dr-reto-resuelto">
+                <p><b>¿Quieres más?</b> Tienes un reto extra de tu nivel ({levelStars(retoPick.level)}) con <b>puntos ×1,5</b>.</p>
+                <button type="button" className="dr-reto-boton" onClick={openReto}>🎯 Jugar mi reto de hoy</button>
               </div>
             )}
             {!user && !laterLogin && (
@@ -238,7 +279,14 @@ export default function Diario({ onExit }) {
                 <small>Se guarda tu nombre, correo y resultados; el creador del juego los ve para saber cuántas personas juegan.</small>
               </div>
             )}
-            {late
+            {playReto
+              ? (
+                <>
+                  <p className="dr-proximo">Reto nuevo mañana · en <b>{countdown}</b></p>
+                  <button type="button" className="suave" onClick={() => setRetoOn(false)}>← Volver a hoy</button>
+                </>
+              )
+              : late
               ? <button type="button" className="suave" onClick={() => setVista('archivo')}>← Volver al archivo</button>
               : (
                 <>
@@ -254,7 +302,7 @@ export default function Diario({ onExit }) {
           </div>
         ) : (
           <>
-            <Game puzzle={puzzle} onCheck={check} key={k} hintStep={step} hinted={!!day.hint} />
+            <Game puzzle={puzzle} onCheck={check} key={(playReto ? 'reto-' : '') + k} hintStep={step} hinted={!!day.hint} />
             <p className={`dr-aviso ${wrong ? 'dr-fallo' : ''}`} key={wrong} role="status">
               {wrong ? 'Esa no es. Vuelve a mirarlo.' : ''}
             </p>
@@ -272,6 +320,32 @@ export default function Diario({ onExit }) {
         )}
         </section>
       </article>
+      )}
+
+      {vista === 'hoy' && !viewKey && !playReto && retoPick && (
+        <aside ref={retoRef} className={'dr-reto' + (retoToday?.done ? ' hecho' : day.done ? ' listo' : '')}>
+          {retoToday?.done
+            ? <p>✅ Reto de hoy resuelto · <b>+{retoPoints(retoToday).total} puntos</b>. Mañana, uno nuevo.</p>
+            : retoLogin && !user
+            ? (
+              <>
+                <p className="dr-reto-t">🔐 Entra para jugar el reto</p>
+                <p>El reto necesita una cuenta de Google: así se guardan tu <b>progreso, tus puntos y tu rango</b> y no los pierdes si cambias de móvil.</p>
+                <button type="button" className="dr-reto-boton" onClick={doLogin} disabled={status === 'entrando'}>{status === 'entrando' ? 'Entrando…' : 'Entrar con Google'}</button>
+                {status === 'error' && <p className="dr-aviso">No se pudo entrar. Inténtalo de nuevo.</p>}
+                <button type="button" className="dr-reto-ahora-no" onClick={() => setRetoLogin(false)}>Ahora no</button>
+                <small className="dr-reto-nota">Se guarda tu nombre, correo y resultados; el creador del juego los ve para saber cuántas personas juegan.</small>
+              </>
+            )
+            : (
+              <>
+                <p className="dr-reto-t">🎯 Tu reto de hoy</p>
+                <p><b>{rankOf(pts).name}</b> · dificultad <span aria-label={`nivel ${retoPick.level} de 5`}>{levelStars(retoPick.level)}</span><br />Un acertijo extra, solo para tu nivel.</p>
+                <span className="dr-reto-extra">Puntos extra ×1,5</span>
+                <button type="button" className="dr-reto-boton" onClick={openReto}>{retoToday ? 'Continuar el reto' : 'Jugar el reto'}</button>
+              </>
+            )}
+        </aside>
       )}
 
       <footer className="dr-pie">

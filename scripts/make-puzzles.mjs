@@ -1,7 +1,7 @@
 // Genera src/diario/puzzles.js (lo que viaja en la web) a partir de src/diario/puzzles.src.mjs + lote-NN.src.mjs (con soluciones en claro).
 // Uso: node scripts/make-puzzles.mjs
 import { writeFileSync } from 'node:fs'
-import { loadSources } from './load-sources.mjs'
+import { loadBanco, loadSources } from './load-sources.mjs'
 import {
   atbash, caesarEncode, hashAnswer, keypadEncode, lockCandidates, lockFeedback, morseEncode, normalize, pigpenStore, rng, shuffled, vigenereDecode, vigenereEncode,
 } from '../src/diario/ciphers.js'
@@ -150,13 +150,14 @@ const encode = {
 }
 
 const src = await loadSources()
+const bancoSrc = await loadBanco() // banco de retos: fuera del calendario
 
 // Comprobaciones extra de calidad: títulos y respuestas sin repetir, solo letras A-Z donde hace falta y pistas que dicen la verdad.
 const NUM = { dos: 2, tres: 3, cuatro: 4, cinco: 5, seis: 6, siete: 7, ocho: 8, nueve: 9, diez: 10 }
 const ORD = { primera: 0, segunda: 1, tercera: 2, cuarta: 3, quinta: 4, sexta: 5, séptima: 6, octava: 7 }
 const titles = new Set(), answers = new Set()
-src.forEach((p, i) => {
-  const n = i + 1
+;[...src, ...bancoSrc].forEach((p, i) => {
+  const n = i < src.length ? i + 1 : `banco ${i - src.length + 1}`
   if (titles.has(p.title)) throw new Error(`Acertijo ${n}: el título "${p.title}" ya existe`)
   titles.add(p.title)
   const key = normalize(p.text)
@@ -194,3 +195,18 @@ writeFileSync(new URL('../src/diario/puzzles.js', import.meta.url),
 const count = {}
 out.forEach((p) => { count[p.type] = (count[p.type] ?? 0) + 1 })
 console.log(`${out.length} acertijos generados`, count)
+
+// Banco de retos: se genera con las mismas reglas de cada tipo, pero sin día de la semana ni orden (no entra en el calendario).
+const banco = bancoSrc.map((p, j) => {
+  if (!encode[p.type]) throw new Error(`Banco ${j + 1}: tipo desconocido ${p.type}`)
+  if (!(p.level >= 1 && p.level <= 5)) throw new Error(`Banco ${j + 1} "${p.title}": el nivel debe ser de 1 a 5`)
+  if (p.type === 'cesar' && /[^A-Z ]/.test(p.text)) throw new Error(`Banco ${j + 1}: César solo admite A-Z`)
+  return { id: 1001 + j, type: p.type, theme: p.theme, level: p.level, title: p.title, clue: p.clue, hint: p.hint, data: encode[p.type](p, src.length + j), h: hashAnswer(p.text) }
+})
+writeFileSync(new URL('../src/diario/banco.js', import.meta.url),
+  `// GENERADO por scripts/make-puzzles.mjs: no editar a mano. Banco de retos: acertijos fuera del calendario, solo para el "Reto de tu nivel".
+export default ${JSON.stringify(banco, null, 2)}
+`)
+const bcount = {}
+banco.forEach((p) => { bcount[`nivel ${p.level}`] = (bcount[`nivel ${p.level}`] ?? 0) + 1 })
+console.log(`${banco.length} acertijos en el banco de retos`, bcount)

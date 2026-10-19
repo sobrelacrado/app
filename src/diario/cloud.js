@@ -39,6 +39,21 @@ export function pushDay(uid, key, d) {
   return setDoc(doc(days(uid), key), data)
 }
 
+// ---------- Retos de nivel (uno por fecha, aparte de los días del Diario) ----------
+const retosCol = (uid) => collection(db, 'users', uid, 'retos')
+export async function pullRetos(uid) {
+  const snap = await getDocs(retosCol(uid))
+  const out = {}
+  snap.forEach((d) => {
+    const x = d.data()
+    out[d.id] = { i: x.i, done: !!x.done, tries: x.tries ?? 0, hint: !!x.hint, ms: x.ms ?? 0, type: x.type, level: x.level }
+  })
+  return out
+}
+export function pushReto(uid, key, d) {
+  return setDoc(doc(retosCol(uid), key), { i: d.i, done: !!d.done, tries: d.tries ?? 0, hint: !!d.hint, ms: Math.min(Math.round(d.ms ?? 0), 86400000), type: d.type, level: d.level, at: serverTimestamp() })
+}
+
 // Perfil del jugador (nombre y correo de su cuenta de Google) para que el creador sepa quién juega. Se actualiza "last" en cada visita.
 export async function saveProfile(u) {
   const ref = doc(db, 'users', u.uid)
@@ -64,10 +79,10 @@ export async function deleteAll(uid) {
   await deleteDoc(doc(db, 'users', uid)).catch(() => {}) // el perfil (nombre y correo) también se borra
   const rated = await getDocs(query(collection(db, 'valoraciones'), where('uid', '==', uid))).catch(() => null)
   await Promise.all((rated?.docs ?? []).map((d) => deleteDoc(d.ref).catch(() => {})))
-  const snap = await getDocs(days(uid))
-  for (let i = 0; i < snap.docs.length; i += 400) {
+  const docs = [...(await getDocs(days(uid))).docs, ...(await getDocs(retosCol(uid))).docs]
+  for (let i = 0; i < docs.length; i += 400) {
     const batch = writeBatch(db)
-    snap.docs.slice(i, i + 400).forEach((d) => batch.delete(d.ref))
+    docs.slice(i, i + 400).forEach((d) => batch.delete(d.ref))
     await batch.commit()
   }
 }

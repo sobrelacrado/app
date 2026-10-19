@@ -341,3 +341,22 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-valorar textarea { width: 100%; box-sizing: border-box; margin: 4px 0 6px; padding: 8px; font: inherit; font-size: 14px; border: 1px solid rgba(0, 0, 0, .3); border-radius: 6px; background: rgba(255, 255, 255, .6); color: inherit; resize: vertical; }
 .dr-valorar-pie { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .dr-valorar-pie small { margin-left: auto; opacity: .7; }
+
+/* Reto de tu nivel: tarjeta dorada y botón grande para que no pase desapercibido (colores fijos, se ve igual en claro y oscuro) */
+.dr-reto { position: relative; margin: 14px 0; padding: 18px 16px; border-radius: 12px; text-align: center; color: #1d1d1d;
+  background: linear-gradient(135deg, #f7d046 0%, #e0a21b 100%); box-shadow: 0 8px 22px rgba(0, 0, 0, .35); }
+.dr-reto p { margin: 0 0 12px; font-size: 14px; line-height: 1.5; color: #1d1d1d; }
+.dr-reto .dr-reto-t { margin: 0 0 6px; font: 700 20px var(--titulo); letter-spacing: .5px; }
+.dr-reto .dr-reto-extra { display: inline-block; margin: 0 0 12px; padding: 2px 10px; border-radius: 99px; background: #1d1d1d; color: #f7d046; font-size: 13px; font-weight: 700; }
+.dr-carta .dr-reto-boton, .dr-reto .dr-reto-boton { display: block; width: 100%; box-sizing: border-box; padding: 16px 12px; min-height: 54px; border: 0; border-radius: 8px; background: #1d1d1d; color: #f7d046;
+  font-size: 17px; font-weight: 700; letter-spacing: .5px; cursor: pointer; box-shadow: 0 3px 0 rgba(0, 0, 0, .4); }
+.dr-reto.listo .dr-reto-boton, .dr-reto-resuelto .dr-reto-boton { animation: dr-latido 1.8s ease-in-out infinite; }
+@keyframes dr-latido { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+@media (prefers-reduced-motion: reduce) { .dr-reto.listo .dr-reto-boton, .dr-reto-resuelto .dr-reto-boton { animation: none; } }
+.dr-reto.hecho { background: linear-gradient(135deg, #2f7d4f 0%, #1d5a37 100%); }
+.dr-reto.hecho p { color: #fff; margin: 0; }
+.dr-reto-resuelto { margin: 14px 0 4px; padding: 14px; border-radius: 10px; text-align: center; background: linear-gradient(135deg, #f7d046 0%, #e0a21b 100%); color: #1d1d1d; box-shadow: 0 4px 14px rgba(0, 0, 0, .3); }
+.dr-reto-resuelto p { margin: 0 0 10px; font-size: 14px; color: #1d1d1d; }
+.dr-reto-aviso { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 0 0 10px; padding: 8px 10px; border-radius: 6px; background: rgba(185, 130, 42, .18); font-size: 14px; }
+.dr-reto-ahora-no { display: block; margin: 10px auto 0; padding: 6px 12px; background: transparent; border: 0; color: #1d1d1d; text-decoration: underline; font-size: 14px; cursor: pointer; }
+.dr-reto .dr-reto-nota { display: block; margin-top: 10px; font-size: 12px; line-height: 1.4; color: #3a2a05; }

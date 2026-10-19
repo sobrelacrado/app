@@ -710,3 +710,88 @@ test('Coartada: las pistas dejan una sola solución, siempre las mismas, y no ha
   assert.match(validateCoartada({ people, places, solution: [0, 0, 1, 2], ask: 0, text: 'Marta' }).join('|'), /sitio distinto/)
   assert.match(validateCoartada({ people: ['A', 'B'], places: ['x', 'y'], solution: [0, 1], ask: 0, text: 'A' }).join('|'), /3 a 5/)
 })
+
+// ---------- Reto de tu nivel ----------
+import { levelForPoints, retoPoints, totalPoints } from '../src/diario/points.js'
+import { retoFor, retoPuzzle } from '../src/diario/reto.js'
+test('Reto: el nivel sale del rango (Aprendiz 1 ... Comisario y Maestro 5)', () => {
+  assert.deepEqual([0, 199, 200, 600, 1500, 3500, 9999].map(levelForPoints), [1, 1, 2, 3, 4, 5, 5])
+})
+test('Reto: puntos completos por nivel, bonus a la primera y sin pista, extra del 50 % y sin racha', () => {
+  assert.equal(retoPoints({ level: 4, tries: 0, hint: false }).total, Math.round(Math.round(40 * 1.75) * 1.5)) // 105
+  assert.equal(retoPoints({ level: 4, tries: 2, hint: true }).total, 60) // 40 × 1,5
+  assert.equal(totalPoints({}, { '2026-10-20': { done: true, level: 2, tries: 0, hint: false }, '2026-10-21': { done: false, level: 5 } }), 53)
+})
+test('Reto: es del nivel que toca, nunca de un día futuro ni el de hoy, sin repetir lo resuelto y estable', () => {
+  const key = '2027-01-04' // día 85 de la lista
+  const a = retoFor(PUZZLES, [], key, 1600), b = retoFor(PUZZLES, [], key, 1600)
+  assert.deepEqual(a, b)
+  assert.equal(a.level, 4)
+  assert.equal(PUZZLES[a.i].level, 4)
+  assert.ok(a.i < 85, 'solo de días ya pasados')
+  const c = retoFor(PUZZLES, [], key, 1600, {}, { '2027-01-03': { done: true, i: a.i } })
+  assert.notEqual(c.i, a.i)
+  assert.equal(PUZZLES[c.i].level, 4)
+})
+test('Reto: cada rango recibe su nivel, si agota el suyo baja, y con el banco hay reto desde el primer día', () => {
+  for (const [pts, lv] of [[0, 1], [300, 2], [800, 3], [2000, 4], [5000, 5]]) assert.equal(retoFor(PUZZLES, [], '2027-03-01', pts).level, lv)
+  const todos = {}
+  PUZZLES.forEach((p, i) => { if (p.level === 5) todos['2026-12-' + String(i).padStart(3, '0')] = { done: true, i } })
+  assert.equal(retoFor(PUZZLES, [], '2027-03-01', 5000, {}, todos).level, 4)
+  assert.equal(retoFor(PUZZLES, [], '2026-10-12', 0), null) // primer día y sin banco: nada que ofrecer
+  const banco = [{ level: 1, title: 'x' }, { level: 3, title: 'y' }]
+  assert.deepEqual(retoFor(PUZZLES, banco, '2026-10-12', 0), { i: 1000, level: 1 })
+  assert.equal(retoPuzzle(PUZZLES, banco, 1001).title, 'y')
+  assert.equal(retoPuzzle(PUZZLES, banco, 5), PUZZLES[5])
+})
+
+// ---------- Banco de retos (acertijos fuera del calendario) ----------
+import BANCO from '../src/diario/banco.js'
+const BSRC = await import('../scripts/load-sources.mjs').then((m) => m.loadBanco()).catch(() => null)
+test('Banco: no se mezcla con el calendario, con niveles de 1 a 5 y títulos sin repetir', () => {
+  assert.ok(BANCO.length >= 70, 'al menos 70 acertijos')
+  assert.ok(BANCO.every((p) => p.id >= 1001 && p.level >= 1 && p.level <= 5), 'ids 1001+ y niveles 1-5')
+  const titles = [...PUZZLES, ...BANCO].map((p) => p.title)
+  assert.equal(new Set(titles).size, titles.length, 'títulos únicos entre calendario y banco')
+  for (let lv = 1; lv <= 5; lv++) assert.ok(BANCO.filter((p) => p.level === lv).length >= 12, `nivel ${lv}: al menos 12`)
+})
+test('Banco: cada acertijo se resuelve con su solución y respeta las reglas de su tipo (necesita el archivo fuente)', { skip: !BSRC && 'sin los archivos .src.mjs' }, () => {
+  assert.equal(BANCO.length, BSRC.length)
+  BANCO.forEach((p, j) => {
+    const s = BSRC[j], at = `banco ${j + 1} (${s.title})`
+    assert.ok(isCorrect(p, s.text), `${at}: la huella no coincide con la solución`)
+    assert.equal(p.level, s.level)
+    if (!['intruso', 'coartada'].includes(s.type)) assert.ok(!JSON.stringify(p).includes(s.text), `${at}: la solución está en claro`)
+    if (s.type === 'cesar') assert.ok(isCorrect(p, caesarDecode(p.data, s.shift)))
+    if (s.type === 'morse') assert.ok(isCorrect(p, morseDecode(p.data)))
+    if (s.type === 'teclado') assert.ok(isCorrect(p, keypadDecode(p.data)))
+    if (s.type === 'espejo') assert.ok(isCorrect(p, atbash(p.data)))
+    if (s.type === 'simbolos') assert.ok(isCorrect(p, pigpenLetters(p.data)))
+    if (s.type === 'golpes') { assert.ok(isCorrect(p, golpesDecode(p.data))); assert.ok(s.level <= 2, `${at}: golpes solo en niveles 1-2`) }
+    if (s.type === 'binario') { assert.ok(isCorrect(p, binarioDecode(p.data))); assert.ok(s.level >= 3, `${at}: binario desde el nivel 3`) }
+    if (s.type === 'numeros') {
+      assert.ok(isCorrect(p, numerosDecode(p.data.code, p.data.mode)))
+      assert.ok(s.level <= 2, `${at}: números solo en niveles 1-2`)
+      if (p.data.mode === 'inverso') assert.ok(s.level >= 2)
+    }
+    if (s.type === 'rebus') { assert.ok(s.level <= 2, `${at}: rebus solo en niveles 1-2`); assert.equal(p.data.lens.reduce((a, b) => a + b, 0), normalize(s.text).length) }
+    if (s.type === 'escitala') { assert.equal(s.level, 3); assert.equal(escitalaRead(p.data.cipher, s.rows), normalize(s.text)) }
+    if (s.type === 'acrostico') assert.ok(isCorrect(p, p.data.map((l) => normalize(l)[0]).join('')))
+    if (s.type === 'cerradura') { const c = lockCandidates(p.data); assert.equal(c.length, 1); assert.ok(isCorrect(p, c[0])) }
+    if (s.type === 'anagrama') assert.equal([...p.data.pool].sort().join(''), [...normalize(s.text)].sort().join(''))
+    if (s.type === 'sinvocales') assert.ok(p.data.every((w) => !/[AEIOU]/.test(w.c) && w.c.length > 0))
+    if (s.type === 'intruso') {
+      assert.ok(p.data.some((x) => normalize(x.n) === normalize(s.text)), `${at}: el intruso está entre las opciones`)
+      assert.ok(p.data.every((x) => Object.keys(x).every((k) => ['e', 'n'].includes(k))), 'no viaja cuál es el intruso ni por qué')
+    }
+    if (s.type === 'coartada') {
+      assert.deepEqual(validateCoartada(s), [])
+      assert.ok(s.level >= 4, `${at}: coartada desde el nivel 4`)
+      assert.equal(s.people.length, s.level === 4 ? 3 : 4, `${at}: 3 sospechosos en el nivel 4 y 4 en el 5`)
+      const clues = coartadaClues(s.people.length, s.solution, !!s.ordered, SRC.length + j + 1)
+      assert.equal(coartadaSolve(s.people.length, clues).length, 1)
+      assert.ok(!('solution' in p.data), 'la solución no viaja')
+    }
+    assert.ok(!['vigenere', 'criptico', 'sopa', 'interrogatorio'].includes(s.type), `${at}: tipo no usado en el banco`)
+  })
+})

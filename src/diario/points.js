@@ -32,9 +32,22 @@ export function dayPoints(d, streak) {
   return { base, firstTry, noHint, subtotal, multiplier: mult, late: false, total: Math.round(subtotal * mult) }
 }
 
-export function totalPoints(days) {
+// Reto de tu nivel (un acertijo extra al día, elegido según el rango): los mismos puntos por nivel y bonus que el del día,
+// sin multiplicador de racha, y un extra del 50 % por ser un reto personal.
+export const RETO_BONUS = 1.5
+export function retoPoints(d) {
+  const base = (d.level ?? 1) * POINTS_PER_LEVEL
+  const firstTry = !d.tries
+  const noHint = !d.hint
+  const subtotal = Math.round(base * (1 + (firstTry ? 0.5 : 0) + (noHint ? 0.25 : 0)))
+  return { base, firstTry, noHint, subtotal, extra: RETO_BONUS, total: Math.round(subtotal * RETO_BONUS) }
+}
+
+// `retos` = los retos de nivel resueltos (mismo formato que los días, uno por fecha).
+export function totalPoints(days, retos = {}) {
   let sum = 0
   for (const [key, d] of Object.entries(days)) if (d?.done) sum += dayPoints(d, streakBefore(days, key)).total
+  for (const r of Object.values(retos)) if (r?.done) sum += retoPoints(r).total
   return sum
 }
 
@@ -57,5 +70,8 @@ export function rankOf(points) {
   const span = next ? next.from - RANKS[i].from : 1
   return { name: RANKS[i].name, next: next?.name ?? null, toNext: next ? next.from - points : 0, fraction: next ? (points - RANKS[i].from) / span : 1 }
 }
+
+// Nivel (1-5) del reto personal según el rango: Aprendiz 1, Ayudante 2, Detective 3, Inspector 4, Comisario y Maestro 5.
+export const levelForPoints = (points) => Math.min(5, RANKS.findIndex((r) => r.name === rankOf(points).name) + 1)
 
 export const fmtMult = (m) => `×${String(m).replace('.', ',')}`

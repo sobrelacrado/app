@@ -33,7 +33,7 @@ const SORTS = [['last', 'last'], ['first', 'since'], ['solved', 'days'], ['strea
 const toDate = (v) => v?.toDate?.() ?? null
 
 // Datos de un jugador a partir de su perfil y de sus días guardados.
-export function buildPlayer(uid, profile, dayDocs, todayKey) {
+export function buildPlayer(uid, profile, dayDocs, todayKey, retoDocs = {}) {
   const days = {}
   let lastAt = toDate(profile?.last)
   for (const [key, x] of Object.entries(dayDocs)) {
@@ -42,7 +42,7 @@ export function buildPlayer(uid, profile, dayDocs, todayKey) {
     if (at && (!lastAt || at > lastAt)) lastAt = at
   }
   const st = diarioStats(days, todayKey, PUZZLES)
-  const points = totalPoints(days)
+  const points = totalPoints(days, retoDocs) // los retos de nivel también suman puntos
   return {
     uid, name: profile?.name ?? '', email: profile?.email ?? '', first: toDate(profile?.first), last: lastAt,
     days, solved: st.solved, streak: st.streak, best: st.best, points, rank: rankOf(points).name,
@@ -69,7 +69,10 @@ export default function Players() {
         const snap = await getDocs(collection(db, 'users', u.id, 'diario'))
         const dayDocs = {}
         snap.forEach((d) => { dayDocs[d.id] = d.data() })
-        return buildPlayer(u.id, u.data(), dayDocs, todayKey)
+        const retoSnap = await getDocs(collection(db, 'users', u.id, 'retos'))
+        const retoDocs = {}
+        retoSnap.forEach((d) => { retoDocs[d.id] = d.data() })
+        return buildPlayer(u.id, u.data(), dayDocs, todayKey, retoDocs)
       }))
       setRows(out)
     } catch { setError(true) }

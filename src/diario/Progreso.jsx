@@ -9,11 +9,11 @@ import PUZZLES from './puzzles.js'
 
 const PRIVACY = 'Al entrar con Google guardamos tu nombre, tu correo y tus resultados del Diario. Sirven para mostrarte tus estadísticas y para que el creador del juego sepa cuántas personas juegan y cómo les va; no se publican ni se comparten con nadie más. Puedes borrarlo cuando quieras (se cierra tu sesión).'
 
-export default function Progreso({ days, todayKey, user, status, onLogin, onLogout, onDelete }) {
+export default function Progreso({ days, retos = {}, todayKey, user, status, onLogin, onLogout, onDelete }) {
   const s = diarioStats(days, todayKey, PUZZLES)
   const [sure, setSure] = useState(false)
   const maxAvg = Math.max(1, ...s.types.map((t) => t.avgMs))
-  const pts = totalPoints(days)
+  const pts = totalPoints(days, retos)
   const rank = rankOf(pts)
   const mult = todayMultiplier(days, todayKey)
   const big = (v, label) => <div className="dr-cifra"><b>{v}</b><small>{label}</small></div>

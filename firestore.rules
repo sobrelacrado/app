@@ -191,5 +191,28 @@ service cloud.firestore {
           && d.at == request.time;
       }
     }
+
+    // ---------- Retos de nivel ----------
+    // Un reto personal al día (id = fecha), con el mismo formato que un día del Diario más "i" (posición del acertijo: lista 0-999 o banco 1000+).
+    match /users/{uid}/retos/{day} {
+      allow read: if (request.auth != null && request.auth.uid == uid) || isAdmin();
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && day.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
+        && isValidReto(request.resource.data);
+      allow delete: if request.auth != null && request.auth.uid == uid;
+
+      function isValidReto(d) {
+        return d.keys().hasOnly(['i', 'done', 'tries', 'hint', 'ms', 'type', 'level', 'at'])
+          && d.keys().hasAll(['i', 'done', 'tries', 'hint', 'ms', 'type', 'level', 'at'])
+          && d.i is int && d.i >= 0 && d.i < 5000
+          && d.done is bool
+          && d.hint is bool
+          && d.tries is int && d.tries >= 0 && d.tries <= 999
+          && d.ms is int && d.ms >= 0 && d.ms <= 86400000
+          && d.type in ['cesar', 'morse', 'teclado', 'cerradura', 'anagrama', 'acrostico', 'simbolos', 'espejo', 'criptico', 'vigenere', 'golpes', 'interrogatorio', 'escitala', 'sopa', 'numeros', 'rebus', 'sinvocales', 'intruso', 'coartada', 'binario']
+          && d.level is int && d.level >= 1 && d.level <= 5
+          && d.at == request.time;
+      }
+    }
   }
 }

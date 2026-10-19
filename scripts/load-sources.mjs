@@ -28,3 +28,12 @@ export async function loadSources() {
   })
   return [...out, ...byTitle.values()] // lo nuevo, al final
 }
+
+// Banco de retos: banco-01.src.mjs, banco-02.src.mjs... Acertijos aparte del calendario (solo para el "Reto de tu nivel").
+// El nombre NO empieza por "lote-" a propósito: así nunca se cuelan en los días programados.
+export async function loadBanco() {
+  const dir = new URL('../src/diario/', import.meta.url)
+  const out = []
+  for (const f of readdirSync(dir).filter((f) => /^banco-\d+\.src\.mjs$/.test(f)).sort()) out.push(...(await import(new URL(f, dir))).default)
+  return out
+}

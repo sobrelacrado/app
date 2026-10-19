@@ -467,3 +467,25 @@ test('Valoración: cada persona lee solo las suyas; el administrador las lee tod
   await assertFails(setDoc(doc(admin(), 'valoraciones/u2_g1'), val())) // el admin no escribe como si fuera ella
   await assertFails(deleteDoc(doc(third(), 'valoraciones/u2_g1')))
 })
+
+// ---------- Retos de nivel ----------
+const reto = (over = {}) => ({ i: 12, done: false, tries: 0, hint: false, ms: 5000, type: 'cesar', level: 2, at: serverTimestamp(), ...over })
+test('Reto: cada persona guarda, lee y borra solo los suyos; el administrador los lee pero no escribe por ella', async () => {
+  const ana = persona('ana'), otra = persona('bea')
+  await assertSucceeds(setDoc(doc(ana, 'users/ana/retos/2026-10-20'), reto()))
+  await assertSucceeds(setDoc(doc(ana, 'users/ana/retos/2026-10-20'), reto({ done: true, tries: 1 })))
+  await assertSucceeds(setDoc(doc(ana, 'users/ana/retos/2026-10-21'), reto({ i: 1003 }))) // acertijo del banco
+  assert.equal((await assertSucceeds(getDocs(collection(ana, 'users/ana/retos')))).size, 2)
+  await assertFails(getDocs(collection(otra, 'users/ana/retos')))
+  await assertFails(setDoc(doc(otra, 'users/ana/retos/2026-10-22'), reto()))
+  await assertSucceeds(getDocs(collection(admin(), 'users/ana/retos')))
+  await assertFails(setDoc(doc(admin(), 'users/ana/retos/2026-10-22'), reto()))
+  await assertSucceeds(deleteDoc(doc(ana, 'users/ana/retos/2026-10-21')))
+})
+test('Reto: se rechazan datos con forma incorrecta', async () => {
+  const ana = persona('ana')
+  const no = (over, day = '2026-10-23') => assertFails(setDoc(doc(ana, 'users/ana/retos/' + day), reto(over)))
+  await no({ i: -1 }); await no({ i: 5000 }); await no({ i: 'a' }); await no({ level: 6 }); await no({ type: 'inventado' })
+  await no({ ms: -1 }); await no({ tries: 1000 }); await no({ at: Timestamp.now() }); await no({ puntos: 99 })
+  await no({}, 'mañana')
+})
