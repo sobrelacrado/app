@@ -36,7 +36,14 @@ export default function Diario({ onExit }) {
   const [now, setNow] = useState(Date.now)
   // 'hoy' | 'archivo' | 'progreso' | 'casos' | 'amigos'. Los enlaces /diario#casos y /diario#grupo=CODIGO abren Mis casos y la invitación a un grupo.
   const [joinCode] = useState(() => /^#grupo=([A-Za-z0-9]{6})$/.exec(location.hash)?.[1]?.toUpperCase() ?? null)
-  const [vista, setVista] = useState(() => (location.hash === '#casos' ? 'casos' : /^#grupo=/.test(location.hash) ? 'amigos' : 'hoy'))
+  const [vista, setVista] = useState(() => {
+    if (location.hash === '#casos') return 'casos'
+    if (/^#grupo=/.test(location.hash)) return 'amigos'
+    // Al recargar la página se vuelve a la pestaña donde estabas (solo mientras la pestaña del navegador siga abierta).
+    try { const v = sessionStorage.getItem('sl_diario_vista'); if (['archivo', 'progreso', 'casos', 'amigos'].includes(v)) return v } catch { /* sin almacenamiento */ }
+    return 'hoy'
+  })
+  useEffect(() => { try { sessionStorage.setItem('sl_diario_vista', vista) } catch { /* sin almacenamiento */ } }, [vista])
   const [retoOn, setRetoOn] = useState(false) // jugando el reto de nivel de hoy (en vez del acertijo del día)
   const [retoLogin, setRetoLogin] = useState(false) // se pulsó el reto sin sesión: se enseña la invitación a entrar con Google
   const retoRef = useRef(null)

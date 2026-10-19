@@ -23,6 +23,11 @@ const store = {
   get: (k, d) => { try { return localStorage.getItem(k) ?? d } catch { return d } },
   set: (k, v) => { try { localStorage.setItem(k, v) } catch { /* sin almacenamiento */ } },
 }
+// Dónde estaba el admin: solo dura mientras la pestaña del navegador siga abierta (se conserva al recargar).
+const lugar = {
+  get: (k) => { try { return sessionStorage.getItem(k) } catch { return null } },
+  set: (k, v) => { try { sessionStorage.setItem(k, v) } catch { /* sin almacenamiento */ } },
+}
 // En la app instalada, la ventana emergente de Google falla en algunos móviles: se usa redirección.
 const isInstalledApp = () => window.matchMedia?.('(display-mode: standalone)').matches
 
@@ -31,8 +36,10 @@ export default function App() {
   const [user, setUser] = useState(undefined) // undefined = comprobando sesión
   const [loginError, setLoginError] = useState(false) // false | código del error
   const [redirectDiag, setRedirectDiag] = useState('…')
-  const [tab, setTab] = useState('runs')
-  const [vista, setVista] = useState('panel') // 'panel' | 'diario' (el panel sigue vivo debajo, con sus avisos)
+  const [tab, setTab] = useState(() => { const v = lugar.get('sl_tab'); return ['runs', 'stats', 'games', 'players'].includes(v) ? v : 'runs' })
+  const [vista, setVista] = useState(() => (lugar.get('sl_vista') === 'diario' ? 'diario' : 'panel')) // 'panel' | 'diario' (el panel sigue vivo debajo, con sus avisos)
+  useEffect(() => { lugar.set('sl_tab', tab) }, [tab])
+  useEffect(() => { lugar.set('sl_vista', vista) }, [vista])
   const [modo, setModo] = useState(() => (store.get('sl_modo', 'claro') === 'oscuro' ? 'oscuro' : 'claro'))
   const [alertsOn, setAlertsOn] = useState(() => store.get('sl_alerts', 'off') === 'on')
   const ctx = useMemo(() => ({ lang, t: textsFor(lang) }), [lang])
