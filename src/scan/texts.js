@@ -9,6 +9,11 @@ export const TEXTS = {
     anyway: 'Ver contenido igualmente',
     error: 'No se ha podido cargar. Revisen la conexión e inténtenlo de nuevo.',
     retry: 'Reintentar',
+    started: '¡Partida iniciada!',
+    startedHelp: 'El tiempo ya corre. Cuando quieran, vean el vídeo de inicio.',
+    watch: '▶ Ver el vídeo de inicio',
+    book: '📓 Abrir mi cuaderno de detective',
+    bookHelp: 'Apunta sospechosos y pistas. Necesitas entrar con Google para guardarlo. Volverás al vídeo escaneando otra vez el QR.',
   },
   en: {
     welcome: 'Welcome to the case',
@@ -20,6 +25,11 @@ export const TEXTS = {
     anyway: 'View content anyway',
     error: 'Could not load. Check your connection and try again.',
     retry: 'Retry',
+    started: 'Game started!',
+    startedHelp: 'The clock is running. Watch the intro video whenever you are ready.',
+    watch: '▶ Watch the intro video',
+    book: '📓 Open my detective notebook',
+    bookHelp: 'Write down suspects and clues. You need to sign in with Google to save it. Scan the QR again to get back to the video.',
   },
 }
 

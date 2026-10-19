@@ -80,9 +80,22 @@ function askAlias(step) {
       await withTimeout(setDoc(newRef, batchRun))
       safeSet(RUN_KEY, newRef.id)
       await withTimeout(setDoc(doc(db, 'runs', newRef.id, 'scans', stepId), { scannedAt: serverTimestamp() }))
-    } catch { /* se redirige igualmente */ }
-    redirect(step.url)
+    } catch { /* se sigue igualmente */ }
+    started(step)
   }
+}
+
+// Tras empezar: el vídeo de inicio (lo de siempre) o el cuaderno de detective, que necesita entrar con Google en el Diario.
+function started(step) {
+  if (!/^https?:\/\//i.test(step.url)) return show(`<p>${t.invalid}</p>`)
+  show(`
+    <h1>${t.started}</h1>
+    <p>${t.startedHelp}</p>
+    <div class="scan-opciones">
+      <a class="boton" href="${esc(step.url)}">${t.watch}</a>
+      <a class="boton secundario" href="/diario#casos">${t.book}</a>
+      <small>${t.bookHelp}</small>
+    </div>`)
 }
 
 main().catch(() => show(`<p>${t.error}</p><button onclick="location.reload()">${t.retry}</button>`))

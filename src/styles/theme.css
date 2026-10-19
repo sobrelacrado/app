@@ -525,3 +525,9 @@ button.paso-toggle:not(:disabled):hover, button.paso-toggle:not(:disabled):activ
 .jug-cuando { white-space: nowrap; font-size: 12px; color: var(--gris); min-width: 56px; text-align: right; }
 .jug-cuerpo { padding: 0 2px 14px; }
 .jugador-correo { display: block; color: var(--gris); font-size: 13px; word-break: break-all; margin-bottom: 8px; }
+
+/* Pantalla tras empezar una partida (página del QR) */
+.scan-opciones { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
+.scan-opciones a.boton { display: block; text-align: center; text-decoration: none; box-sizing: border-box; padding: 14px 16px; }
+.scan-opciones a.boton.secundario { background: transparent; color: var(--tinta); border: 2px solid var(--tinta); }
+.scan-opciones small { color: var(--gris); font-size: 12px; line-height: 1.4; }

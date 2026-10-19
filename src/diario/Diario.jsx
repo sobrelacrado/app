@@ -32,7 +32,7 @@ export default function Diario({ onExit }) {
   const [copied, setCopied] = useState(false)
   const [laterLogin, setLaterLogin] = useState(() => { try { return localStorage.getItem('sl_login_ahora') === dateKey() } catch { return false } }) // "Ahora no" vale hasta mañana
   const [now, setNow] = useState(Date.now)
-  const [vista, setVista] = useState('hoy') // 'hoy' | 'archivo' | 'progreso' | 'casos'
+  const [vista, setVista] = useState(() => (location.hash === '#casos' ? 'casos' : 'hoy')) // 'hoy' | 'archivo' | 'progreso' | 'casos' (el enlace /diario#casos abre Mis casos)
   const [retoOn, setRetoOn] = useState(false) // jugando el reto de nivel de hoy (en vez del acertijo del día)
   const [retoLogin, setRetoLogin] = useState(false) // se pulsó el reto sin sesión: se enseña la invitación a entrar con Google
   const retoRef = useRef(null)
