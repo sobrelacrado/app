@@ -72,7 +72,7 @@ function Grupo({ code, user, cloud, today, days, retos, onBack, onChange }) {
   const rows = weeklyRanking(detail.members, detail.scores, wk, tab === 'now' ? { ...yo, streak: detail.scores?.[week]?.[user.uid]?.streak ?? 0 } : null)
   const winner = weeklyRanking(detail.members, detail.scores, prev)[0]
   return (
-    <div className="dr-grupo">
+    <div className="dr-amigos-grupo">
       <button type="button" className="suave" onClick={onBack}>← Mis grupos</button>
       <h2>{detail.group.name}</h2>
       <p className="dr-nota">{detail.members.length} {detail.members.length === 1 ? 'persona' : 'personas'} · código <b className="dr-codigo">{code}</b></p>
