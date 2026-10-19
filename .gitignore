@@ -37,3 +37,6 @@ secretos-NO-SUBIR/
 
 # Hojas de revision de acertijos (llevan las soluciones en claro)
 revision/
+
+# Mapa del proyecto generado por graphify
+graphify-out/

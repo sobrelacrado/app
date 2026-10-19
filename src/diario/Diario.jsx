@@ -84,7 +84,14 @@ export default function Diario({ onExit }) {
       await Promise.all(groupsRef.current.map((g) => cloud.current.pushScore(u.uid, g.code, wk, { pts, solved, streak })))
     } catch { /* sin red o sin permiso: se reintenta la próxima vez */ }
   }
-  const groupsChanged = () => { groupsRef.current = null; pushScores() }
+  const groupsChanged = () => { groupsRef.current = null; pushScores(); refreshChat() }
+  // Puntito en la pestaña Amigos si algún grupo tiene mensajes de otras personas que aún no has visto.
+  const [chatNuevo, setChatNuevo] = useState(false)
+  const refreshChat = async () => {
+    const u = userRef.current
+    if (!u || !cloud.current) return
+    try { setChatNuevo((await cloud.current.unreadGroups(u.uid, await cloud.current.myGroups(u.uid))).length > 0) } catch { /* sin red: no se avisa */ }
+  }
 
   // sync = false para el reloj (cada segundo): lo demás (pista, fallo, resuelto) se guarda también en la cuenta.
   const update = (patch, sync = true) => {
@@ -128,6 +135,7 @@ export default function Diario({ onExit }) {
         await Promise.all(upload.map((k) => cloud.current.pushDay(u.uid, k, { type: puzzleFor(PUZZLES, k).type, level: puzzleFor(PUZZLES, k).level, ...merged[k] })))
         await Promise.all(mr.upload.map((k) => cloud.current.pushReto(u.uid, k, mr.merged[k])))
         pushScores()
+        refreshChat()
         setStatus('')
       } catch { setStatus('error') }
     })
@@ -236,7 +244,7 @@ export default function Diario({ onExit }) {
           { id: 'archivo', label: 'Archivo', icon: 'archivo' },
           { id: 'progreso', label: 'Progreso', icon: 'progreso' },
           { id: 'casos', label: 'Casos', icon: 'casos', destacada: true },
-          { id: 'amigos', label: 'Amigos', icon: 'amigos' },
+          { id: 'amigos', label: 'Amigos', icon: 'amigos', badge: chatNuevo && vista !== 'amigos' ? 'Mensajes nuevos en un grupo' : null },
         ]} />
 
       {vista === 'sellos' && <Sellos onExit={() => setVista(sellosBack)} />}

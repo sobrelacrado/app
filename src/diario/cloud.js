@@ -1,6 +1,6 @@
 // Cuenta de jugador y progreso del Diario en la nube. Se carga solo cuando hace falta (no pesa en la primera pantalla).
 import { GoogleAuthProvider, getRedirectResult, onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut } from 'firebase/auth'
-import { collection, deleteDoc, deleteField, doc, getDoc, getDocs, query, serverTimestamp, setDoc, updateDoc, where, writeBatch } from 'firebase/firestore'
+import { collection, deleteDoc, deleteField, doc, getDoc, getDocs, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc, updateDoc, where, writeBatch } from 'firebase/firestore'
 import { auth } from '../auth.js'
 import { db } from '../firebase.js'
 
@@ -114,9 +114,10 @@ export async function joinGroup(uid, rawCode, alias) {
 export async function loadGroup(code, weeks) {
   const g = await getDoc(groupRef(code)).catch(() => null)
   if (!g?.exists()) throw new Error('gone')
-  let members, scores
+  let members, mods, scores
   try {
     members = await getDocs(collection(groupRef(code), 'members'))
+    mods = await getDocs(collection(groupRef(code), 'mods'))
     scores = await getDocs(query(collection(groupRef(code), 'scores'), where('week', 'in', weeks)))
   } catch (e) { throw new Error(e?.code === 'permission-denied' ? 'gone' : 'error') }
   const by = {}
@@ -124,6 +125,7 @@ export async function loadGroup(code, weeks) {
   return {
     group: { name: g.data().name, owner: g.data().owner },
     members: members.docs.map((d) => ({ uid: d.id, name: d.data().name })),
+    mods: mods.docs.map((d) => d.id),
     scores: by,
   }
 }
@@ -136,17 +138,30 @@ const removeScores = async (code, uid) => {
   const mine = await getDocs(query(collection(groupRef(code), 'scores'), where('uid', '==', uid))).catch(() => null)
   await Promise.all((mine?.docs ?? []).map((d) => deleteDoc(d.ref).catch(() => {})))
 }
+// Mensajes del chat de una persona en un grupo (cada quien puede borrar los suyos; el creador, los de cualquiera).
+const removeMessages = async (code, uid) => {
+  const mine = await getDocs(query(collection(groupRef(code), 'messages'), where('uid', '==', uid))).catch(() => null)
+  await Promise.all((mine?.docs ?? []).map((d) => deleteDoc(d.ref).catch(() => {})))
+}
 export async function leaveGroup(uid, code) {
+  await removeMessages(code, uid)
+  await deleteDoc(doc(groupRef(code), 'mods', uid)).catch(() => {})
   await removeScores(code, uid)
   await deleteDoc(doc(groupRef(code), 'members', uid))
   await deleteDoc(myGroupRef(uid, code))
 }
 export const forgetGroup = (uid, code) => deleteDoc(myGroupRef(uid, code)) // el grupo ya no existe o te echaron: se quita de tu lista
 export async function removeMember(code, uid) { // solo el creador
+  await removeMessages(code, uid)
+  await deleteDoc(doc(groupRef(code), 'mods', uid)).catch(() => {})
   await removeScores(code, uid)
   await deleteDoc(doc(groupRef(code), 'members', uid))
 }
-export async function deleteGroup(uid, code) { // solo el creador: se lleva a todos los miembros y sus puntos
+export async function deleteGroup(uid, code) { // solo el creador: se lleva a todos los miembros, sus puntos y el chat
+  const chat = await getDocs(collection(groupRef(code), 'messages'))
+  await Promise.all(chat.docs.map((d) => deleteDoc(d.ref)))
+  const mods = await getDocs(collection(groupRef(code), 'mods'))
+  await Promise.all(mods.docs.map((d) => deleteDoc(d.ref)))
   const scores = await getDocs(collection(groupRef(code), 'scores'))
   await Promise.all(scores.docs.map((d) => deleteDoc(d.ref)))
   const members = await getDocs(collection(groupRef(code), 'members'))
@@ -154,6 +169,40 @@ export async function deleteGroup(uid, code) { // solo el creador: se lleva a to
   await deleteDoc(doc(groupRef(code), 'members', uid))
   await deleteDoc(groupRef(code))
   await deleteDoc(myGroupRef(uid, code))
+}
+
+// ---------- Chat del grupo ----------
+const MAX_TEXT = 300, LAST_MESSAGES = 100
+const SEEN = 'sl_chat_visto' // cuándo abrió cada chat esta persona (solo en su móvil), para el puntito de mensajes nuevos
+const seenMap = () => { try { return JSON.parse(localStorage.getItem(SEEN)) ?? {} } catch { return {} } }
+export const markChatSeen = (code) => { try { localStorage.setItem(SEEN, JSON.stringify({ ...seenMap(), [code]: Date.now() })) } catch { /* sin almacenamiento */ } }
+
+// Mensajes en directo (los últimos 100, del más antiguo al más nuevo). Devuelve la función para dejar de escuchar.
+export function watchMessages(code, onData, onError) {
+  const q = query(collection(groupRef(code), 'messages'), orderBy('at', 'desc'), limit(LAST_MESSAGES))
+  return onSnapshot(q, (snap) => {
+    onData(snap.docs.map((d) => {
+      const x = d.data({ serverTimestamps: 'estimate' })
+      return { id: d.id, uid: x.uid, name: x.name, text: x.text, ms: x.at?.toMillis?.() ?? Date.now() }
+    }).reverse())
+  }, onError)
+}
+export const sendMessage = (uid, code, name, text) =>
+  setDoc(doc(collection(groupRef(code), 'messages')), { uid, name, text: String(text).trim().slice(0, MAX_TEXT), at: serverTimestamp() })
+export const deleteMessage = (code, id) => deleteDoc(doc(groupRef(code), 'messages', id))
+// El creador nombra (on = true) o quita moderadores del chat.
+export const setMod = (code, uid, on) => (on ? setDoc(doc(groupRef(code), 'mods', uid), { at: serverTimestamp() }) : deleteDoc(doc(groupRef(code), 'mods', uid)))
+// Grupos con mensajes de otras personas que esta persona aún no ha visto.
+export async function unreadGroups(uid, groups) {
+  const seen = seenMap()
+  const out = []
+  await Promise.all(groups.map(async (g) => {
+    try {
+      const snap = await getDocs(query(collection(groupRef(g.code), 'messages'), orderBy('at', 'desc'), limit(10)))
+      if (snap.docs.some((d) => d.data().uid !== uid && (d.data().at?.toMillis?.() ?? 0) > (seen[g.code] ?? 0))) out.push(g.code)
+    } catch { /* sin permiso o sin red: no se avisa */ }
+  }))
+  return out
 }
 
 // Perfil del jugador (nombre y correo de su cuenta de Google) para que el creador sepa quién juega. Se actualiza "last" en cada visita.

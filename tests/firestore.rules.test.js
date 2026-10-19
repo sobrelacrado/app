@@ -623,3 +623,64 @@ test('Grupos: la lista personal de grupos es de su dueño (y la lee el administr
   await assertSucceeds(getDocs(collection(admin(), 'users/ana/grupos')))
   await assertSucceeds(deleteDoc(doc(ana, 'users/ana/grupos/K7M2QX')))
 })
+
+// ---------- Chat del grupo (privado: solo miembros; ni el administrador lo lee) ----------
+const mensaje = (uid, name, text = 'Hola', over = {}) => ({ uid, name, text, at: serverTimestamp(), ...over })
+async function grupoConBea() { // grupo de Ana con Bea (miembro) y Carlos (miembro)
+  await crearGrupo()
+  await assertSucceeds(setDoc(doc(persona('bea'), 'groups/K7M2QX/members/bea'), miembro('Bea')))
+  await assertSucceeds(setDoc(doc(persona('carlos'), 'groups/K7M2QX/members/carlos'), miembro('Carlos')))
+}
+test('Chat: solo los miembros leen; ni el administrador, ni quien no es del grupo, ni sin sesión', async () => {
+  await grupoConBea()
+  await assertSucceeds(setDoc(doc(persona('bea'), 'groups/K7M2QX/messages/m1'), mensaje('bea', 'Bea')))
+  assert.equal((await assertSucceeds(getDocs(collection(persona('ana'), 'groups/K7M2QX/messages')))).size, 1)
+  assert.equal((await assertSucceeds(getDoc(doc(persona('carlos'), 'groups/K7M2QX/messages/m1')))).data().text, 'Hola')
+  await assertFails(getDocs(collection(admin(), 'groups/K7M2QX/messages')))
+  await assertFails(getDoc(doc(admin(), 'groups/K7M2QX/messages/m1')))
+  await assertFails(getDocs(collection(persona('intruso'), 'groups/K7M2QX/messages')))
+  await assertFails(getDocs(collection(player(), 'groups/K7M2QX/messages')))
+})
+test('Chat: se escribe con tu nombre del grupo, 1 a 300 caracteres y sin campos de más', async () => {
+  await grupoConBea()
+  const bea = persona('bea')
+  const ok = (over, id) => assertSucceeds(setDoc(doc(bea, 'groups/K7M2QX/messages/' + id), mensaje('bea', 'Bea', 'Hola', over)))
+  const no = (over, id = 'x') => assertFails(setDoc(doc(bea, 'groups/K7M2QX/messages/' + id), mensaje('bea', 'Bea', 'Hola', over)))
+  await ok({}, 'a')
+  await ok({ text: 'x'.repeat(300) }, 'b')
+  await no({ text: '' }); await no({ text: 'x'.repeat(301) }); await no({ text: 5 })
+  await no({ name: 'Ana' }) // hacerse pasar por otra persona del grupo
+  await no({ uid: 'ana' }); await no({ extra: 1 }); await no({ at: Timestamp.now() })
+  await assertFails(setDoc(doc(persona('intruso'), 'groups/K7M2QX/messages/z'), mensaje('intruso', 'Intruso'))) // no es del grupo
+  await assertFails(setDoc(doc(admin(), 'groups/K7M2QX/messages/z'), mensaje('a1', 'Admin'))) // el administrador tampoco
+  await assertFails(setDoc(doc(player(), 'groups/K7M2QX/messages/z'), mensaje('bea', 'Bea')))
+  await assertFails(updateDoc(doc(bea, 'groups/K7M2QX/messages/a'), { text: 'editado' })) // no se editan
+})
+test('Chat: borra el autor, el creador y los moderadores; nadie más', async () => {
+  await grupoConBea()
+  const msg = async (id, uid, name) => assertSucceeds(setDoc(doc(persona(uid), 'groups/K7M2QX/messages/' + id), mensaje(uid, name)))
+  await msg('m1', 'bea', 'Bea'); await msg('m2', 'bea', 'Bea'); await msg('m3', 'bea', 'Bea'); await msg('m4', 'bea', 'Bea')
+  await assertFails(deleteDoc(doc(persona('carlos'), 'groups/K7M2QX/messages/m1'))) // otro miembro, aún sin permiso
+  await assertFails(deleteDoc(doc(admin(), 'groups/K7M2QX/messages/m1')))
+  await assertFails(deleteDoc(doc(persona('intruso'), 'groups/K7M2QX/messages/m1')))
+  await assertSucceeds(deleteDoc(doc(persona('bea'), 'groups/K7M2QX/messages/m1'))) // el autor
+  await assertSucceeds(deleteDoc(doc(persona('ana'), 'groups/K7M2QX/messages/m2'))) // el creador
+  await assertSucceeds(setDoc(doc(persona('ana'), 'groups/K7M2QX/mods/carlos'), { at: serverTimestamp() })) // Ana nombra moderador a Carlos
+  await assertSucceeds(deleteDoc(doc(persona('carlos'), 'groups/K7M2QX/messages/m3'))) // ahora Carlos puede
+  await assertSucceeds(deleteDoc(doc(persona('ana'), 'groups/K7M2QX/mods/carlos'))) // Ana le quita el permiso
+  await assertFails(deleteDoc(doc(persona('carlos'), 'groups/K7M2QX/messages/m4')))
+})
+test('Chat: solo el creador nombra moderadores, y deben ser miembros', async () => {
+  await grupoConBea()
+  const modDoc = { at: serverTimestamp() }
+  await assertFails(setDoc(doc(persona('bea'), 'groups/K7M2QX/mods/bea'), modDoc)) // nadie se nombra a sí mismo
+  await assertFails(setDoc(doc(persona('bea'), 'groups/K7M2QX/mods/carlos'), modDoc))
+  await assertFails(setDoc(doc(admin(), 'groups/K7M2QX/mods/bea'), modDoc))
+  await assertFails(setDoc(doc(persona('ana'), 'groups/K7M2QX/mods/intruso'), modDoc)) // no es del grupo
+  await assertFails(setDoc(doc(persona('ana'), 'groups/K7M2QX/mods/bea'), { at: serverTimestamp(), extra: 1 }))
+  await assertSucceeds(setDoc(doc(persona('ana'), 'groups/K7M2QX/mods/bea'), modDoc))
+  await assertFails(setDoc(doc(persona('bea'), 'groups/K7M2QX/mods/carlos'), modDoc)) // un moderador no nombra a otros
+  assert.equal((await assertSucceeds(getDocs(collection(persona('carlos'), 'groups/K7M2QX/mods')))).size, 1)
+  await assertFails(getDocs(collection(persona('intruso'), 'groups/K7M2QX/mods')))
+  await assertSucceeds(deleteDoc(doc(persona('bea'), 'groups/K7M2QX/mods/bea'))) // puede renunciar
+})

@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { nextKey } from './ciphers.js'
 import { weekStart, weeklyPoints, weeklyRanking } from './points.js'
+import Chat from './Chat.jsx'
 
 const MEDAL = ['🥇', '🥈', '🥉']
 const SITE_URL = 'https://app-sobre-lacrado.web.app/diario'
@@ -28,8 +29,10 @@ function Clasificacion({ rows, user }) {
   )
 }
 
-function Grupo({ code, user, cloud, today, days, retos, onBack, onChange }) {
+function Grupo({ code, user, cloud, today, days, retos, unread, onBack, onChange }) {
   const [detail, setDetail] = useState(null)
+  const [chat, setChat] = useState(false) // chat abierto
+  const [chatSeen, setChatSeen] = useState(false) // ya se abrió el chat: se quita el puntito
   const [error, setError] = useState('')
   const [tab, setTab] = useState('now') // 'now' | 'prev'
   const [sure, setSure] = useState('') // 'salir' | 'borrar' | uid a echar
@@ -63,10 +66,15 @@ function Grupo({ code, user, cloud, today, days, retos, onBack, onChange }) {
   const leave = async () => { if (await act(() => cloud.leaveGroup(user.uid, code))) onBack() }
   const wipe = async () => { if (await act(() => cloud.deleteGroup(user.uid, code))) onBack() }
   const kick = async (uid) => { if (await act(() => cloud.removeMember(code, uid))) load() }
+  const toggleMod = async (uid, on) => { if (await act(() => cloud.setMod(code, uid, on))) load() }
 
   if (error && !detail) return <><p className="dr-aviso">{error}</p><button type="button" className="suave" onClick={load}>Reintentar</button> <button type="button" className="suave" onClick={onBack}>← Mis grupos</button></>
   if (!detail) return <p className="dr-nota">Cargando el grupo…</p>
   const owner = detail.group.owner === user.uid
+  if (chat) {
+    const myName = detail.members.find((m) => m.uid === user.uid)?.name ?? firstName(user)
+    return <Chat code={code} user={user} cloud={cloud} myName={myName} canModerate={owner || detail.mods.includes(user.uid)} onBack={() => { setChat(false); setChatSeen(true); onChange() }} />
+  }
   const wk = tab === 'now' ? week : prev
   const yo = { uid: user.uid, ...weeklyPoints(days, retos, week), streak: 0 } // tu fila siempre al día, aunque aún no se haya subido
   const rows = weeklyRanking(detail.members, detail.scores, wk, tab === 'now' ? { ...yo, streak: detail.scores?.[week]?.[user.uid]?.streak ?? 0 } : null)
@@ -77,6 +85,7 @@ function Grupo({ code, user, cloud, today, days, retos, onBack, onChange }) {
       <h2>{detail.group.name}</h2>
       <p className="dr-nota">{detail.members.length} {detail.members.length === 1 ? 'persona' : 'personas'} · código <b className="dr-codigo">{code}</b></p>
       <button type="button" className="dr-reto-boton dr-invitar" onClick={invite}>{copied ? '¡Copiado!' : '📨 Invitar amigos'}</button>
+      <button type="button" className="dr-chat-boton" onClick={() => setChat(true)}>💬 Chat del grupo{unread && !chatSeen && <i className="dr-chat-punto" role="img" aria-label="mensajes nuevos" />}</button>
 
       <div className="dr-sem-tabs">
         <button type="button" className={tab === 'now' ? 'activa' : ''} onClick={() => setTab('now')}>Esta semana</button>
@@ -92,11 +101,13 @@ function Grupo({ code, user, cloud, today, days, retos, onBack, onChange }) {
       {owner && detail.members.length > 1 && (
         <div className="dr-gestion">
           <h3>Gestionar miembros</h3>
-          {detail.members.filter((m) => m.uid !== user.uid).map((m) => (
-            sure === m.uid
+          <p className="dr-nota">Un <b>moderador</b> puede borrar mensajes del chat. Tú decides quién lo es.</p>
+          {detail.members.filter((m) => m.uid !== user.uid).map((m) => {
+            const mod = detail.mods.includes(m.uid)
+            return sure === m.uid
               ? <div key={m.uid} className="dr-borrar"><p>¿Echar a {m.name} del grupo?</p><button type="button" className="suave" onClick={() => kick(m.uid)}>Sí, echar</button> <button type="button" className="suave" onClick={() => setSure('')}>Cancelar</button></div>
-              : <p key={m.uid}>{m.name} <button type="button" className="suave" onClick={() => setSure(m.uid)}>Echar</button></p>
-          ))}
+              : <p key={m.uid}>{m.name}{mod ? ' 🛡️' : ''} <button type="button" className="suave" onClick={() => toggleMod(m.uid, !mod)}>{mod ? 'Quitar moderador' : 'Hacer moderador'}</button> <button type="button" className="suave" onClick={() => setSure(m.uid)}>Echar</button></p>
+          })}
         </div>
       )}
       {sure === (owner ? 'borrar' : 'salir')
@@ -114,6 +125,7 @@ function Grupo({ code, user, cloud, today, days, retos, onBack, onChange }) {
 
 export default function Amigos({ user, cloud, status, onLogin, today, days, retos, joinCode, onChange }) {
   const [groups, setGroups] = useState(null)
+  const [unread, setUnread] = useState([]) // códigos de grupos con mensajes nuevos
   const [open, setOpen] = useState('')
   const [mode, setMode] = useState(joinCode ? 'unir' : '') // '' | 'crear' | 'unir'
   const [name, setName] = useState('')
@@ -123,7 +135,11 @@ export default function Amigos({ user, cloud, status, onLogin, today, days, reto
   const [error, setError] = useState('')
 
   const load = useCallback(async () => {
-    try { setGroups(await cloud.myGroups(user.uid)) } catch { setGroups([]); setError('No se pudieron cargar tus grupos.') }
+    try {
+      const list = await cloud.myGroups(user.uid)
+      setGroups(list)
+      cloud.unreadGroups(user.uid, list).then(setUnread).catch(() => {})
+    } catch { setGroups([]); setError('No se pudieron cargar tus grupos.') }
   }, [cloud, user])
   useEffect(() => { if (user && cloud) load() }, [user, cloud, load])
   useEffect(() => { if (joinCode) { setMode('unir'); setCode(joinCode) } }, [joinCode])
@@ -154,7 +170,7 @@ export default function Amigos({ user, cloud, status, onLogin, today, days, reto
     setBusy(false)
   }
 
-  if (open) return <article className="dr-carta tema-detective"><Grupo code={open} user={user} cloud={cloud} today={today} days={days} retos={retos} onBack={() => { setOpen(''); load() }} onChange={onChange} /></article>
+  if (open) return <article className="dr-carta tema-detective"><Grupo code={open} user={user} cloud={cloud} today={today} days={days} retos={retos} unread={unread.includes(open)} onBack={() => { setOpen(''); load() }} onChange={onChange} /></article>
 
   return (
     <article className="dr-carta tema-detective">
@@ -163,7 +179,7 @@ export default function Amigos({ user, cloud, status, onLogin, today, days, reto
       {groups === null && <p className="dr-nota">Cargando tus grupos…</p>}
       {groups?.length > 0 && (
         <ul className="dr-grupos">
-          {groups.map((g) => <li key={g.code}><button type="button" onClick={() => setOpen(g.code)}><b>{g.name}</b><small>código {g.code}</small></button></li>)}
+          {groups.map((g) => <li key={g.code}><button type="button" onClick={() => setOpen(g.code)}><b>{g.name}{unread.includes(g.code) && <i className="dr-chat-punto" role="img" aria-label="mensajes nuevos" />}</b><small>código {g.code}</small></button></li>)}
         </ul>
       )}
       {groups?.length === 0 && !mode && <p className="dr-nota">Todavía no estás en ningún grupo.</p>}
@@ -190,7 +206,7 @@ export default function Amigos({ user, cloud, status, onLogin, today, days, reto
         </form>
       )}
       {!mode && error && <p className="dr-aviso">{error}</p>}
-      <p className="dr-nota">Los grupos son privados: solo los ven sus miembros (y el creador del juego, para saber cuántos grupos hay).</p>
+      <p className="dr-nota">Los grupos son privados: solo los ven sus miembros (y el creador del juego, para saber cuántos grupos hay). El chat de cada grupo es solo para sus miembros: ni el creador del juego lo ve.</p>
     </article>
   )
 }
