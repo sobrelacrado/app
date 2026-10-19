@@ -142,6 +142,32 @@ service cloud.firestore {
       }
     }
 
+    // ---------- Valoración de los casos ----------
+    // Una por persona y caso (id = uid_juego). Solo se puede valorar un caso del que se tiene una partida TERMINADA en la propia
+    // cuenta (endedAt solo se rellena escaneando la solución dentro del tiempo). La lee el dueño o el administrador.
+    match /valoraciones/{id} {
+      allow get: if request.auth != null && (id.matches(request.auth.uid + '_.*') || isAdmin());
+      allow list: if isAdmin() || (request.auth != null && resource.data.get('uid', null) == request.auth.uid);
+      allow create, update: if request.auth != null
+        && isValidRating(request.resource.data)
+        && id == request.auth.uid + '_' + request.resource.data.gameId;
+      allow delete: if request.auth != null && id.matches(request.auth.uid + '_.*');
+
+      function isValidRating(d) {
+        let run = get(/databases/$(database)/documents/runs/$(d.runId)).data;
+        return d.keys().hasOnly(['uid', 'gameId', 'runId', 'stars', 'comment', 'at'])
+          && d.keys().hasAll(['uid', 'gameId', 'runId', 'stars', 'comment', 'at'])
+          && d.uid == request.auth.uid
+          && d.gameId is string && d.runId is string
+          && d.stars is int && d.stars >= 1 && d.stars <= 5
+          && d.comment is string && d.comment.size() <= 300
+          && d.at == request.time
+          && run.get('uid', null) == request.auth.uid
+          && run.gameId == d.gameId
+          && run.endedAt != null;
+      }
+    }
+
     // ---------- Progreso personal del Diario ----------
     // Cada persona (sesión de Google) lee y escribe solo lo suyo; el administrador puede leerlo.
     match /users/{uid}/diario/{day} {

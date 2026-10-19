@@ -330,3 +330,14 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-carta button.dr-marca { width: 100%; min-width: 34px; min-height: 34px; margin: 0; padding: 0; background: rgba(0, 0, 0, .08); color: inherit; border: 1px solid rgba(0, 0, 0, .25); font: 700 16px 'Space Mono', monospace; }
 .dr-carta button.dr-marca.m1 { background: rgba(160, 40, 40, .2); color: #8a1f1f; }
 .dr-carta button.dr-marca.m2 { background: rgba(29, 106, 58, .25); color: #1d6a3a; }
+
+/* Vídeo del caso gratis y valoración de casos terminados */
+.dr-regalo .dr-video { display: block; width: min(100%, 260px); aspect-ratio: 1080 / 1850; margin: 0 auto 14px; border-radius: 10px; background: #000; box-shadow: 0 4px 14px rgba(0, 0, 0, .4); }
+.dr-valorar { margin: 12px 0 0; padding-top: 10px; border-top: 1px dashed rgba(0, 0, 0, .25); }
+.dr-valorar-t { margin: 0 0 4px; font-weight: 700; font-size: 14px; }
+.dr-estrellas { display: flex; gap: 2px; }
+.dr-carta .dr-estrellas button { width: 44px; min-height: 44px; padding: 0; background: transparent; border: 0; color: rgba(0, 0, 0, .3); font-size: 30px; line-height: 1; cursor: pointer; }
+.dr-carta .dr-estrellas button.on { color: #b9822a; }
+.dr-valorar textarea { width: 100%; box-sizing: border-box; margin: 4px 0 6px; padding: 8px; font: inherit; font-size: 14px; border: 1px solid rgba(0, 0, 0, .3); border-radius: 6px; background: rgba(255, 255, 255, .6); color: inherit; resize: vertical; }
+.dr-valorar-pie { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.dr-valorar-pie small { margin-left: auto; opacity: .7; }

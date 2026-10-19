@@ -6,12 +6,18 @@ import { caseSummary, STATUS_TEXT } from './casos.js'
 // Formulario de la lista de espera (el mismo enlace del perfil de Instagram): al apuntarse se recibe por correo el Caso 2, gratis.
 const FREE_CASE_URL = 'https://preview.mailerlite.io/forms/2670725/199972870005195853/share'
 
+// El vídeo está en GitHub Pages (mismo sitio que los del Caso 3), no dentro de la app: así no gasta la descarga diaria del alojamiento.
+const VIDEOS = 'https://sobrelacrado.github.io/videos/duarte-v0'
+
 function CasoGratis() {
   return (
     <aside className="dr-regalo">
       <span className="dr-gratis" aria-hidden="true">GRATIS</span>
       <h2>🕵️ Caso 2: Agencia Duarte</h2>
       <p className="dr-regalo-sub">Resuelve el caso del detective Tomás Duarte</p>
+      <video className="dr-video" controls playsInline preload="none" poster={`${VIDEOS}/duarte-v0-poster.jpg`} aria-label="Vídeo de presentación del Caso 2">
+        <source src={`${VIDEOS}/duarte-v0.mp4`} type="video/mp4" />
+      </video>
       <p>Un caso completo para imprimir y jugar en casa, con códigos QR, pistas y vídeos. Apúntate a la lista de espera y <b>te llega gratis por correo</b>.</p>
       <a className="boton dr-cta" href={FREE_CASE_URL} target="_blank" rel="noopener noreferrer">Quiero el caso gratis</a>
     </aside>
@@ -21,17 +27,56 @@ function CasoGratis() {
 const NOTE = 'Aquí aparecen las partidas que has jugado con los QR de los casos desde este móvil. Se vinculan a tu cuenta solo para que puedas verlas; no se comparten con nadie. Quitar una partida de tu cuenta no la borra del juego.'
 const fmtDate = (d) => d.toLocaleString('es', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
 
+// Valoración privada de un caso terminado: de 1 a 5 estrellas y un comentario opcional que solo lee el creador.
+function Valoracion({ uid, cloud, gameId, runId, saved, onSaved }) {
+  const [stars, setStars] = useState(saved?.stars ?? 0)
+  const [comment, setComment] = useState(saved?.comment ?? '')
+  const [state, setState] = useState('') // '' | 'guardando' | 'ok' | 'error'
+  const change = (fn) => (v) => { fn(v); setState('') }
+  const save = async () => {
+    setState('guardando')
+    try { await cloud.saveRating(uid, gameId, runId, stars, comment); onSaved(gameId, { stars, comment: comment.trim() }); setState('ok') } catch { setState('error') }
+  }
+  const remove = async () => {
+    setState('guardando')
+    try { await cloud.deleteRating(uid, gameId); onSaved(gameId, null); setStars(0); setComment(''); setState('') } catch { setState('error') }
+  }
+  return (
+    <div className="dr-valorar">
+      <p className="dr-valorar-t">{saved ? 'Tu valoración' : '¿Qué tal el caso?'}</p>
+      <div className="dr-estrellas" role="radiogroup" aria-label="Estrellas">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <button key={n} type="button" role="radio" aria-checked={stars === n} aria-label={`${n} ${n === 1 ? 'estrella' : 'estrellas'}`}
+            className={n <= stars ? 'on' : ''} onClick={() => change(setStars)(n)}>★</button>
+        ))}
+      </div>
+      <textarea value={comment} maxLength={300} rows={2} placeholder="Cuéntame qué te ha gustado o qué mejorarías (opcional)"
+        onChange={(e) => change(setComment)(e.target.value)} aria-label="Comentario" />
+      <div className="dr-valorar-pie">
+        <button type="button" className="suave" disabled={!stars || state === 'guardando'} onClick={save}>{saved ? 'Actualizar' : 'Enviar valoración'}</button>
+        {saved && <button type="button" className="suave" disabled={state === 'guardando'} onClick={remove}>Quitar</button>}
+        <small>{comment.length}/300</small>
+      </div>
+      {state === 'ok' && <p className="dr-nota">¡Gracias! Guardado.</p>}
+      {state === 'error' && <p className="dr-aviso">No se pudo guardar. Inténtalo de nuevo.</p>}
+      <p className="dr-nota">Solo la lee el creador del juego, no se publica.</p>
+    </div>
+  )
+}
+
 export default function Casos({ user, cloud, status, onLogin }) {
   const [items, setItems] = useState(null) // null = cargando
   const [error, setError] = useState(false)
   const [open, setOpen] = useState('') // id de la partida con los pasos desplegados
   const [sure, setSure] = useState('') // id de la partida pendiente de confirmar
+  const [ratings, setRatings] = useState({}) // valoraciones propias por juego
 
   const load = async () => {
     setError(false)
     try {
       await cloud.claimLocalRuns(user.uid)
       setItems(await cloud.loadCases(user.uid))
+      setRatings(await cloud.loadRatings(user.uid).catch(() => ({})))
     } catch { setError(true); setItems([]) }
   }
   useEffect(() => {
@@ -93,6 +138,11 @@ export default function Casos({ user, cloud, status, onLogin }) {
                   ))}
                   {rows.length === 0 && <li><span>Sin pasos registrados</span></li>}
                 </ol>
+              )}
+
+              {st.kind === 'finished' && c.run.gameId && (
+                <Valoracion key={c.id} uid={user.uid} cloud={cloud} gameId={c.run.gameId} runId={c.id}
+                  saved={ratings[c.run.gameId]} onSaved={(g, v) => setRatings((r) => { const n = { ...r }; if (v) n[g] = v; else delete n[g]; return n })} />
               )}
 
               {sure === c.id ? (

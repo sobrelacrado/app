@@ -420,3 +420,50 @@ test('Perfil: la primera vez no se puede actualizar un perfil que no existe; hay
   await assertSucceeds(setDoc(doc(ana, 'users/ana'), { ...datos(), first: serverTimestamp() }))
   await assertSucceeds(updateDoc(doc(ana, 'users/ana'), datos()))
 })
+
+// ---------- Valoración de los casos ----------
+const cerrar = (id = 'r1', extra = {}) => env.withSecurityRulesDisabled((ctx) => updateDoc(doc(ctx.firestore(), 'runs/' + id), { uid: 'u2', endedAt: Timestamp.now(), ...extra }))
+const val = (over = {}) => ({ uid: 'u2', gameId: 'g1', runId: 'r1', stars: 4, comment: 'Muy bueno', at: serverTimestamp(), ...over })
+
+test('Valoración: quien terminó el caso lo valora, lo cambia y lo borra; solo una por caso', async () => {
+  await cerrar()
+  await assertSucceeds(setDoc(doc(mine(), 'valoraciones/u2_g1'), val()))
+  await assertSucceeds(setDoc(doc(mine(), 'valoraciones/u2_g1'), val({ stars: 5, comment: '' }))) // cambiar la suya
+  assert.equal((await getDoc(doc(mine(), 'valoraciones/u2_g1'))).data().stars, 5)
+  await assertFails(setDoc(doc(mine(), 'valoraciones/u2_otra'), val())) // el id debe ser uid_juego
+  await assertSucceeds(deleteDoc(doc(mine(), 'valoraciones/u2_g1')))
+  assert.equal((await getDoc(doc(admin(), 'valoraciones/u2_g1'))).exists(), false)
+})
+test('Valoración: no se puede valorar sin partida terminada, con partida ajena ni de otro juego', async () => {
+  await assertFails(setDoc(doc(mine(), 'valoraciones/u2_g1'), val())) // la partida no es suya ni está terminada
+  await env.withSecurityRulesDisabled((ctx) => updateDoc(doc(ctx.firestore(), 'runs/r1'), { uid: 'u2' }))
+  await assertFails(setDoc(doc(mine(), 'valoraciones/u2_g1'), val())) // suya pero en curso (sin terminar o sin tiempo)
+  await assertFails(setDoc(doc(player(), 'valoraciones/u2_g1'), val())) // sin sesión
+  await cerrar()
+  await assertFails(setDoc(doc(third(), 'valoraciones/u3_g1'), val({ uid: 'u3' }))) // la partida es de u2
+  await assertFails(setDoc(doc(mine(), 'valoraciones/u2_g2'), val({ gameId: 'g2' }))) // la partida es del juego g1
+  await assertFails(setDoc(doc(mine(), 'valoraciones/u2_g1'), val({ runId: 'noexiste' })))
+})
+test('Valoración: se rechazan estrellas, comentario y campos con forma incorrecta', async () => {
+  await cerrar()
+  const ok = (over) => assertSucceeds(setDoc(doc(mine(), 'valoraciones/u2_g1'), val(over)))
+  const no = (over) => assertFails(setDoc(doc(mine(), 'valoraciones/u2_g1'), val(over)))
+  await no({ stars: 0 }); await no({ stars: 6 }); await no({ stars: 3.5 }); await no({ stars: '5' })
+  await no({ comment: 'x'.repeat(301) }); await no({ comment: 7 })
+  await no({ at: Timestamp.now() }); await no({ uid: 'u3' }); await no({ extra: 1 })
+  await ok({ comment: 'x'.repeat(300), stars: 1 })
+})
+test('Valoración: cada persona lee solo las suyas; el administrador las lee todas pero no escribe por nadie', async () => {
+  await cerrar()
+  await assertSucceeds(setDoc(doc(mine(), 'valoraciones/u2_g1'), val()))
+  await assertSucceeds(getDoc(doc(mine(), 'valoraciones/u2_g1')))
+  await assertFails(getDoc(doc(third(), 'valoraciones/u2_g1')))
+  await assertFails(getDoc(doc(player(), 'valoraciones/u2_g1')))
+  assert.equal((await assertSucceeds(getDocs(query(collection(mine(), 'valoraciones'), where('uid', '==', 'u2'))))).size, 1)
+  await assertFails(getDocs(collection(mine(), 'valoraciones'))) // sin filtrar
+  await assertFails(getDocs(query(collection(third(), 'valoraciones'), where('uid', '==', 'u2')))) // filtrando por otra
+  assert.equal((await assertSucceeds(getDocs(collection(admin(), 'valoraciones')))).size, 1)
+  await assertSucceeds(getDoc(doc(admin(), 'valoraciones/u2_g1')))
+  await assertFails(setDoc(doc(admin(), 'valoraciones/u2_g1'), val())) // el admin no escribe como si fuera ella
+  await assertFails(deleteDoc(doc(third(), 'valoraciones/u2_g1')))
+})

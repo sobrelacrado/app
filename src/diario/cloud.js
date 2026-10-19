@@ -48,8 +48,22 @@ export async function saveProfile(u) {
   else await setDoc(ref, { ...data, first: serverTimestamp() })
 }
 
+// ---------- Valoración de los casos (privada: solo la leen su autor y el creador) ----------
+export async function loadRatings(uid) {
+  const snap = await getDocs(query(collection(db, 'valoraciones'), where('uid', '==', uid)))
+  const out = {}
+  snap.forEach((d) => { const x = d.data(); out[x.gameId] = { stars: x.stars, comment: x.comment ?? '' } })
+  return out
+}
+// Una por persona y caso; runId es la partida terminada que lo permite (lo comprueban las reglas).
+export const saveRating = (uid, gameId, runId, stars, comment) =>
+  setDoc(doc(db, 'valoraciones', `${uid}_${gameId}`), { uid, gameId, runId, stars, comment: String(comment).trim().slice(0, 300), at: serverTimestamp() })
+export const deleteRating = (uid, gameId) => deleteDoc(doc(db, 'valoraciones', `${uid}_${gameId}`))
+
 export async function deleteAll(uid) {
   await deleteDoc(doc(db, 'users', uid)).catch(() => {}) // el perfil (nombre y correo) también se borra
+  const rated = await getDocs(query(collection(db, 'valoraciones'), where('uid', '==', uid))).catch(() => null)
+  await Promise.all((rated?.docs ?? []).map((d) => deleteDoc(d.ref).catch(() => {})))
   const snap = await getDocs(days(uid))
   for (let i = 0; i < snap.docs.length; i += 400) {
     const batch = writeBatch(db)
