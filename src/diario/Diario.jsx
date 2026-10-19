@@ -5,6 +5,7 @@ import { GAMES, HOWTO, TYPE_NAME } from './games.jsx'
 import './diario.css'
 import PUZZLES from './puzzles.js'
 import Archivo from './Archivo.jsx'
+import TabBar from '../components/TabBar.jsx'
 import Amigos from './Amigos.jsx'
 import Avisos from './Avisos.jsx'
 import Casos from './Casos.jsx'
@@ -191,6 +192,9 @@ export default function Diario({ onExit }) {
   const multi = puzzle.type === 'criptico' // el críptico da la ayuda por pasos (0-3)
   const step = day.hintStep ?? 0
 
+  // Puntito en «Hoy»: falta el acertijo del día o, con sesión, el reto de tu nivel.
+  const pendienteHoy = !days[key]?.done || (!!user && !!retoPick && !retos[key]?.done)
+
   const share = async () => {
     const text = shareText(puzzle, { ...day, n }, SITE_URL)
     try {
@@ -214,15 +218,15 @@ export default function Diario({ onExit }) {
         <div className="dr-racha" title="Racha de días seguidos · puntos">🔥 {streak} · ⭐ {pts}</div>
       </header>
 
-      <nav className="dr-tabs" aria-label="Secciones">
-        <button type="button" className={vista === 'hoy' && !viewKey && !playReto ? 'activa' : ''} onClick={() => { setViewKey(null); setRetoOn(false); setVista('hoy') }}>Hoy</button>
-        <button type="button" className={vista === 'archivo' || (vista === 'hoy' && viewKey) ? 'activa' : ''} onClick={() => setVista('archivo')}>Archivo</button>
-        <button type="button" className={vista === 'progreso' ? 'activa' : ''} onClick={() => setVista('progreso')}>
-          Progreso
-        </button>
-        <button type="button" className={vista === 'casos' ? 'activa' : ''} onClick={() => setVista('casos')}>Casos</button>
-        <button type="button" className={vista === 'amigos' ? 'activa' : ''} onClick={() => setVista('amigos')}>Amigos</button>
-      </nav>
+      <TabBar variant="diario" label="Secciones" active={vista === 'hoy' ? (viewKey ? 'archivo' : 'hoy') : vista}
+        onChange={(id) => { if (id === 'hoy') { setViewKey(null); setRetoOn(false) } setVista(id) }}
+        tabs={[
+          { id: 'hoy', label: 'Hoy', icon: 'hoy', badge: pendienteHoy ? 'Tienes un acertijo o un reto sin resolver' : null },
+          { id: 'archivo', label: 'Archivo', icon: 'archivo' },
+          { id: 'progreso', label: 'Progreso', icon: 'progreso' },
+          { id: 'casos', label: 'Casos', icon: 'casos' },
+          { id: 'amigos', label: 'Amigos', icon: 'amigos' },
+        ]} />
 
       {vista === 'archivo' && <Archivo days={days} todayKey={key} onPick={(dayKey) => { setViewKey(dayKey); setRetoOn(false); setVista('hoy') }} />}
 

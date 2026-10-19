@@ -1,11 +1,13 @@
 import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import { GoogleAuthProvider, getRedirectResult, onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut } from 'firebase/auth'
 import { auth } from './auth.js'
-import { LANGS, LangContext, initialLang, textsFor } from './i18n.js'
+import { LangContext, initialLang, textsFor } from './i18n.js'
 import { ADMIN_EMAIL } from './lib/runs.js'
 import { applyUpdate, promptInstall, useCanInstall, useNeedRefresh, useOnline } from './lib/pwa.js'
 import AlertWatcher from './components/AlertWatcher.jsx'
 import Menu from './components/Menu.jsx'
+import Switch from './components/Switch.jsx'
+import TabBar from './components/TabBar.jsx'
 import Games from './components/Games.jsx'
 import Panel from './components/Panel.jsx'
 import Stats from './components/Stats.jsx'
@@ -107,7 +109,7 @@ export default function App() {
           <Diario onExit={() => setVista('panel')} />
         </Suspense>
       )}
-      <div className="hoja" hidden={allowed && vista === 'diario'}>
+      <div className={'hoja' + (allowed ? ' con-barra' : '')} hidden={allowed && vista === 'diario'}>
         <header className="membrete">
           <div className="marca">
             <img src="/sello-128.png" alt="" />
@@ -118,19 +120,18 @@ export default function App() {
               <button type="button" role="menuitem" onClick={() => setVista('diario')}>🔓 {t.diaryOpen}</button>
             )}
             {allowed && (
-              <button type="button" role="menuitem" onClick={toggleAlerts} aria-pressed={alertsOn}>
-                {alertsOn ? t.alertsOn : t.alertsOff}
-              </button>
+              <div className="menu-fila" data-keep>
+                <span>{t.alerts}</span>
+                <Switch left={t.switchNo} right={t.switchYes} checked={alertsOn} onChange={toggleAlerts} label={t.alerts} />
+              </div>
             )}
-            <button type="button" role="menuitem" onClick={toggleModo}>
-              {modo === 'oscuro' ? '☀ ' + t.modeToLight : '☾ ' + t.modeToDark}
-            </button>
-            <div className="menu-idiomas">
-              {LANGS.map((l) => (
-                <button key={l} type="button" role="menuitem" className={l === lang ? 'activo' : ''} onClick={() => chooseLang(l)}>
-                  {l.toUpperCase()}
-                </button>
-              ))}
+            <div className="menu-fila" data-keep>
+              <span>{t.modeLabel}</span>
+              <Switch left={t.modeLight} right={t.modeDark} checked={modo === 'oscuro'} onChange={toggleModo} label={t.modeLabel} />
+            </div>
+            <div className="menu-fila" data-keep>
+              <span>{t.languageLabel}</span>
+              <Switch left="ES" right="EN" checked={lang === 'en'} onChange={(on) => chooseLang(on ? 'en' : 'es')} label={t.languageLabel} />
             </div>
             {canInstall && <button type="button" role="menuitem" onClick={promptInstall}>{t.install}</button>}
             {user && <button type="button" role="menuitem" onClick={() => signOut(auth)}>{t.logout}</button>}
@@ -162,12 +163,12 @@ export default function App() {
 
         {allowed && (
           <>
-            <nav className="pestanas">
-              <button type="button" className={tab === 'runs' ? 'activa' : ''} onClick={() => setTab('runs')}>{t.tabRuns}</button>
-              <button type="button" className={tab === 'stats' ? 'activa' : ''} onClick={() => setTab('stats')}>{t.tabStats}</button>
-              <button type="button" className={tab === 'games' ? 'activa' : ''} onClick={() => setTab('games')}>{t.tabGames}</button>
-              <button type="button" className={tab === 'players' ? 'activa' : ''} onClick={() => setTab('players')}>{t.tabPlayers}</button>
-            </nav>
+            <TabBar label={t.tabsLabel} active={tab} onChange={setTab} tabs={[
+              { id: 'runs', label: t.tabRuns, icon: 'partidas' },
+              { id: 'stats', label: t.tabStats, icon: 'stats' },
+              { id: 'games', label: t.tabGames, icon: 'juegos' },
+              { id: 'players', label: t.tabPlayers, icon: 'jugadores' },
+            ]} />
             <div className="vista" key={tab}>
               {tab === 'runs' && <Panel />}
               {tab === 'stats' && <Stats />}

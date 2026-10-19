@@ -1,0 +1,59 @@
+/* Barra de pestañas flotante: píldora abajo, con cristal esmerilado, sombra suave y un selector que se desliza. */
+.tabbar {
+  --tb-bg: var(--papel);
+  --tb-fg: var(--tinta);
+  --tb-line: var(--regla);
+  --tb-sel-bg: var(--tinta);
+  --tb-sel-fg: var(--papel);
+  --tb-dot-ring: var(--papel);
+  position: fixed; z-index: 40; left: 50%; bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  width: min(calc(100% - 24px), 480px); box-sizing: border-box;
+  display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+  padding: 5px; border-radius: 24px;
+  background: var(--tb-bg); border: 1px solid var(--tb-line);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .32), 0 2px 6px rgba(0, 0, 0, .18);
+  transform: translateX(-50%);
+  transition: transform .32s cubic-bezier(.3, .9, .3, 1), opacity .25s ease;
+}
+@supports (backdrop-filter: blur(1px)) {
+  .tabbar { background: color-mix(in srgb, var(--tb-bg) 86%, transparent); -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2); }
+}
+.tabbar.oculta { transform: translate(-50%, 170%); opacity: 0; pointer-events: none; }
+[data-modo='oscuro'] .tabbar:not(.diario) { --tb-line: rgba(243, 238, 226, .18); }
+
+/* Variante del Diario: siempre oscura, con colores fijos */
+.tabbar.diario {
+  --tb-bg: #1b1814; --tb-fg: rgba(243, 238, 226, .72); --tb-line: rgba(243, 238, 226, .16);
+  --tb-sel-bg: #f3eee2; --tb-sel-fg: #1d1d1d; --tb-dot-ring: #1b1814;
+}
+
+/* El selector: ocupa exactamente una pestaña y se mueve con la variable --i */
+.tabbar-sel {
+  position: absolute; top: 5px; bottom: 5px; left: 5px; border-radius: 19px; background: var(--tb-sel-bg);
+  width: calc((100% - 10px) / var(--n)); transform: translateX(calc(var(--i) * 100%));
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .3);
+  transition: transform .42s cubic-bezier(.3, .9, .3, 1);
+}
+
+.tabbar button, .tabbar button:hover, .tabbar button:active {
+  position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  min-height: 54px; padding: 7px 2px 6px; margin: 0; border: 0; border-radius: 19px; background: transparent;
+  box-shadow: none; filter: none; transform: none;
+  color: var(--tb-fg); font-family: var(--texto, inherit); font-weight: 700; font-size: 10.5px; letter-spacing: .3px; text-transform: none; line-height: 1.1;
+  transition: color .3s ease;
+}
+.tabbar button.activa { color: var(--tb-sel-fg); }
+.tabbar button:focus-visible { outline: 2px solid var(--tb-sel-fg); outline-offset: -4px; }
+.tabbar .tabbar-txt { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tabbar .tabbar-ico { position: relative; display: block; line-height: 0; }
+.tabbar svg { width: 22px; height: 22px; transition: transform .3s cubic-bezier(.3, .9, .3, 1); }
+.tabbar button.activa svg { transform: translateY(-1px) scale(1.08); }
+
+/* Puntito de aviso (algo pendiente en esa pestaña) */
+.tabbar .tabbar-punto { position: absolute; top: -2px; right: -5px; width: 9px; height: 9px; border-radius: 50%; background: #e8731a; box-shadow: 0 0 0 2px var(--tb-dot-ring); }
+.tabbar button.activa .tabbar-punto { box-shadow: 0 0 0 2px var(--tb-sel-bg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tabbar, .tabbar-sel, .tabbar svg, .tabbar button { transition: none !important; }
+}
+@media print { .tabbar { display: none !important; } }

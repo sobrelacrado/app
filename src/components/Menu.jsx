@@ -25,7 +25,7 @@ export default function Menu({ label, children }) {
       >
         ⋮
       </button>
-      {open && <div className="menu-panel" role="menu" onClick={() => setOpen(false)}>{children}</div>}
+      {open && <div className="menu-panel" role="menu" onClick={(e) => { if (!e.target.closest('[data-keep]')) setOpen(false) }}>{children}</div>}
     </div>
   )
 }

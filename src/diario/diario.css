@@ -18,8 +18,8 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-como summary::-webkit-details-marker { display: none; }
 .dr-como p { margin: 10px 0 2px; padding: 12px 14px; font-size: 14px; line-height: 1.6; background: rgba(0, 0, 0, .06); border-radius: 6px; }
 .dr-juego { margin-top: 18px; padding-top: 20px; border-top: 1px dashed currentColor; }
-.dr-carta button { background: var(--t-etq-bg); color: var(--t-etq-color); border-color: var(--t-etq-bg); font-family: var(--t-titulo); width: 100%; margin-top: 16px; min-height: 48px; }
-.dr-carta button.suave { background: transparent; color: var(--t-tinta); border: 1px solid currentColor; width: auto; min-height: 36px; padding: 4px 12px; }
+.dr-carta button { background: var(--t-etq-bg); color: var(--t-etq-color); border-color: var(--t-etq-bg); font-family: var(--t-titulo); width: 100%; margin-top: 16px; min-height: 48px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0, 0, 0, .28); }
+.dr-carta button.suave { background: transparent; color: var(--t-tinta); border: 1px solid currentColor; width: auto; min-height: 36px; padding: 4px 12px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, .18); }
 
 .dr-cifrado { font-size: 20px; font-weight: 700; letter-spacing: 3px; text-align: center; word-break: break-word; margin: 8px 0; padding: 10px; background: rgba(0, 0, 0, .06); }
 .dr-cifrado, .dr-grupo, .dr-lectura b, .dr-celda span { font-family: 'Space Mono', 'Courier New', monospace; }
@@ -412,3 +412,14 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-gestion { margin-top: 14px; }
 .dr-gestion h3 { margin: 0 0 6px; font-size: 14px; text-transform: uppercase; letter-spacing: .5px; }
 .dr-gestion p { margin: 4px 0; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+
+/* ---------- Estética: barra de abajo, botones y entrada de pantallas ---------- */
+.dr-pagina { padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)); }
+.dr-carta button:disabled { box-shadow: none; }
+/* controles pequeños (fichas, casillas, estrellas…): redondeados pero sin sombra, para no recargar */
+.dr-carta button.dr-bin, .dr-carta button.dr-intruso, .dr-carta button.dr-marca, .dr-carta .dr-estrellas button, .dr-carta .dr-sosp button, .dr-carta .dr-sem-tabs button,
+.dr-carta .dr-grupos button, .dr-sopa button, .dr-grosor button, .dr-arch button.dr-dia, .dr-carta .dr-sosp-nuevo button { box-shadow: none; }
+.dr-carta button.dr-bin, .dr-carta button.dr-intruso, .dr-carta button.dr-marca { border-radius: 8px; }
+@keyframes dr-entra { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.dr-carta, .dr-archivo-aviso, .dr-reto { animation: dr-entra .3s ease-out backwards; }
+@media (prefers-reduced-motion: reduce) { .dr-carta, .dr-archivo-aviso, .dr-reto { animation: none; } }
