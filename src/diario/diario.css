@@ -461,3 +461,8 @@ body { background: var(--mesa); min-height: 100vh; }
 @media (prefers-reduced-motion: reduce) { .ss-tablero.ganado, .ss-sello { animation: none; } }
 .ss-carta .dr-sello { margin-bottom: 18px; }
 .ss-carta .dr-como { margin-top: 14px; }
+.ss-reglas { margin: 8px 0; padding-left: 22px; line-height: 1.55; }
+.ss-reglas li { margin-bottom: 4px; }
+.dr-como .ss-caja { margin: 10px 0 2px; padding: 12px 14px; font-size: 14px; line-height: 1.6; background: rgba(0, 0, 0, .06); border-radius: 6px; }
+.dr-como .ss-caja p { margin: 0 0 6px; padding: 0; background: none; }
+.dr-como .ss-caja p:last-child { margin-bottom: 0; }

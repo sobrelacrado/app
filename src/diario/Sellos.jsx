@@ -32,6 +32,24 @@ function Sello() {
   )
 }
 
+function Reglas({ abierto }) {
+  return (
+    <details className="dr-como" open={abierto}>
+      <summary>¿Cómo se juega?</summary>
+      <div className="ss-caja">
+      <p>Hay que poner <b>tantos sellos como casillas tiene un lado</b> del tablero, cumpliendo estas reglas:</p>
+      <ol className="ss-reglas">
+        <li><b>Un solo sello en cada fila.</b> Nunca dos en la misma fila (la línea de izquierda a derecha).</li>
+        <li><b>Un solo sello en cada columna.</b> Nunca dos en la misma columna (la línea de arriba abajo).</li>
+        <li><b>Un solo sello en cada color.</b> Cada región de color lleva exactamente uno.</li>
+        <li><b>No se pueden tocar</b>, ni de lado ni en diagonal.</li>
+      </ol>
+      <p>Toca una casilla para descartarla (✕) y otra vez para poner el sello. Si dos sellos se estorban, se marcan en rojo.</p>
+      </div>
+    </details>
+  )
+}
+
 function Partida({ initial, onWin, onLeave, onNew, firstTime }) {
   const { n, seed } = initial
   const board = useMemo(() => generate(n, seed), [n, seed])
@@ -146,10 +164,7 @@ function Partida({ initial, onWin, onLeave, onNew, firstTime }) {
             <button type="button" className="suave" onClick={hint}>Pista</button>
             <button type="button" className="suave" onClick={reset}>Reiniciar</button>
           </div>
-          <details className="dr-como" open={firstTime}>
-            <summary>¿Cómo se juega?</summary>
-            <p>Toca una casilla: primero la descartas (✕) y al tocar otra vez pones un sello. Hay que poner un sello en cada fila, en cada columna y en cada región de color, y dos sellos nunca pueden tocarse, ni en diagonal.</p>
-          </details>
+          <Reglas abierto={firstTime} />
           <button type="button" className="suave ss-salir" onClick={onLeave}>← Cambiar de tamaño</button>
         </>
       )}
@@ -198,10 +213,7 @@ export default function Sellos({ onExit }) {
             {stats.played ? <>Llevas <b>{stats.played}</b> {stats.played === 1 ? 'tablero resuelto' : 'tableros resueltos'}{stats.streak > 1 ? <> · racha de <b>{stats.streak}</b> días</> : null}. </> : null}
             Los récords solo cuentan si no usas pista.
           </p>
-          <details className="dr-como" open={!stats.played}>
-            <summary>¿Cómo se juega?</summary>
-            <p>Pon un sello de lacre en cada fila, en cada columna y en cada región de color. Dos sellos nunca pueden tocarse, ni siquiera en diagonal. Toca una casilla para descartarla (✕) y otra vez para poner el sello.</p>
-          </details>
+          <Reglas abierto={!stats.played} />
           <button type="button" className="suave" onClick={onExit}>← Volver</button>
         </>
       )}
