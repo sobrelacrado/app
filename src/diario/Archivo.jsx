@@ -1,4 +1,5 @@
 // Archivo del Diario: calendario con todos los días anteriores. Tocar un día lo abre para jugarlo (sin racha, con la mitad de puntos).
+import SellosTarjeta from './SellosTarjeta.jsx'
 import { archiveMonths, archiveSummary } from './archive.js'
 
 const MARK = { done: '✓', late: '↺', started: '…' }
@@ -16,10 +17,7 @@ export default function Archivo({ days, todayKey, onPick, onSellos }) {
       </p>
 
       {onSellos && (
-        <div className="dr-sellos-invita">
-          <p><b>Sellos</b> · tableros de lógica sin límite, para jugar cuando quieras.</p>
-          <button type="button" className="suave" onClick={onSellos}>Jugar a Sellos</button>
-        </div>
+        <SellosTarjeta onClick={onSellos} />
       )}
 
       {months.map((m) => (

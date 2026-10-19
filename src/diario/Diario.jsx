@@ -11,6 +11,7 @@ import Avisos from './Avisos.jsx'
 import Casos from './Casos.jsx'
 import Progreso from './Progreso.jsx'
 import Sellos from './Sellos.jsx'
+import SellosTarjeta from './SellosTarjeta.jsx'
 import { dayPoints, fmtMult, rankOf, retoPoints, streakBefore, totalPoints, weekStart, weeklyPoints } from './points.js'
 import { retoFor, retoPuzzle } from './reto.js'
 import BANCO from './banco.js'
@@ -234,7 +235,7 @@ export default function Diario({ onExit }) {
           { id: 'hoy', label: 'Hoy', icon: 'hoy', badge: pendienteHoy ? 'Tienes un acertijo o un reto sin resolver' : null },
           { id: 'archivo', label: 'Archivo', icon: 'archivo' },
           { id: 'progreso', label: 'Progreso', icon: 'progreso' },
-          { id: 'casos', label: 'Casos', icon: 'casos' },
+          { id: 'casos', label: 'Casos', icon: 'casos', destacada: true },
           { id: 'amigos', label: 'Amigos', icon: 'amigos' },
         ]} />
 
@@ -310,10 +311,7 @@ export default function Diario({ onExit }) {
               </div>
             )}
             {!playReto && !late && (
-              <div className="dr-sellos-invita">
-                <p><b>¿Sigues con ganas?</b> Sellos: tableros de lógica sin límite, para entrenar cuanto quieras.</p>
-                <button type="button" className="suave" onClick={() => openSellos('hoy')}>Jugar a Sellos</button>
-              </div>
+              <SellosTarjeta onClick={() => openSellos('hoy')} />
             )}
             {!user && !laterLogin && (
               <div className="dr-guardar">

@@ -428,9 +428,13 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-grupo-form input::placeholder, .dr-valorar textarea::placeholder, .dr-sosp-nuevo input::placeholder, .dr-cuaderno textarea::placeholder { color: #767676; }
 
 /* Sellos: práctica ilimitada (colores de casilla fijos: se leen igual en claro y oscuro) */
-.dr-sellos-invita { margin: 14px 0 4px; padding: 12px 14px; border-radius: 10px; text-align: center; background: color-mix(in srgb, var(--t-tinta) 8%, transparent); border: 1px dashed color-mix(in srgb, var(--t-tinta) 40%, transparent); }
-.dr-sellos-invita p { margin: 0 0 8px; font-size: 14px; }
-.dr-carta .dr-sellos-invita button { margin-top: 0; }
+.ss-tarjeta { margin: 16px 0 4px; padding: 14px; border-radius: 14px; background: linear-gradient(160deg, #f4ead0 0%, #eadcb8 100%); color: #2b2113; border: 1px solid rgba(70, 48, 22, .28); box-shadow: 0 4px 14px rgba(70, 48, 22, .22); }
+.ss-tarjeta-fila { display: flex; align-items: center; gap: 14px; text-align: left; }
+.ss-mini { flex: none; width: 76px; height: 76px; border-radius: 6px; filter: drop-shadow(0 2px 4px rgba(70, 48, 22, .3)); transform: rotate(-3deg); }
+.ss-tarjeta-titulo { margin: 0 0 4px; font-family: var(--t-titulo); font-size: 20px; letter-spacing: 1.5px; text-transform: uppercase; color: #2b2113; }
+.ss-nuevo { display: inline-block; vertical-align: middle; margin-left: 6px; padding: 2px 8px; border-radius: 999px; background: #a8201a; color: #fff; font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 1.5px; }
+.ss-tarjeta-texto { margin: 0; font-size: 14px; line-height: 1.45; color: #3a2e1b; }
+.dr-carta .ss-tarjeta button { margin-top: 12px; background: #1d1d1d; color: #fbf7ea; border-color: #1d1d1d; }
 .ss-barra { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 4px 0 10px; font-size: 14px; font-weight: 700; }
 .ss-tiempo { font-family: 'Space Mono', monospace; font-size: 18px; }
 .ss-tablero { display: grid; width: 100%; max-width: 420px; margin: 0 auto; border-radius: 8px; overflow: hidden; box-shadow: 0 3px 10px rgba(70, 48, 22, .22); user-select: none; -webkit-user-select: none; touch-action: manipulation; }

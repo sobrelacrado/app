@@ -41,7 +41,7 @@ export default function TabBar({ tabs, active, onChange, label, variant = '' }) 
       <span className="tabbar-sel" aria-hidden="true" />
       {tabs.map((t) => (
         <button key={t.id} type="button" role="tab" data-tab={t.id} aria-selected={t.id === active} tabIndex={t.id === active ? 0 : -1}
-          className={t.id === active ? 'activa' : ''} onClick={() => onChange(t.id)}>
+          className={(t.id === active ? 'activa' : '') + (t.destacada ? ' destacada' : '')} onClick={() => onChange(t.id)}>
           <span className="tabbar-ico">
             <svg viewBox="0 0 24 24" aria-hidden="true" {...G}>{ICONS[t.icon]}</svg>
             {t.badge && <i className="tabbar-punto" role="img" aria-label={typeof t.badge === 'string' ? t.badge : 'pendiente'} />}
