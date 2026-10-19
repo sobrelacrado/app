@@ -4,7 +4,7 @@ import { archiveMonths, archiveSummary } from './archive.js'
 const MARK = { done: '✓', late: '↺', started: '…' }
 const LABEL = { done: 'resuelto', late: 'resuelto desde el archivo', started: 'empezado', miss: 'sin jugar', today: 'hoy', future: 'todavía no', before: '' }
 
-export default function Archivo({ days, todayKey, onPick }) {
+export default function Archivo({ days, todayKey, onPick, onSellos }) {
   const months = archiveMonths(days, todayKey)
   const { done, total } = archiveSummary(days, todayKey)
   return (
@@ -14,6 +14,13 @@ export default function Archivo({ days, todayKey, onPick }) {
         Juega los días que te perdiste. Aquí <b>no sube la racha</b> y los puntos son <b>la mitad</b> (y solo la primera vez).
         {total > 0 && <> Llevas <b>{done}</b> de <b>{total}</b> días anteriores.</>}
       </p>
+
+      {onSellos && (
+        <div className="dr-sellos-invita">
+          <p><b>Sellos</b> · tableros de lógica sin límite, para jugar cuando quieras.</p>
+          <button type="button" className="suave" onClick={onSellos}>Jugar a Sellos</button>
+        </div>
+      )}
 
       {months.map((m) => (
         <section key={m.key} className="dr-mes">

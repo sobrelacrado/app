@@ -10,6 +10,7 @@ import Amigos from './Amigos.jsx'
 import Avisos from './Avisos.jsx'
 import Casos from './Casos.jsx'
 import Progreso from './Progreso.jsx'
+import Sellos from './Sellos.jsx'
 import { dayPoints, fmtMult, rankOf, retoPoints, streakBefore, totalPoints, weekStart, weeklyPoints } from './points.js'
 import { retoFor, retoPuzzle } from './reto.js'
 import BANCO from './banco.js'
@@ -40,10 +41,12 @@ export default function Diario({ onExit }) {
     if (location.hash === '#casos') return 'casos'
     if (/^#grupo=/.test(location.hash)) return 'amigos'
     // Al recargar la página se vuelve a la pestaña donde estabas (solo mientras la pestaña del navegador siga abierta).
-    try { const v = sessionStorage.getItem('sl_diario_vista'); if (['archivo', 'progreso', 'casos', 'amigos'].includes(v)) return v } catch { /* sin almacenamiento */ }
+    try { const v = sessionStorage.getItem('sl_diario_vista'); if (['archivo', 'progreso', 'casos', 'amigos', 'sellos'].includes(v)) return v } catch { /* sin almacenamiento */ }
     return 'hoy'
   })
   useEffect(() => { try { sessionStorage.setItem('sl_diario_vista', vista) } catch { /* sin almacenamiento */ } }, [vista])
+  const [sellosBack, setSellosBack] = useState('hoy') // desde dónde se abrió Sellos (Hoy o Archivo), para el botón de volver
+  const openSellos = (from) => { setSellosBack(from); setVista('sellos'); window.scrollTo({ top: 0 }) }
   const [retoOn, setRetoOn] = useState(false) // jugando el reto de nivel de hoy (en vez del acertijo del día)
   const [retoLogin, setRetoLogin] = useState(false) // se pulsó el reto sin sesión: se enseña la invitación a entrar con Google
   const retoRef = useRef(null)
@@ -225,7 +228,7 @@ export default function Diario({ onExit }) {
         <div className="dr-racha" title="Racha de días seguidos · puntos">🔥 {streak} · ⭐ {pts}</div>
       </header>
 
-      <TabBar variant="diario" label="Secciones" active={vista === 'hoy' ? (viewKey ? 'archivo' : 'hoy') : vista}
+      <TabBar variant="diario" label="Secciones" active={vista === 'hoy' ? (viewKey ? 'archivo' : 'hoy') : vista === 'sellos' ? sellosBack : vista}
         onChange={(id) => { if (id === 'hoy') { setViewKey(null); setRetoOn(false) } setVista(id) }}
         tabs={[
           { id: 'hoy', label: 'Hoy', icon: 'hoy', badge: pendienteHoy ? 'Tienes un acertijo o un reto sin resolver' : null },
@@ -235,7 +238,9 @@ export default function Diario({ onExit }) {
           { id: 'amigos', label: 'Amigos', icon: 'amigos' },
         ]} />
 
-      {vista === 'archivo' && <Archivo days={days} todayKey={key} onPick={(dayKey) => { setViewKey(dayKey); setRetoOn(false); setVista('hoy') }} />}
+      {vista === 'sellos' && <Sellos onExit={() => setVista(sellosBack)} />}
+
+      {vista === 'archivo' && <Archivo onSellos={() => openSellos('archivo')} days={days} todayKey={key} onPick={(dayKey) => { setViewKey(dayKey); setRetoOn(false); setVista('hoy') }} />}
 
       {vista === 'progreso' && (
         <Progreso days={days} retos={retos} todayKey={key} user={user} status={status} onLogin={doLogin} onLogout={doLogout} onDelete={doDelete} />
@@ -302,6 +307,12 @@ export default function Diario({ onExit }) {
               <div className="dr-reto-resuelto">
                 <p><b>¿Quieres más?</b> Tienes un reto extra de tu nivel ({levelStars(retoPick.level)}) con <b>puntos ×1,5</b>.</p>
                 <button type="button" className="dr-reto-boton" onClick={openReto}>🎯 Jugar mi reto de hoy</button>
+              </div>
+            )}
+            {!playReto && !late && (
+              <div className="dr-sellos-invita">
+                <p><b>¿Sigues con ganas?</b> Sellos: tableros de lógica sin límite, para entrenar cuanto quieras.</p>
+                <button type="button" className="suave" onClick={() => openSellos('hoy')}>Jugar a Sellos</button>
               </div>
             )}
             {!user && !laterLogin && (

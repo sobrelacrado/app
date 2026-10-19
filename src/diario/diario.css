@@ -426,3 +426,34 @@ body { background: var(--mesa); min-height: 100vh; }
 
 /* campos de texto de las pantallas nuevas: siempre texto oscuro sobre fondo blanco, también con el tema oscuro */
 .dr-grupo-form input::placeholder, .dr-valorar textarea::placeholder, .dr-sosp-nuevo input::placeholder, .dr-cuaderno textarea::placeholder { color: #767676; }
+
+/* Sellos: práctica ilimitada (colores de casilla fijos: se leen igual en claro y oscuro) */
+.dr-sellos-invita { margin: 14px 0 4px; padding: 12px 14px; border-radius: 10px; text-align: center; background: color-mix(in srgb, var(--t-tinta) 8%, transparent); border: 1px dashed color-mix(in srgb, var(--t-tinta) 40%, transparent); }
+.dr-sellos-invita p { margin: 0 0 8px; font-size: 14px; }
+.dr-carta .dr-sellos-invita button { margin-top: 0; }
+.ss-barra { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 4px 0 10px; font-size: 14px; font-weight: 700; }
+.ss-tiempo { font-family: 'Space Mono', monospace; font-size: 18px; }
+.ss-tablero { display: grid; width: 100%; max-width: 420px; margin: 0 auto; border-radius: 8px; overflow: hidden; box-shadow: 0 3px 10px rgba(70, 48, 22, .22); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.ss-tablero.ganado { animation: ss-brillo .8s ease; }
+@keyframes ss-brillo { 40% { filter: brightness(1.18) saturate(1.2); } }
+.dr-carta button.ss-cel { position: relative; display: flex; align-items: center; justify-content: center; width: auto; min-height: 0; aspect-ratio: 1; margin: 0; padding: 0; border-radius: 0; box-shadow: none; border: 1px solid rgba(70, 48, 22, .13); color: #1d1d1d; font-family: inherit; cursor: pointer; }
+.dr-carta button.ss-cel.bt { border-top: 2px solid rgba(70, 48, 22, .5); }
+.dr-carta button.ss-cel.bl { border-left: 2px solid rgba(70, 48, 22, .5); }
+.dr-carta button.ss-cel.bb { border-bottom: 2px solid rgba(70, 48, 22, .5); }
+.dr-carta button.ss-cel.br { border-right: 2px solid rgba(70, 48, 22, .5); }
+.dr-carta button.ss-cel.mal { box-shadow: inset 0 0 0 3px #d32f2f; }
+.ss-x { font-size: 62%; line-height: 1; opacity: .55; font-weight: 700; }
+.ss-sello { width: 82%; height: 82%; filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, .45)); animation: ss-pon .18s ease-out; }
+@keyframes ss-pon { from { transform: scale(1.5); opacity: 0; } }
+.ss-acciones { display: flex; justify-content: center; gap: 8px; margin-top: 4px; }
+.dr-carta .ss-acciones button { margin-top: 8px; }
+.dr-carta .ss-acciones button:disabled { opacity: .4; }
+.dr-carta button.ss-salir { display: block; margin: 14px auto 0; }
+.ss-tamanos { display: grid; gap: 8px; margin-bottom: 12px; }
+.dr-carta .ss-tamanos button { display: flex; align-items: baseline; gap: 10px; margin: 0; padding: 12px 14px; text-align: left; font-size: 16px; text-transform: none; letter-spacing: 0; }
+.ss-tamanos button b { font-size: 20px; }
+.ss-tamanos button span { flex: 1; }
+.ss-tamanos button small { opacity: .85; font-size: 13px; }
+@media (prefers-reduced-motion: reduce) { .ss-tablero.ganado, .ss-sello { animation: none; } }
+.ss-carta .dr-sello { margin-bottom: 18px; }
+.ss-carta .dr-como { margin-top: 14px; }
