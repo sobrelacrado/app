@@ -360,3 +360,26 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-reto-aviso { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 0 0 10px; padding: 8px 10px; border-radius: 6px; background: rgba(185, 130, 42, .18); font-size: 14px; }
 .dr-reto-ahora-no { display: block; margin: 10px auto 0; padding: 6px 12px; background: transparent; border: 0; color: #1d1d1d; text-decoration: underline; font-size: 14px; cursor: pointer; }
 .dr-reto .dr-reto-nota { display: block; margin-top: 10px; font-size: 12px; line-height: 1.4; color: #3a2a05; }
+
+/* Cuaderno de detective: hoja de papel rayado (colores fijos, se lee igual en claro y oscuro) */
+.dr-cuaderno-btn { margin: 0 8px 8px 0; }
+.dr-cuaderno { margin: 8px 0 12px; padding: 14px; border-radius: 6px; border-left: 5px double #b9822a; color: #2b2113;
+  background: repeating-linear-gradient(#fdf6dc 0 27px, #e4d6a6 27px 28px); box-shadow: 0 3px 10px rgba(0, 0, 0, .2); }
+.dr-cuaderno h3 { margin: 12px 0 6px; font-size: 15px; letter-spacing: .5px; text-transform: uppercase; color: #6b4a12; }
+.dr-cuaderno .dr-nota { color: #5a4a2a; }
+.dr-cuaderno-priv { margin: 0 0 4px; font-size: 13px; font-weight: 700; color: #6b4a12; }
+.dr-sosp { list-style: none; margin: 0; padding: 0; }
+.dr-sosp li { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 16px; }
+.dr-sosp li.st1 .dr-sosp-n { text-decoration: line-through; opacity: .6; }
+.dr-sosp li.st2 { font-weight: 700; }
+.dr-sosp .dr-sosp-n { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.dr-sosp small { color: #6b4a12; font-size: 12px; }
+.dr-carta .dr-sosp button { width: 40px; min-height: 40px; padding: 0; border: 0; background: transparent; font-size: 20px; line-height: 1; cursor: pointer; color: inherit; }
+.dr-carta .dr-sosp .dr-sosp-x { width: 32px; font-size: 15px; opacity: .6; }
+.dr-sosp-nuevo { display: flex; gap: 8px; margin-top: 6px; }
+.dr-sosp-nuevo input { flex: 1; min-width: 0; box-sizing: border-box; padding: 8px; font: inherit; font-size: 15px; border: 1px solid rgba(0, 0, 0, .3); border-radius: 6px; background: rgba(255, 255, 255, .7); color: inherit; }
+.dr-snippets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.dr-cuaderno textarea { width: 100%; box-sizing: border-box; padding: 8px; font: inherit; font-size: 15px; line-height: 28px; border: 1px solid rgba(0, 0, 0, .3); border-radius: 6px; background: rgba(255, 255, 255, .55); color: inherit; resize: vertical; }
+.dr-cuaderno-pie { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; }
+.dr-guardado.guardado { color: #2f7d4f; font-weight: 700; }
+.dr-guardado.sinred { color: #a31d1d; }

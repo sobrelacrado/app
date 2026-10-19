@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { fmtDuration } from '../lib/runs.js'
 import { caseSummary, STATUS_TEXT } from './casos.js'
+import Cuaderno from './Cuaderno.jsx'
 
 // Formulario de la lista de espera (el mismo enlace del perfil de Instagram): al apuntarse se recibe por correo el Caso 2, gratis.
 const FREE_CASE_URL = 'https://preview.mailerlite.io/forms/2670725/199972870005195853/share'
@@ -69,6 +70,7 @@ export default function Casos({ user, cloud, status, onLogin }) {
   const [error, setError] = useState(false)
   const [open, setOpen] = useState('') // id de la partida con los pasos desplegados
   const [sure, setSure] = useState('') // id de la partida pendiente de confirmar
+  const [book, setBook] = useState('') // id de la partida con el cuaderno abierto
   const [ratings, setRatings] = useState({}) // valoraciones propias por juego
 
   const load = async () => {
@@ -138,6 +140,15 @@ export default function Casos({ user, cloud, status, onLogin }) {
                   ))}
                   {rows.length === 0 && <li><span>Sin pasos registrados</span></li>}
                 </ol>
+              )}
+
+              {c.run.gameId && (
+                <>
+                  <button type="button" className="suave dr-cuaderno-btn" onClick={() => setBook(book === c.id ? '' : c.id)} aria-expanded={book === c.id}>
+                    {book === c.id ? 'Cerrar cuaderno' : '📓 Cuaderno de detective'}
+                  </button>
+                  {book === c.id && <Cuaderno uid={user.uid} cloud={cloud} gameId={c.run.gameId} />}
+                </>
               )}
 
               {st.kind === 'finished' && c.run.gameId && (

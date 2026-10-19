@@ -214,5 +214,28 @@ service cloud.firestore {
           && d.at == request.time;
       }
     }
+
+    // ---------- Cuaderno de detective ----------
+    // Notas PRIVADAS de cada persona para cada caso: texto libre + lista de sospechosos (nombre y estado 0 sospechoso, 1 descartado, 2 culpable).
+    // Solo su dueño las lee, las escribe y las borra: ni siquiera el administrador.
+    match /users/{uid}/cuadernos/{gameId} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && gameId.size() <= 100
+        && isValidNotebook(request.resource.data);
+
+      // Una regla no puede recorrer una lista: se comprueban uno a uno los 12 sitios posibles.
+      function suspectOk(l, i) {
+        return l.size() <= i || (l[i] is map && l[i].size() == 2 && l[i].n is string && l[i].n.size() > 0 && l[i].n.size() <= 40 && l[i].st in [0, 1, 2]);
+      }
+      function isValidNotebook(d) {
+        return d.keys().hasOnly(['text', 'suspects', 'at'])
+          && d.keys().hasAll(['text', 'suspects', 'at'])
+          && d.text is string && d.text.size() <= 5000
+          && d.suspects is list && d.suspects.size() <= 12
+          && suspectOk(d.suspects, 0) && suspectOk(d.suspects, 1) && suspectOk(d.suspects, 2) && suspectOk(d.suspects, 3) && suspectOk(d.suspects, 4) && suspectOk(d.suspects, 5) && suspectOk(d.suspects, 6) && suspectOk(d.suspects, 7) && suspectOk(d.suspects, 8) && suspectOk(d.suspects, 9) && suspectOk(d.suspects, 10) && suspectOk(d.suspects, 11)
+          && d.at == request.time;
+      }
+    }
   }
 }

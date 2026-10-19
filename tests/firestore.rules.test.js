@@ -489,3 +489,38 @@ test('Reto: se rechazan datos con forma incorrecta', async () => {
   await no({ ms: -1 }); await no({ tries: 1000 }); await no({ at: Timestamp.now() }); await no({ puntos: 99 })
   await no({}, 'mañana')
 })
+
+// ---------- Cuaderno de detective ----------
+const cuaderno = (over = {}) => ({ text: 'La clienta mintió sobre la hora.', suspects: [{ n: 'Marta', st: 0 }, { n: 'Luis', st: 1 }], at: serverTimestamp(), ...over })
+test('Cuaderno: solo su dueño lo lee, escribe y borra; ni el administrador ni nadie más', async () => {
+  const ana = persona('ana'), otra = persona('bea')
+  await assertSucceeds(setDoc(doc(ana, 'users/ana/cuadernos/g1'), cuaderno()))
+  await assertSucceeds(setDoc(doc(ana, 'users/ana/cuadernos/g1'), cuaderno({ text: 'Otra nota', suspects: [] }))) // editar
+  assert.equal((await getDoc(doc(ana, 'users/ana/cuadernos/g1'))).data().text, 'Otra nota')
+  assert.equal((await assertSucceeds(getDocs(collection(ana, 'users/ana/cuadernos')))).size, 1)
+  await assertFails(getDoc(doc(otra, 'users/ana/cuadernos/g1')))
+  await assertFails(getDocs(collection(otra, 'users/ana/cuadernos')))
+  await assertFails(getDoc(doc(admin(), 'users/ana/cuadernos/g1'))) // privado del todo
+  await assertFails(getDocs(collection(admin(), 'users/ana/cuadernos')))
+  await assertFails(getDoc(doc(player(), 'users/ana/cuadernos/g1')))
+  await assertFails(setDoc(doc(otra, 'users/ana/cuadernos/g2'), cuaderno()))
+  await assertFails(setDoc(doc(admin(), 'users/ana/cuadernos/g2'), cuaderno()))
+  await assertFails(deleteDoc(doc(otra, 'users/ana/cuadernos/g1')))
+  await assertSucceeds(deleteDoc(doc(ana, 'users/ana/cuadernos/g1')))
+})
+test('Cuaderno: se rechazan textos, listas y sospechosos con forma incorrecta', async () => {
+  const ana = persona('ana')
+  const ok = (over) => assertSucceeds(setDoc(doc(ana, 'users/ana/cuadernos/g1'), cuaderno(over)))
+  const no = (over) => assertFails(setDoc(doc(ana, 'users/ana/cuadernos/g1'), cuaderno(over)))
+  await ok({ text: 'x'.repeat(5000) })
+  await no({ text: 'x'.repeat(5001) }); await no({ text: 5 })
+  const doce = Array.from({ length: 12 }, (_, i) => ({ n: 'S' + i, st: i % 3 }))
+  await ok({ suspects: doce })
+  await no({ suspects: [...doce, { n: 'Otro', st: 0 }] }) // más de 12
+  await no({ suspects: 'Marta' })
+  await no({ suspects: [{ n: 'Marta', st: 3 }] }); await no({ suspects: [{ n: 'Marta', st: -1 }] }); await no({ suspects: [{ n: 'Marta', st: 'si' }] })
+  await no({ suspects: [{ n: '', st: 0 }] }); await no({ suspects: [{ n: 'x'.repeat(41), st: 0 }] }); await no({ suspects: [{ st: 0 }] })
+  await no({ suspects: [{ n: 'Marta', st: 0, extra: 1 }] })
+  await no({ suspects: [...doce.slice(0, 11), { n: 'x'.repeat(41), st: 0 }] }) // el último sitio también se comprueba
+  await no({ at: Timestamp.now() }); await no({ nota: 'x' })
+})

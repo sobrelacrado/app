@@ -54,6 +54,18 @@ export function pushReto(uid, key, d) {
   return setDoc(doc(retosCol(uid), key), { i: d.i, done: !!d.done, tries: d.tries ?? 0, hint: !!d.hint, ms: Math.min(Math.round(d.ms ?? 0), 86400000), type: d.type, level: d.level, at: serverTimestamp() })
 }
 
+// ---------- Cuaderno de detective (privado: solo lo lee su dueño) ----------
+const cuadernosCol = (uid) => collection(db, 'users', uid, 'cuadernos')
+export async function loadNotebook(uid, gameId) {
+  const snap = await getDoc(doc(cuadernosCol(uid), gameId))
+  if (!snap.exists()) return { text: '', suspects: [] }
+  const x = snap.data()
+  return { text: x.text ?? '', suspects: Array.isArray(x.suspects) ? x.suspects : [] }
+}
+export const saveNotebook = (uid, gameId, nb) =>
+  setDoc(doc(cuadernosCol(uid), gameId), { text: String(nb.text).slice(0, 5000), suspects: nb.suspects.slice(0, 12).map((s) => ({ n: String(s.n).slice(0, 40), st: s.st })), at: serverTimestamp() })
+export const deleteNotebook = (uid, gameId) => deleteDoc(doc(cuadernosCol(uid), gameId))
+
 // Perfil del jugador (nombre y correo de su cuenta de Google) para que el creador sepa quién juega. Se actualiza "last" en cada visita.
 export async function saveProfile(u) {
   const ref = doc(db, 'users', u.uid)
@@ -79,7 +91,7 @@ export async function deleteAll(uid) {
   await deleteDoc(doc(db, 'users', uid)).catch(() => {}) // el perfil (nombre y correo) también se borra
   const rated = await getDocs(query(collection(db, 'valoraciones'), where('uid', '==', uid))).catch(() => null)
   await Promise.all((rated?.docs ?? []).map((d) => deleteDoc(d.ref).catch(() => {})))
-  const docs = [...(await getDocs(days(uid))).docs, ...(await getDocs(retosCol(uid))).docs]
+  const docs = [...(await getDocs(days(uid))).docs, ...(await getDocs(retosCol(uid))).docs, ...(await getDocs(cuadernosCol(uid))).docs]
   for (let i = 0; i < docs.length; i += 400) {
     const batch = writeBatch(db)
     docs.slice(i, i + 400).forEach((d) => batch.delete(d.ref))
