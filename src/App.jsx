@@ -15,6 +15,7 @@ const Diario = lazy(() => import('./diario/Diario.jsx'))
 // La pestaña de jugadores del Diario también se carga solo al abrirla.
 const Players = lazy(() => import('./components/Players.jsx'))
 const Ratings = lazy(() => import('./components/Ratings.jsx'))
+const Groups = lazy(() => import('./components/Groups.jsx'))
 
 const store = {
   get: (k, d) => { try { return localStorage.getItem(k) ?? d } catch { return d } },
@@ -171,7 +172,7 @@ export default function App() {
               {tab === 'runs' && <Panel />}
               {tab === 'stats' && <Stats />}
               {tab === 'games' && <Games />}
-              {tab === 'players' && <Suspense fallback={<p className="vacio">{t.loading}</p>}><Players /><Ratings /></Suspense>}
+              {tab === 'players' && <Suspense fallback={<p className="vacio">{t.loading}</p>}><Players /><Ratings /><Groups /></Suspense>}
             </div>
             <AlertWatcher enabled={alertsOn} onOpen={() => setTab('runs')} />
           </>

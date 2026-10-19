@@ -5,10 +5,11 @@ import { GAMES, HOWTO, TYPE_NAME } from './games.jsx'
 import './diario.css'
 import PUZZLES from './puzzles.js'
 import Archivo from './Archivo.jsx'
+import Amigos from './Amigos.jsx'
 import Avisos from './Avisos.jsx'
 import Casos from './Casos.jsx'
 import Progreso from './Progreso.jsx'
-import { dayPoints, fmtMult, rankOf, retoPoints, streakBefore, totalPoints } from './points.js'
+import { dayPoints, fmtMult, rankOf, retoPoints, streakBefore, totalPoints, weekStart, weeklyPoints } from './points.js'
 import { retoFor, retoPuzzle } from './reto.js'
 import BANCO from './banco.js'
 import { mergeDays } from './stats.js'
@@ -32,7 +33,9 @@ export default function Diario({ onExit }) {
   const [copied, setCopied] = useState(false)
   const [laterLogin, setLaterLogin] = useState(() => { try { return localStorage.getItem('sl_login_ahora') === dateKey() } catch { return false } }) // "Ahora no" vale hasta mañana
   const [now, setNow] = useState(Date.now)
-  const [vista, setVista] = useState(() => (location.hash === '#casos' ? 'casos' : 'hoy')) // 'hoy' | 'archivo' | 'progreso' | 'casos' (el enlace /diario#casos abre Mis casos)
+  // 'hoy' | 'archivo' | 'progreso' | 'casos' | 'amigos'. Los enlaces /diario#casos y /diario#grupo=CODIGO abren Mis casos y la invitación a un grupo.
+  const [joinCode] = useState(() => /^#grupo=([A-Za-z0-9]{6})$/.exec(location.hash)?.[1]?.toUpperCase() ?? null)
+  const [vista, setVista] = useState(() => (location.hash === '#casos' ? 'casos' : /^#grupo=/.test(location.hash) ? 'amigos' : 'hoy'))
   const [retoOn, setRetoOn] = useState(false) // jugando el reto de nivel de hoy (en vez del acertijo del día)
   const [retoLogin, setRetoLogin] = useState(false) // se pulsó el reto sin sesión: se enseña la invitación a entrar con Google
   const retoRef = useRef(null)
@@ -41,6 +44,7 @@ export default function Diario({ onExit }) {
   const cloud = useRef(null) // módulo de la nube, se carga solo cuando hace falta
   const storeRef = useRef(store)
   storeRef.current = store
+  const groupsRef = useRef(null) // grupos de amigos de esta persona (se piden una vez y se recuerdan)
 
   const days = store.days ?? {}
   const retos = store.retos ?? {} // retos de nivel, uno por fecha
@@ -55,6 +59,21 @@ export default function Diario({ onExit }) {
   const act = useRef(null) // día y acertijo activos para el reloj y las escrituras (que viven en funciones antiguas)
   act.current = { k, puzzle, reto: playReto ? retoPick.i : null }
 
+  // Sube a cada grupo de amigos los puntos de esta semana (al resolver un acertijo, al entrar y al cambiar de grupos).
+  const pushScores = async () => {
+    const u = userRef.current
+    if (!u || !cloud.current) return
+    try {
+      groupsRef.current ??= await cloud.current.myGroups(u.uid)
+      if (!groupsRef.current.length) return
+      const cur = storeRef.current, today = dateKey(), wk = weekStart(today)
+      const { pts, solved } = weeklyPoints(cur.days ?? {}, cur.retos ?? {}, wk)
+      const streak = streakOf(cur.days ?? {}, today)
+      await Promise.all(groupsRef.current.map((g) => cloud.current.pushScore(u.uid, g.code, wk, { pts, solved, streak })))
+    } catch { /* sin red o sin permiso: se reintenta la próxima vez */ }
+  }
+  const groupsChanged = () => { groupsRef.current = null; pushScores() }
+
   // sync = false para el reloj (cada segundo): lo demás (pista, fallo, resuelto) se guarda también en la cuenta.
   const update = (patch, sync = true) => {
     const { k: kk, puzzle: pz, reto: ri } = act.current
@@ -66,6 +85,7 @@ export default function Diario({ onExit }) {
     setStore(next)
     save(next)
     if (sync && userRef.current && cloud.current) (ri === null ? cloud.current.pushDay : cloud.current.pushReto)(userRef.current.uid, kk, d).catch(() => setStatus('error'))
+    if (patch.done && sync) pushScores()
   }
 
   // Cuenta: se carga al abrir si ya había entrado antes (o si el Diario va dentro del panel); al detectar sesión se mezcla el progreso.
@@ -95,6 +115,7 @@ export default function Diario({ onExit }) {
         save(next)
         await Promise.all(upload.map((k) => cloud.current.pushDay(u.uid, k, { type: puzzleFor(PUZZLES, k).type, level: puzzleFor(PUZZLES, k).level, ...merged[k] })))
         await Promise.all(mr.upload.map((k) => cloud.current.pushReto(u.uid, k, mr.merged[k])))
+        pushScores()
         setStatus('')
       } catch { setStatus('error') }
     })
@@ -200,6 +221,7 @@ export default function Diario({ onExit }) {
           Progreso
         </button>
         <button type="button" className={vista === 'casos' ? 'activa' : ''} onClick={() => setVista('casos')}>Casos</button>
+        <button type="button" className={vista === 'amigos' ? 'activa' : ''} onClick={() => setVista('amigos')}>Amigos</button>
       </nav>
 
       {vista === 'archivo' && <Archivo days={days} todayKey={key} onPick={(dayKey) => { setViewKey(dayKey); setRetoOn(false); setVista('hoy') }} />}
@@ -209,6 +231,8 @@ export default function Diario({ onExit }) {
       )}
 
       {vista === 'casos' && <Casos user={user} cloud={cloud.current} status={status} onLogin={doLogin} />}
+
+      {vista === 'amigos' && <Amigos user={user} cloud={cloud.current} status={status} onLogin={doLogin} today={key} days={days} retos={retos} joinCode={joinCode} onChange={groupsChanged} />}
 
       {vista === 'hoy' && late && (
         <div className="dr-archivo-aviso">

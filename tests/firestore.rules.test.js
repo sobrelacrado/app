@@ -524,3 +524,102 @@ test('Cuaderno: se rechazan textos, listas y sospechosos con forma incorrecta', 
   await no({ suspects: [...doce.slice(0, 11), { n: 'x'.repeat(41), st: 0 }] }) // el último sitio también se comprueba
   await no({ at: Timestamp.now() }); await no({ nota: 'x' })
 })
+
+// ---------- Grupos de amigos (ranking semanal) ----------
+const grupo = (owner = 'ana', over = {}) => ({ name: 'Los Sabuesos', owner, at: serverTimestamp(), ...over })
+const miembro = (name = 'Ana') => ({ name, at: serverTimestamp() })
+const puntos = (uid, over = {}) => ({ uid, week: '2026-10-19', pts: 120, solved: 3, streak: 2, at: serverTimestamp(), ...over })
+async function crearGrupo(uid = 'ana', code = 'K7M2QX') { // el creador crea el grupo y su ficha de miembro a la vez, como lo hace la app
+  const db = persona(uid)
+  const b = writeBatch(db)
+  b.set(doc(db, 'groups/' + code), grupo(uid))
+  b.set(doc(db, `groups/${code}/members/${uid}`), miembro('Ana'))
+  b.set(doc(db, `users/${uid}/grupos/${code}`), { name: 'Los Sabuesos', at: serverTimestamp() })
+  await assertSucceeds(b.commit())
+}
+test('Grupos: se crea con código válido y nombre; el creador es el dueño y entra como miembro', async () => {
+  await crearGrupo()
+  const ana = persona('ana')
+  await assertFails(setDoc(doc(ana, 'groups/ABC12'), grupo())) // código corto
+  await assertFails(setDoc(doc(ana, 'groups/ABCDE0'), grupo())) // el 0 no vale
+  await assertFails(setDoc(doc(ana, 'groups/ABCDEI'), grupo())) // la I no vale
+  await assertFails(setDoc(doc(ana, 'groups/PQRSTU'), grupo('otro'))) // el dueño debe ser quien lo crea
+  await assertFails(setDoc(doc(ana, 'groups/PQRSTU'), grupo('ana', { name: '' })))
+  await assertFails(setDoc(doc(ana, 'groups/PQRSTU'), grupo('ana', { name: 'x'.repeat(41) })))
+  await assertFails(setDoc(doc(ana, 'groups/PQRSTU'), grupo('ana', { extra: 1 })))
+  await assertFails(setDoc(doc(player(), 'groups/PQRSTU'), grupo('ana'))) // sin sesión
+  await assertSucceeds(updateDoc(doc(ana, 'groups/K7M2QX'), { name: 'Los Sabuesos II' })) // el dueño renombra
+  await assertFails(updateDoc(doc(ana, 'groups/K7M2QX'), { owner: 'bea' })) // pero no regala el grupo
+  await assertFails(updateDoc(doc(persona('bea'), 'groups/K7M2QX'), { name: 'Mío' }))
+})
+test('Grupos: con el código se ve el nombre y se puede unir; no se pueden listar los grupos', async () => {
+  await crearGrupo()
+  const bea = persona('bea')
+  assert.equal((await assertSucceeds(getDoc(doc(bea, 'groups/K7M2QX')))).data().name, 'Los Sabuesos')
+  await assertFails(getDoc(doc(player(), 'groups/K7M2QX'))) // sin sesión no
+  await assertFails(getDocs(collection(bea, 'groups')))
+  await assertFails(getDocs(collection(bea, 'groups/K7M2QX/members'))) // aún no es miembro
+  await assertSucceeds(setDoc(doc(bea, 'groups/K7M2QX/members/bea'), miembro('Bea')))
+  await assertFails(setDoc(doc(bea, 'groups/K7M2QX/members/otra'), miembro('Falsa'))) // solo se une a sí misma
+  await assertFails(setDoc(doc(persona('cam'), 'groups/ZZZZZZ/members/cam'), miembro('Cam'))) // el grupo no existe
+  await assertFails(setDoc(doc(bea, 'groups/K7M2QX/members/bea'), { name: 'x'.repeat(31), at: serverTimestamp() }))
+  assert.equal((await assertSucceeds(getDocs(collection(bea, 'groups/K7M2QX/members')))).size, 2)
+  await assertSucceeds(setDoc(doc(bea, 'groups/K7M2QX/members/bea'), miembro('Beatriz'))) // cambia su nombre en el grupo
+})
+test('Grupos: cada miembro escribe solo sus puntos y solo los miembros ven la clasificación', async () => {
+  await crearGrupo()
+  const ana = persona('ana'), bea = persona('bea'), cam = persona('cam')
+  await assertSucceeds(setDoc(doc(bea, 'groups/K7M2QX/members/bea'), miembro('Bea')))
+  await assertSucceeds(setDoc(doc(ana, 'groups/K7M2QX/scores/2026-10-19_ana'), puntos('ana')))
+  await assertSucceeds(setDoc(doc(ana, 'groups/K7M2QX/scores/2026-10-19_ana'), puntos('ana', { pts: 150 }))) // se actualiza
+  await assertFails(setDoc(doc(bea, 'groups/K7M2QX/scores/2026-10-19_ana'), puntos('ana'))) // no escribe por otra
+  await assertFails(setDoc(doc(bea, 'groups/K7M2QX/scores/2026-10-19_bea'), puntos('ana'))) // ni se hace pasar
+  await assertSucceeds(setDoc(doc(bea, 'groups/K7M2QX/scores/2026-10-19_bea'), puntos('bea', { pts: 90 })))
+  await assertFails(setDoc(doc(cam, 'groups/K7M2QX/scores/2026-10-19_cam'), puntos('cam'))) // no es miembro
+  assert.equal((await assertSucceeds(getDocs(collection(bea, 'groups/K7M2QX/scores')))).size, 2)
+  await assertFails(getDocs(collection(cam, 'groups/K7M2QX/scores')))
+  await assertFails(getDocs(collection(player(), 'groups/K7M2QX/scores')))
+})
+test('Grupos: se rechazan puntos con forma incorrecta o fuera de tope', async () => {
+  await crearGrupo()
+  const ana = persona('ana')
+  const ok = (over, id = '2026-10-19_ana') => assertSucceeds(setDoc(doc(ana, 'groups/K7M2QX/scores/' + id), puntos('ana', over)))
+  const no = (over, id = '2026-10-19_ana') => assertFails(setDoc(doc(ana, 'groups/K7M2QX/scores/' + id), puntos('ana', over)))
+  await ok({ pts: 4000, solved: 14 })
+  await no({ pts: 4001 }); await no({ pts: -1 }); await no({ pts: 1.5 }); await no({ pts: '90' })
+  await no({ solved: 15 }); await no({ streak: -1 }); await no({ streak: 10000 })
+  await no({ week: '19/10/2026' }, '19/10/2026_ana'); await no({ week: '2026-10-26' }) // el id debe ser semana_uid
+  await no({ at: Timestamp.now() }); await no({ extra: 1 })
+})
+test('Grupos: salir, echar y borrar; el administrador lee todo pero no escribe', async () => {
+  await crearGrupo()
+  const ana = persona('ana'), bea = persona('bea'), cam = persona('cam')
+  await assertSucceeds(setDoc(doc(bea, 'groups/K7M2QX/members/bea'), miembro('Bea')))
+  await assertSucceeds(setDoc(doc(cam, 'groups/K7M2QX/members/cam'), miembro('Cam')))
+  await assertSucceeds(setDoc(doc(bea, 'groups/K7M2QX/scores/2026-10-19_bea'), puntos('bea')))
+  // el administrador ve nombre, miembros y puntos, y lista los grupos; no escribe
+  assert.equal((await assertSucceeds(getDocs(collection(admin(), 'groups')))).size, 1)
+  assert.equal((await assertSucceeds(getDocs(collection(admin(), 'groups/K7M2QX/members')))).size, 3)
+  assert.equal((await assertSucceeds(getDocs(collection(admin(), 'groups/K7M2QX/scores')))).size, 1)
+  await assertFails(setDoc(doc(admin(), 'groups/K7M2QX/members/falso'), miembro('Falso')))
+  await assertFails(deleteDoc(doc(admin(), 'groups/K7M2QX')))
+  // salir: cada uno de sí mismo; echar: solo el dueño
+  await assertFails(deleteDoc(doc(cam, 'groups/K7M2QX/members/bea'))) // no echa a otro
+  await assertSucceeds(deleteDoc(doc(bea, 'groups/K7M2QX/scores/2026-10-19_bea')))
+  await assertSucceeds(deleteDoc(doc(bea, 'groups/K7M2QX/members/bea'))) // sale
+  await assertSucceeds(deleteDoc(doc(ana, 'groups/K7M2QX/members/cam'))) // el dueño echa
+  await assertFails(getDocs(collection(bea, 'groups/K7M2QX/members'))) // ya no es miembro
+  await assertFails(deleteDoc(doc(bea, 'groups/K7M2QX'))) // solo el dueño borra el grupo
+  await assertSucceeds(deleteDoc(doc(ana, 'groups/K7M2QX')))
+})
+test('Grupos: la lista personal de grupos es de su dueño (y la lee el administrador)', async () => {
+  const ana = persona('ana')
+  const fila = { name: 'Los Sabuesos', at: serverTimestamp() }
+  await assertSucceeds(setDoc(doc(ana, 'users/ana/grupos/K7M2QX'), fila))
+  await assertFails(setDoc(doc(persona('bea'), 'users/ana/grupos/PQRSTU'), fila))
+  await assertFails(setDoc(doc(ana, 'users/ana/grupos/abc'), fila)) // código inválido
+  await assertFails(getDocs(collection(persona('bea'), 'users/ana/grupos')))
+  assert.equal((await assertSucceeds(getDocs(collection(ana, 'users/ana/grupos')))).size, 1)
+  await assertSucceeds(getDocs(collection(admin(), 'users/ana/grupos')))
+  await assertSucceeds(deleteDoc(doc(ana, 'users/ana/grupos/K7M2QX')))
+})

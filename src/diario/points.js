@@ -74,4 +74,36 @@ export function rankOf(points) {
 // Nivel (1-5) del reto personal según el rango: Aprendiz 1, Ayudante 2, Detective 3, Inspector 4, Comisario y Maestro 5.
 export const levelForPoints = (points) => Math.min(5, RANKS.findIndex((r) => r.name === rankOf(points).name) + 1)
 
+// ---------- Semana (ranking entre amigos): de lunes a domingo ----------
+// Lunes de la semana a la que pertenece una fecha (AAAA-MM-DD).
+export function weekStart(key) {
+  const [y, m, d] = key.split('-').map(Number)
+  const dow = (new Date(Date.UTC(y, m - 1, d)).getUTCDay() + 6) % 7 // 0 = lunes
+  return nextKey(key, -dow)
+}
+// Puntos de esa semana: los acertijos resueltos EN SU DÍA (con racha y bonus) y los retos de nivel. El archivo no cuenta.
+// Devuelve { pts, solved } (solved = acertijos del día + retos resueltos, como mucho 14).
+export function weeklyPoints(days, retos, weekKey) {
+  let pts = 0, solved = 0
+  for (let i = 0; i < 7; i++) {
+    const k = nextKey(weekKey, i)
+    const d = days[k]
+    if (d?.done && !d.late) { pts += dayPoints(d, streakBefore(days, k)).total; solved++ }
+    const r = retos?.[k]
+    if (r?.done) { pts += retoPoints(r).total; solved++ }
+  }
+  return { pts, solved }
+}
+
+// Clasificación de un grupo en una semana: más puntos primero; a igualdad, más acertijos y luego por nombre.
+// members = [{ uid, name }], scores = { semana: { uid: { pts, solved, streak } } }; `mine` = { uid, pts, solved, streak } para poner tu fila al día.
+export function weeklyRanking(members, scores, week, mine = null) {
+  return members
+    .map((m) => {
+      const s = mine && mine.uid === m.uid ? mine : scores?.[week]?.[m.uid]
+      return { ...m, pts: s?.pts ?? 0, solved: s?.solved ?? 0, streak: s?.streak ?? 0 }
+    })
+    .sort((a, b) => b.pts - a.pts || b.solved - a.solved || a.name.localeCompare(b.name, 'es'))
+}
+
 export const fmtMult = (m) => `×${String(m).replace('.', ',')}`

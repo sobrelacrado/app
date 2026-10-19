@@ -795,3 +795,42 @@ test('Banco: cada acertijo se resuelve con su solución y respeta las reglas de 
     assert.ok(!['vigenere', 'criptico', 'sopa', 'interrogatorio'].includes(s.type), `${at}: tipo no usado en el banco`)
   })
 })
+
+// ---------- Ranking semanal (suma de la semana) ----------
+import { weekStart, weeklyPoints } from '../src/diario/points.js'
+test('Semana: va de lunes a domingo y se calcula desde cualquier día', () => {
+  assert.equal(weekStart('2026-10-19'), '2026-10-19') // lunes
+  assert.equal(weekStart('2026-10-25'), '2026-10-19') // domingo
+  assert.equal(weekStart('2026-10-26'), '2026-10-26') // el lunes siguiente
+  assert.equal(weekStart('2026-11-01'), '2026-10-26') // cambio de mes
+  assert.equal(weekStart('2027-01-01'), '2026-12-28') // cambio de año
+})
+test('Semana: suma los días resueltos en su día y los retos, y no el archivo ni lo de otras semanas', () => {
+  const d = (over = {}) => ({ done: true, level: 2, tries: 0, hint: false, ...over })
+  const days = {
+    '2026-10-18': d(), // domingo anterior: otra semana
+    '2026-10-19': d(), '2026-10-20': d(),
+    '2026-10-21': d({ late: true }), // archivo: no cuenta
+    '2026-10-22': d({ done: false }),
+  }
+  const retos = { '2026-10-20': { done: true, level: 3, tries: 1, hint: true }, '2026-10-21': { done: false, level: 3 } }
+  const w = weeklyPoints(days, retos, '2026-10-19')
+  assert.equal(w.solved, 3)
+  // lunes: 35 × 1,1 (el domingo anterior da racha 1) · martes: 35 × 1,2 · reto de nivel 3 con fallo y pista: 30 × 1,5
+  assert.equal(w.pts, Math.round(35 * 1.1) + Math.round(35 * 1.2) + Math.round(30 * 1.5))
+  assert.deepEqual(weeklyPoints({}, {}, '2026-10-19'), { pts: 0, solved: 0 })
+  assert.deepEqual(weeklyPoints(days, retos, '2026-10-26'), { pts: 0, solved: 0 })
+})
+import { weeklyRanking } from '../src/diario/points.js'
+test('Clasificación semanal: más puntos primero, empate por acertijos y luego nombre, y quien no ha jugado sale con 0', () => {
+  const members = [{ uid: 'a', name: 'Ana' }, { uid: 'b', name: 'Beto' }, { uid: 'c', name: 'Carla' }, { uid: 'd', name: 'Dani' }]
+  const scores = { '2026-10-19': { a: { pts: 100, solved: 3, streak: 3 }, b: { pts: 100, solved: 4, streak: 1 }, c: { pts: 250, solved: 5, streak: 5 } }, '2026-10-12': { d: { pts: 9, solved: 1, streak: 1 } } }
+  const r = weeklyRanking(members, scores, '2026-10-19')
+  assert.deepEqual(r.map((x) => x.name), ['Carla', 'Beto', 'Ana', 'Dani']) // Beto y Ana empatan en puntos: gana quien resolvió más
+  assert.deepEqual(r.map((x) => x.pts), [250, 100, 100, 0])
+  assert.deepEqual(weeklyRanking(members, scores, '2026-10-12').map((x) => x.name)[0], 'Dani') // otra semana
+  // tu fila se pone al día con lo calculado en tu móvil
+  const y = weeklyRanking(members, scores, '2026-10-19', { uid: 'a', pts: 400, solved: 6, streak: 6 })
+  assert.equal(y[0].name, 'Ana'); assert.equal(y[0].pts, 400)
+  assert.deepEqual(weeklyRanking([], {}, '2026-10-19'), [])
+})

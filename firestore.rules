@@ -237,5 +237,67 @@ service cloud.firestore {
           && d.at == request.time;
       }
     }
+    // ---------- Grupos de amigos (ranking semanal) ----------
+    // Un grupo se identifica por un código de 6 caracteres. Quien lo conoce y tiene sesión puede ver su nombre y unirse; solo los miembros
+    // ven la clasificación. Cada persona escribe únicamente su propia fila. El administrador puede leer todo (nombres, miembros, puntos).
+    match /groups/{code} {
+      allow get: if request.auth != null;
+      allow list: if isAdmin();
+      allow create: if request.auth != null
+        && code.matches('[A-HJ-NP-Z2-9]{6}')
+        && request.resource.data.keys().hasOnly(['name', 'owner', 'at'])
+        && request.resource.data.name is string && request.resource.data.name.size() >= 1 && request.resource.data.name.size() <= 40
+        && request.resource.data.owner == request.auth.uid
+        && request.resource.data.at == request.time;
+      allow update: if request.auth != null && resource.data.owner == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name'])
+        && request.resource.data.name is string && request.resource.data.name.size() >= 1 && request.resource.data.name.size() <= 40;
+      allow delete: if request.auth != null && resource.data.owner == request.auth.uid;
+
+      function isMember(code) {
+        return request.auth != null && exists(/databases/$(database)/documents/groups/$(code)/members/$(request.auth.uid));
+      }
+      function isGroupOwner(code) {
+        return request.auth != null && get(/databases/$(database)/documents/groups/$(code)).data.owner == request.auth.uid;
+      }
+
+      // Miembros: el nombre con el que sale cada persona en el grupo.
+      match /members/{uid} {
+        allow read: if isMember(code) || isAdmin();
+        allow create, update: if request.auth != null && request.auth.uid == uid
+          && existsAfter(/databases/$(database)/documents/groups/$(code))
+          && request.resource.data.keys().hasOnly(['name', 'at'])
+          && request.resource.data.name is string && request.resource.data.name.size() >= 1 && request.resource.data.name.size() <= 30
+          && request.resource.data.at == request.time;
+        allow delete: if request.auth != null && (request.auth.uid == uid || isGroupOwner(code));
+      }
+
+      // Puntos de cada semana: id = lunes_uid (por ejemplo 2026-10-19_abc123). Solo cada persona escribe el suyo.
+      match /scores/{id} {
+        allow read: if isMember(code) || isAdmin();
+        allow create, update: if isMember(code)
+          && id == request.resource.data.week + '_' + request.auth.uid
+          && request.resource.data.keys().hasOnly(['uid', 'week', 'pts', 'solved', 'streak', 'at'])
+          && request.resource.data.keys().hasAll(['uid', 'week', 'pts', 'solved', 'streak', 'at'])
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.week is string && request.resource.data.week.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
+          && request.resource.data.pts is int && request.resource.data.pts >= 0 && request.resource.data.pts <= 4000
+          && request.resource.data.solved is int && request.resource.data.solved >= 0 && request.resource.data.solved <= 14
+          && request.resource.data.streak is int && request.resource.data.streak >= 0 && request.resource.data.streak <= 9999
+          && request.resource.data.at == request.time;
+        allow delete: if request.auth != null && (resource.data.uid == request.auth.uid || isGroupOwner(code));
+      }
+    }
+
+    // Lista personal de grupos de cada persona (para encontrarlos y borrarlos con la cuenta). La lee su dueño y el administrador.
+    match /users/{uid}/grupos/{code} {
+      allow read: if (request.auth != null && request.auth.uid == uid) || isAdmin();
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && code.matches('[A-HJ-NP-Z2-9]{6}')
+        && request.resource.data.keys().hasOnly(['name', 'at'])
+        && request.resource.data.name is string && request.resource.data.name.size() <= 40
+        && request.resource.data.at == request.time;
+      allow delete: if request.auth != null && request.auth.uid == uid;
+    }
   }
 }
