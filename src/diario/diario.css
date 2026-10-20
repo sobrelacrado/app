@@ -41,6 +41,10 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-morse .dr-palabra { padding-bottom: 10px; border-bottom: 1px dashed currentColor; }
 .dr-morse .dr-palabra:last-child { border-bottom: 0; padding-bottom: 0; }
 .dr-palabra { display: flex; flex-wrap: wrap; gap: 6px; }
+/* Guion al final de la línea cuando una palabra salta a la siguiente (lo pone useGuiones en games.jsx) */
+.dr-palabra > [data-quiebra] { position: relative; }
+.dr-palabra > [data-quiebra]::after { content: '-'; position: absolute; left: 100%; top: 50%; width: 12px; margin-top: -17px; text-align: center; font: 700 34px 'Space Mono', monospace; line-height: 34px; color: var(--t-tinta, currentColor); pointer-events: none; }
+.dr-palabra > .dr-celda[data-quiebra]::after { top: auto; bottom: 4px; margin-top: 0; }
 .dr-grupo { font-size: 16px; font-weight: 700; padding: 4px 6px; min-width: 32px; text-align: center; background: rgba(0, 0, 0, .07); letter-spacing: 1px; }
 .dr-tabla { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 4px 8px; margin: 10px 0; font-family: 'Space Mono', monospace; font-size: 13px; }
 .dr-campo { display: block; margin-top: 16px; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; }
@@ -90,7 +94,7 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-rueda-num b { font: 700 38px 'Space Mono', monospace; width: 58px; text-align: center; padding: 2px 0; background: #fff; border: 2px solid var(--t-tinta); color: #1d1d1d; }
 .dr-carta .dr-rueda-num button.dr-ficha { width: 58px; height: 38px; font-size: 16px; }
 
-.dr-huecos { display: flex; flex-direction: column; gap: 10px; margin: 8px 0 12px; }
+.dr-huecos { display: flex; flex-direction: column; gap: 18px; margin: 8px 0 12px; }
 .dr-carta button.dr-ficha.dr-hueco { background: #fff; color: #1d1d1d; border-style: dashed; width: 38px; min-width: 0; padding: 0; }
 .dr-carta button.dr-ficha.dr-hueco:not(:disabled) { border-style: solid; opacity: 1; }
 .dr-carta button.dr-ficha.dr-hueco:disabled { opacity: 1; box-shadow: none; }

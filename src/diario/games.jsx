@@ -53,11 +53,31 @@ function CajaRespuesta({ onCheck, label = 'Tu respuesta' }) {
   )
 }
 
+// Si una palabra no cabe en una línea y salta a la siguiente, la última casilla de cada línea lleva un guion (data-quiebra) para que no parezcan dos palabras.
+function useGuiones(ref) {
+  useEffect(() => {
+    const root = ref.current
+    if (!root) return undefined
+    const mark = () => {
+      for (const w of root.querySelectorAll('.dr-palabra')) {
+        const kids = [...w.children]
+        kids.forEach((c, i) => { if (kids[i + 1] && kids[i + 1].offsetTop > c.offsetTop) c.dataset.quiebra = '1'; else delete c.dataset.quiebra })
+      }
+    }
+    mark()
+    const ro = new ResizeObserver(mark)
+    ro.observe(root)
+    return () => ro.disconnect()
+  }, [ref])
+}
+
 // Una casilla por letra, agrupadas en palabras; cada casilla lleva encima una etiqueta (la tecla, el dibujo...).
 function Casillas({ words, onCheck }) {
   const total = words.reduce((n, w) => n + w.length, 0)
   const [letters, setLetters] = useState(() => Array(total).fill(''))
   const refs = useRef([])
+  const box = useRef(null)
+  useGuiones(box)
   const set = (i, v) => setLetters((l) => l.map((x, k) => (k === i ? v : x)))
   const submit = () => {
     let i = 0
@@ -75,7 +95,7 @@ function Casillas({ words, onCheck }) {
   let n = -1
   return (
     <>
-      <div className="dr-letras">
+      <div className="dr-letras" ref={box}>
         {words.map((w, wi) => (
           <div className="dr-palabra" key={wi}>
             {w.map((tag, gi) => {
@@ -244,10 +264,12 @@ function Anagrama({ puzzle, onCheck }) {
     let i = 0
     onCheck(lens.map((n) => Array.from({ length: n }, () => tiles[slots[i++]]).join('')).join(' '))
   }
+  const box = useRef(null)
+  useGuiones(box)
   let n = -1
   return (
     <>
-      <div className="dr-huecos">
+      <div className="dr-huecos" ref={box}>
         {lens.map((len, wi) => (
           <div className="dr-palabra" key={wi}>
             {Array.from({ length: len }, () => {
