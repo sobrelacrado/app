@@ -355,7 +355,7 @@ export default [
     "theme": "policial",
     "level": 2,
     "title": "Papel revuelto",
-    "clue": "Alguien rompió una nota y mezcló las letras. Ordénalas y sabrás qué decía.",
+    "clue": "Alguien rompió una nota y mezcló las letras. Habla de alguien a quien la policía vigila de cerca. Ordénalas y sabrás qué decía.",
     "hint": "Son tres palabras y la última es HUYE.",
     "data": {
       "pool": "PHSOLEOCSEUOSYEH",

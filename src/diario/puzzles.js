@@ -54,7 +54,7 @@ export default [
     "theme": "egipcio",
     "level": 2,
     "title": "Jeroglíficos revueltos",
-    "clue": "Las letras de una orden han quedado mezcladas sobre el papiro. Ordénalas para leerla.",
+    "clue": "Las letras de una orden han quedado mezcladas sobre el papiro. Es una orden para entrar en el lugar donde descansa un faraón. Ordénalas para leerla.",
     "hint": "Empieza por A. Son tres palabras.",
     "data": {
       "pool": "EARUBABLTAM",
@@ -1937,7 +1937,7 @@ export default [
     "theme": "alien",
     "level": 2,
     "title": "Mensaje en el radar",
-    "clue": "El radar muestra una frase con las letras mezcladas.",
+    "clue": "El radar muestra una frase con las letras mezcladas. Es un aviso sobre algo que llega desde el espacio.",
     "hint": "Son cuatro palabras y la última es LUNA.",
     "data": {
       "pool": "NLVANUELEEANDI",
@@ -2089,7 +2089,7 @@ export default [
     "theme": "policial",
     "level": 2,
     "title": "Orden en el cuaderno",
-    "clue": "En el cuaderno del comisario, las letras de una orden quedaron mezcladas.",
+    "clue": "En el cuaderno del comisario, las letras de una orden quedaron mezcladas. Es una orden de la policía sobre una persona.",
     "hint": "Es una orden de tres palabras sobre quien conducía el coche.",
     "data": {
       "pool": "ARSLFAHCEORTRNEE",
