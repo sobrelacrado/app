@@ -4,8 +4,8 @@ import { fmtDuration } from '../lib/runs.js'
 import { caseSummary, STATUS_TEXT } from './casos.js'
 import Cuaderno from './Cuaderno.jsx'
 
-// Formulario de la lista de espera (el mismo enlace del perfil de Instagram): al apuntarse se recibe por correo el Caso 2, gratis.
-const FREE_CASE_URL = 'https://preview.mailerlite.io/forms/2670725/199972870005195853/share'
+// Formulario de la lista de espera exclusivo de la app (copia del que lleva el perfil de Instagram, para saber de dónde llega cada persona): al apuntarse se recibe por correo el Caso 2, gratis.
+const FREE_CASE_URL = 'https://preview.mailerlite.io/forms/2670725/202227977784657815/share'
 
 // El vídeo está en GitHub Pages (mismo sitio que los del Caso 3), no dentro de la app: así no gasta la descarga diaria del alojamiento.
 const VIDEOS = 'https://sobrelacrado.github.io/videos/duarte-v0'
