@@ -20,7 +20,7 @@ const to = Number(nums[1] ?? src.length)
 const seedOf = (n) => (BANCO ? calendario.length + n : n) // mismas pistas de coartada que genera make-puzzles.mjs
 const TYPE_NAME = { // mismos nombres que games.jsx (Node no puede importar archivos .jsx)
   cesar: 'Rueda de César', morse: 'Código Morse', teclado: 'Teclado antiguo', cerradura: 'Cerradura de 3 cifras', anagrama: 'Anagrama',
-  acrostico: 'Mensaje escondido', simbolos: 'Alfabeto de símbolos', espejo: 'Alfabeto en espejo', criptico: 'Críptico', vigenere: 'Cifrado Vigenère', golpes: 'Golpes en la pared', interrogatorio: 'El interrogatorio', escitala: 'Escítala', sopa: 'Sopa de letras escondidas',
+  acrostico: 'Mensaje escondido', simbolos: 'Alfabeto de símbolos', espejo: 'Alfabeto en espejo', criptico: 'Críptico', vigenere: 'Cifrado Vigenère', golpes: 'Golpes en la pared', interrogatorio: 'El interrogatorio', sopa: 'Sopa de letras escondidas',
   numeros: 'Números a letras', rebus: 'Rebus de emojis', sinvocales: 'Texto sin vocales', intruso: 'El intruso', coartada: 'La coartada', binario: 'Binario a letras',
 }
 const DIAS = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo']
@@ -34,8 +34,7 @@ for (let n = from; n <= Math.min(to, src.length); n++) {
   const solucion = p.type === 'cesar' ? `${esc(p.text)} <small>(desplazamiento ${p.shift})</small>`
     : p.type === 'vigenere' ? `${esc(p.text)} <small>(clave ${esc(p.key)} · ${p.keyGiven ? 'la clave se enseña' : 'clave secreta, se adivina con la pista'})</small>`
     : p.type === 'numeros' ? `${esc(p.text)} <small>(${p.mode === 'inverso' ? 'A=26, al revés' : 'A=1'})</small>`
-    : p.type === 'escitala' ? `${esc(p.text)} <small>(grosor correcto: ${p.rows} filas)</small>`
-    : p.type === 'acrostico' ? `${esc(p.text)} <small>(iniciales de las líneas)</small>` : esc(p.text)
+    : p.type === 'acrostico' ? `${esc(p.text)} <small>(regla: ${p.rule ?? 'primera'}${p.reverse ? ', de abajo arriba' : ''})</small>` : esc(p.text)
   const cuerpo = p.type === 'sopa'
     ? `<p><b>Pista:</b> ${esc(p.hint)}</p><pre>${sopaBuild(p).rows.join('<br>')}</pre><p><b>Palabras:</b> ${p.words.map((w) => esc(typeof w === 'string' ? w : `${w.w} (${w.c})`)).join(' · ')}</p>`
     : p.type === 'interrogatorio'

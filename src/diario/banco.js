@@ -380,45 +380,6 @@ export default [
   },
   {
     "id": 1025,
-    "type": "escitala",
-    "theme": "policial",
-    "level": 3,
-    "title": "La tira del chófer",
-    "clue": "Un chófer te entrega una tira de cuero con letras sin sentido. Enrollada en el palo del grosor justo, el mensaje se lee de corrido.",
-    "hint": "Son seis palabras y la última es GARAJE.",
-    "data": {
-      "cipher": "EELLSGCTAOARCEAHNJEEE"
-    },
-    "h": "peyzbyt5gk"
-  },
-  {
-    "id": 1026,
-    "type": "escitala",
-    "theme": "egipcio",
-    "level": 3,
-    "title": "La tira del escriba",
-    "clue": "Un escriba te entrega una tira de papiro con letras desordenadas. Si encuentras el bastón del grosor justo, el mensaje aparece.",
-    "hint": "Son cinco palabras y la última es DEBAJO.",
-    "data": {
-      "cipher": "LACEEARRSBCAETAASTAJMEADO"
-    },
-    "h": "15092plbxyw"
-  },
-  {
-    "id": 1027,
-    "type": "escitala",
-    "theme": "detective",
-    "level": 3,
-    "title": "La tira del cartero",
-    "clue": "Un cartero deja una tira de cuero con letras sin sentido. Dicen que en el palo del grosor justo se lee un mensaje.",
-    "hint": "Son seis palabras y la primera es EL.",
-    "data": {
-      "cipher": "EEELRLSDAOECBTLRIAEEVVNE"
-    },
-    "h": "14tg4346qt3"
-  },
-  {
-    "id": 1028,
     "type": "binario",
     "theme": "detective",
     "level": 3,
@@ -429,7 +390,7 @@ export default [
     "h": "gk33kn5nfu"
   },
   {
-    "id": 1029,
+    "id": 1026,
     "type": "binario",
     "theme": "alien",
     "level": 3,
@@ -440,43 +401,7 @@ export default [
     "h": "13c1z22uokd"
   },
   {
-    "id": 1030,
-    "type": "acrostico",
-    "theme": "detective",
-    "level": 3,
-    "title": "La habitación del hotel",
-    "clue": "Un huésped dejó una nota contando su noche en el hotel. Lo importante no está en lo que cuenta, sino en cómo lo cuenta.",
-    "hint": "La palabra tiene seis letras: te devuelve tu propia imagen.",
-    "data": [
-      "Entré en la habitación sin hacer ruido.",
-      "Sobre la cómoda había un sobre cerrado.",
-      "Pensé en llamar a alguien, pero me contuve.",
-      "En la pared, un marco viejo me devolvía la mirada.",
-      "Juraría que el reflejo parpadeó un segundo después que yo.",
-      "Olvidé lo que había ido a buscar y salí corriendo."
-    ],
-    "h": "1ki33z5pj5t"
-  },
-  {
-    "id": 1031,
-    "type": "acrostico",
-    "theme": "policial",
-    "level": 3,
-    "title": "El vecino de la maleta",
-    "clue": "Una vecina declara en comisaría lo que vio. Parece una queja sin importancia, pero esconde una palabra.",
-    "hint": "La palabra tiene seis letras: es lo que se teclea para abrir una caja fuerte.",
-    "data": [
-      "Cada noche el vecino salía con una maleta.",
-      "Observaba la calle antes de cruzarla.",
-      "Dejaba la luz del pasillo encendida.",
-      "Iba siempre hacia el mismo callejón.",
-      "Gritaba un número antes de entrar.",
-      "Ocultaba algo bajo el abrigo."
-    ],
-    "h": "2c877u06quw"
-  },
-  {
-    "id": 1032,
+    "id": 1027,
     "type": "sinvocales",
     "theme": "policial",
     "level": 3,
@@ -508,39 +433,7 @@ export default [
     "h": "gq5skew9lf"
   },
   {
-    "id": 1033,
-    "type": "sinvocales",
-    "theme": "detective",
-    "level": 3,
-    "title": "La ventana rota",
-    "clue": "En el informe de un robo se han perdido las vocales. Léelo con las consonantes que quedan.",
-    "hint": "Son cinco palabras y la primera es LA.",
-    "data": [
-      {
-        "c": "L",
-        "len": 2
-      },
-      {
-        "c": "PRT",
-        "len": 6
-      },
-      {
-        "c": "TRSR",
-        "len": 7
-      },
-      {
-        "c": "STB",
-        "len": 6
-      },
-      {
-        "c": "BRT",
-        "len": 7
-      }
-    ],
-    "h": "dq0xevttbl"
-  },
-  {
-    "id": 1034,
+    "id": 1028,
     "type": "cesar",
     "theme": "alien",
     "level": 3,
@@ -551,7 +444,7 @@ export default [
     "h": "3pg73swsqp"
   },
   {
-    "id": 1035,
+    "id": 1029,
     "type": "cesar",
     "theme": "egipcio",
     "level": 3,
@@ -562,7 +455,7 @@ export default [
     "h": "2zbo3qej7p"
   },
   {
-    "id": 1036,
+    "id": 1030,
     "type": "intruso",
     "theme": "detective",
     "level": 3,
@@ -571,25 +464,25 @@ export default [
     "hint": "Piensa en lo que es cada ciudad dentro de su país.",
     "data": [
       {
-        "n": "Barcelona"
+        "n": "Madrid"
       },
       {
-        "n": "París"
+        "n": "Barcelona"
       },
       {
         "n": "Lisboa"
       },
       {
-        "n": "Roma"
+        "n": "París"
       },
       {
-        "n": "Madrid"
+        "n": "Roma"
       }
     ],
     "h": "1bxl99dymvz"
   },
   {
-    "id": 1037,
+    "id": 1031,
     "type": "morse",
     "theme": "policial",
     "level": 3,
@@ -600,7 +493,7 @@ export default [
     "h": "1ravducc10j"
   },
   {
-    "id": 1038,
+    "id": 1032,
     "type": "teclado",
     "theme": "alien",
     "level": 3,
@@ -611,36 +504,7 @@ export default [
     "h": "1b5sijnt2ns"
   },
   {
-    "id": 1039,
-    "type": "coartada",
-    "theme": "detective",
-    "level": 4,
-    "title": "Tres en la casa",
-    "clue": "Tres invitados estaban cada uno en una zona distinta de la casa cuando desapareció el cuadro. El cuadro estaba en el garaje.",
-    "hint": "Anota cada pista en una tabla de personas y sitios.",
-    "data": {
-      "people": [
-        "Carmen",
-        "Andrés",
-        "Beatriz"
-      ],
-      "places": [
-        "la cocina",
-        "el jardín",
-        "el garaje"
-      ],
-      "ordered": false,
-      "clues": [
-        "Beatriz estaba en la cocina o en el garaje.",
-        "Andrés no estaba en la cocina.",
-        "Andrés estaba en la cocina o en el garaje."
-      ],
-      "ask": 2
-    },
-    "h": "601pbitkk5"
-  },
-  {
-    "id": 1040,
+    "id": 1033,
     "type": "coartada",
     "theme": "policial",
     "level": 4,
@@ -660,45 +524,16 @@ export default [
       ],
       "ordered": true,
       "clues": [
-        "Hugo estaba en la oficina o en el muelle.",
-        "Olga y Rosa estaban en sitios contiguos, uno al lado del otro.",
-        "Olga estaba en el almacén o en el muelle."
+        "Hugo y Rosa estaban en sitios contiguos, uno al lado del otro.",
+        "Olga estaba más cerca de la entrada que Rosa.",
+        "Hugo estaba en el almacén o en el muelle."
       ],
       "ask": 1
     },
     "h": "1299c4yzhnh"
   },
   {
-    "id": 1041,
-    "type": "coartada",
-    "theme": "egipcio",
-    "level": 4,
-    "title": "Tres en el yacimiento",
-    "clue": "Tres arqueólogos estaban cada uno en un lugar distinto cuando desapareció el amuleto. El amuleto estaba en el mercado.",
-    "hint": "Anota cada pista en una tabla de personas y sitios.",
-    "data": {
-      "people": [
-        "Nacho",
-        "Irene",
-        "Tomás"
-      ],
-      "places": [
-        "el templo",
-        "la tumba",
-        "el mercado"
-      ],
-      "ordered": false,
-      "clues": [
-        "Nacho no estaba en la tumba.",
-        "Nacho estaba en el templo o en la tumba.",
-        "Irene estaba en el templo o en el mercado."
-      ],
-      "ask": 2
-    },
-    "h": "15dy7ydh1rm"
-  },
-  {
-    "id": 1042,
+    "id": 1034,
     "type": "coartada",
     "theme": "alien",
     "level": 4,
@@ -718,49 +553,16 @@ export default [
       ],
       "ordered": true,
       "clues": [
-        "Elsa no estaba en el radar.",
-        "Mario estaba en el hangar o en el radar.",
-        "Mario no estaba en el radar."
+        "Mario no estaba en el radar.",
+        "Mario estaba más cerca de la entrada que Elsa.",
+        "Daniel estaba más cerca de la entrada que Elsa."
       ],
       "ask": 0
     },
     "h": "agcd3fd0j9"
   },
   {
-    "id": 1043,
-    "type": "binario",
-    "theme": "policial",
-    "level": 4,
-    "title": "El pendrive del sargento",
-    "clue": "En el pendrive del sargento solo hay un archivo: una ristra de ceros y unos.",
-    "hint": "Son cinco palabras y la última es DENTRO.",
-    "data": "01100 00001 / 10100 10010 00001 01001 00011 01001 01111 01110 / 10110 01001 01110 01111 / 00100 00101 / 00100 00101 01110 10100 10010 01111",
-    "h": "1bw5wl15mp1"
-  },
-  {
-    "id": 1044,
-    "type": "binario",
-    "theme": "egipcio",
-    "level": 4,
-    "title": "La tablilla escaneada",
-    "clue": "Un arqueólogo escaneó una tablilla y el ordenador la tradujo a ceros y unos.",
-    "hint": "Son seis palabras y la última es ESPEJO.",
-    "data": "00101 01100 / 00011 01111 00100 01001 00111 01111 / 00101 10011 10100 00001 / 00101 01110 / 00101 01100 / 00101 10011 10000 00101 01010 01111",
-    "h": "26xpl3q4jqz"
-  },
-  {
-    "id": 1045,
-    "type": "binario",
-    "theme": "detective",
-    "level": 4,
-    "title": "Las cuatro frases",
-    "clue": "El detective recibe un archivo con ceros y unos. Dicen que es una confesión muy corta.",
-    "hint": "Son cuatro palabras y la primera es NADIE.",
-    "data": "01110 00001 00100 01001 00101 / 00101 01110 10100 10010 01111 / 01110 00001 00100 01001 00101 / 10011 00001 01100 01001 01111",
-    "h": "1gemoj87b27"
-  },
-  {
-    "id": 1046,
+    "id": 1035,
     "type": "sinvocales",
     "theme": "detective",
     "level": 4,
@@ -804,7 +606,7 @@ export default [
     "h": "3fl4s4xb0i"
   },
   {
-    "id": 1047,
+    "id": 1036,
     "type": "sinvocales",
     "theme": "policial",
     "level": 4,
@@ -844,62 +646,7 @@ export default [
     "h": "16x07iirggf"
   },
   {
-    "id": 1048,
-    "type": "cesar",
-    "theme": "policial",
-    "level": 4,
-    "title": "La nota del tren",
-    "clue": "Una nota apareció bajo un asiento del tren. Las letras están movidas y no hay ninguna pista del número.",
-    "hint": "Son seis palabras y la última es ESTACION.",
-    "data": "MNSJ NU MRWNAX NW UJ NBCJLRXW",
-    "h": "jkngz4t0dx"
-  },
-  {
-    "id": 1049,
-    "type": "cesar",
-    "theme": "egipcio",
-    "level": 4,
-    "title": "La advertencia del sarcófago",
-    "clue": "Dentro de un sarcófago hay una advertencia cifrada. Cada letra se desplazó una cantidad que nadie te cuenta.",
-    "hint": "Son siete palabras y la primera es LA.",
-    "data": "CR DFDZR EF VJ CF HLV GRIVTV",
-    "h": "1rahkicwyka"
-  },
-  {
-    "id": 1050,
-    "type": "simbolos",
-    "theme": "detective",
-    "level": 4,
-    "title": "Símbolos en el despacho",
-    "clue": "Alguien dibujó una frase con símbolos en la pared del despacho. La tabla para leerlos está al lado.",
-    "hint": "Son seis palabras y la primera es EL.",
-    "data": "RY NTRAGR QBOYR RFGN RAGER ABFBGEBF",
-    "h": "7r5lv57lkn"
-  },
-  {
-    "id": 1051,
-    "type": "simbolos",
-    "theme": "alien",
-    "level": 4,
-    "title": "Marcas en el maizal",
-    "clue": "Unos círculos y trazos aparecen cada noche en el maizal. Junto al último, la tabla para leerlos.",
-    "hint": "Son siete palabras y la última es PLAN.",
-    "data": "AB SHR HA NPPVQRAGR SHR HA CYNA",
-    "h": "hbjchqi97q"
-  },
-  {
-    "id": 1052,
-    "type": "teclado",
-    "theme": "policial",
-    "level": 4,
-    "title": "Mensaje del testigo protegido",
-    "clue": "El testigo protegido solo puede comunicarse por un móvil antiguo. Cada grupo de números es una letra.",
-    "hint": "Son cinco palabras y la última es JARDINERO.",
-    "data": "555 2 / 44 88 33 555 555 2 / 33 7777 / 3 33 555 / 5 2 777 3 444 66 33 777 666",
-    "h": "1lp9u5lxyz"
-  },
-  {
-    "id": 1053,
+    "id": 1037,
     "type": "espejo",
     "theme": "detective",
     "level": 4,
@@ -910,130 +657,7 @@ export default [
     "h": "hbev5izv8t"
   },
   {
-    "id": 1054,
-    "type": "intruso",
-    "theme": "policial",
-    "level": 4,
-    "title": "La libreta de números",
-    "clue": "En una libreta hay cinco números subrayados. Cuatro comparten algo y uno no.",
-    "hint": "Piensa en la tabla de multiplicar del seis.",
-    "data": [
-      {
-        "n": "30"
-      },
-      {
-        "n": "35"
-      },
-      {
-        "n": "24"
-      },
-      {
-        "n": "18"
-      },
-      {
-        "n": "12"
-      }
-    ],
-    "h": "1trs8ncupt7"
-  },
-  {
-    "id": 1055,
-    "type": "coartada",
-    "theme": "detective",
-    "level": 5,
-    "title": "Cuatro en la finca",
-    "clue": "Cuatro invitados recorrían la finca la noche en que desapareció el vino. Las salas están en fila, desde la entrada. El robo fue en la bodega.",
-    "hint": "Las salas están en fila, así que el orden también cuenta.",
-    "data": {
-      "people": [
-        "Pilar",
-        "Rubén",
-        "Alma",
-        "Gonzalo"
-      ],
-      "places": [
-        "la biblioteca",
-        "la bodega",
-        "el salón",
-        "el invernadero"
-      ],
-      "ordered": true,
-      "clues": [
-        "Pilar y Gonzalo estaban en sitios contiguos, uno al lado del otro.",
-        "Alma estaba en la biblioteca.",
-        "Pilar no estaba en el salón.",
-        "Rubén no estaba en el invernadero."
-      ],
-      "ask": 1
-    },
-    "h": "22rwx2n93b"
-  },
-  {
-    "id": 1056,
-    "type": "coartada",
-    "theme": "policial",
-    "level": 5,
-    "title": "Cuatro en la comisaría",
-    "clue": "Cuatro personas estaban cada una en un sitio distinto de la comisaría cuando se perdió una prueba. La prueba estaba en la sala de pruebas.",
-    "hint": "Anota cada pista en una tabla de personas y sitios.",
-    "data": {
-      "people": [
-        "Lola",
-        "Víctor",
-        "Nuria",
-        "Samuel"
-      ],
-      "places": [
-        "la recepción",
-        "el archivo",
-        "la sala de pruebas",
-        "el calabozo"
-      ],
-      "ordered": false,
-      "clues": [
-        "Lola estaba en la recepción o en la sala de pruebas.",
-        "Nuria estaba en la recepción o en el calabozo.",
-        "Víctor estaba en la sala de pruebas o en el calabozo.",
-        "Nuria no estaba en el calabozo."
-      ],
-      "ask": 2
-    },
-    "h": "2d58ebgaf1n"
-  },
-  {
-    "id": 1057,
-    "type": "coartada",
-    "theme": "egipcio",
-    "level": 5,
-    "title": "Cuatro junto al Nilo",
-    "clue": "Cuatro escribas recorrían la ciudad cuando desapareció el sello del faraón. Los lugares están en fila, desde la orilla del río. El sello estaba en el palacio.",
-    "hint": "Los lugares están en fila, así que el orden también cuenta.",
-    "data": {
-      "people": [
-        "Amón",
-        "Nefer",
-        "Kiara",
-        "Ramsés"
-      ],
-      "places": [
-        "el río",
-        "el templo",
-        "el mercado",
-        "el palacio"
-      ],
-      "ordered": true,
-      "clues": [
-        "Kiara no estaba en el río.",
-        "Nefer estaba en el palacio.",
-        "Kiara estaba en el río o en el mercado.",
-        "Ramsés estaba en el río o en el mercado."
-      ],
-      "ask": 3
-    },
-    "h": "17vk1jd8dgt"
-  },
-  {
-    "id": 1058,
+    "id": 1038,
     "type": "coartada",
     "theme": "alien",
     "level": 5,
@@ -1055,28 +679,17 @@ export default [
       ],
       "ordered": false,
       "clues": [
-        "Zoe estaba en el puente o en la cabina.",
-        "Bruno no estaba en la bodega.",
-        "Marta no estaba en el motor.",
-        "Bruno estaba en la cabina o en la bodega."
+        "Marta no estaba en la cabina.",
+        "Iván estaba en el puente o en el motor.",
+        "Zoe no estaba en la cabina.",
+        "Zoe estaba en el puente o en la cabina."
       ],
       "ask": 3
     },
     "h": "2231fn6kd5l"
   },
   {
-    "id": 1059,
-    "type": "binario",
-    "theme": "detective",
-    "level": 5,
-    "title": "El archivo del despacho",
-    "clue": "Un archivo oculto en el ordenador del despacho: una larga cadena de ceros y unos.",
-    "hint": "Son siete palabras y la última es DETECTIVE.",
-    "data": "00101 01100 / 10100 00101 10011 10100 01001 00111 01111 / 00011 01100 00001 10110 00101 / 00101 10011 / 00101 01100 / 10000 10010 01111 10000 01001 01111 / 00100 00101 10100 00101 00011 10100 01001 10110 00101",
-    "h": "1mij1b02esm"
-  },
-  {
-    "id": 1060,
+    "id": 1039,
     "type": "binario",
     "theme": "policial",
     "level": 5,
@@ -1087,18 +700,7 @@ export default [
     "h": "1k3lqb52efe"
   },
   {
-    "id": 1061,
-    "type": "binario",
-    "theme": "alien",
-    "level": 5,
-    "title": "El mensaje del satélite",
-    "clue": "Un satélite abandonado envía cada noche la misma secuencia de ceros y unos. Por fin alguien la ha descodificado.",
-    "hint": "Son siete palabras y la última es VIGILANDO.",
-    "data": "00101 01100 01100 01111 10011 / 11001 00001 / 10011 00001 00010 00101 01110 / 10001 10101 00101 / 01100 01111 10011 / 00101 10011 10100 00001 01101 01111 10011 / 10110 01001 00111 01001 01100 00001 01110 00100 01111",
-    "h": "n4m22qu2jh"
-  },
-  {
-    "id": 1062,
+    "id": 1040,
     "type": "sinvocales",
     "theme": "detective",
     "level": 5,
@@ -1146,55 +748,7 @@ export default [
     "h": "30uggta674"
   },
   {
-    "id": 1063,
-    "type": "sinvocales",
-    "theme": "policial",
-    "level": 5,
-    "title": "La declaración mojada",
-    "clue": "La lluvia borró las vocales de una declaración firmada. Quien la lea sabrá quién abrió la caja.",
-    "hint": "Son nueve palabras y la última es NOCHE.",
-    "data": [
-      {
-        "c": "ND",
-        "len": 5
-      },
-      {
-        "c": "RCRD",
-        "len": 8
-      },
-      {
-        "c": "QN",
-        "len": 5
-      },
-      {
-        "c": "BR",
-        "len": 5
-      },
-      {
-        "c": "L",
-        "len": 2
-      },
-      {
-        "c": "CJ",
-        "len": 4
-      },
-      {
-        "c": "FRT",
-        "len": 6
-      },
-      {
-        "c": "S",
-        "len": 3
-      },
-      {
-        "c": "NCH",
-        "len": 5
-      }
-    ],
-    "h": "nxtnmmzbbp"
-  },
-  {
-    "id": 1064,
+    "id": 1041,
     "type": "sinvocales",
     "theme": "egipcio",
     "level": 5,
@@ -1238,7 +792,7 @@ export default [
     "h": "1mx5j18myq2"
   },
   {
-    "id": 1065,
+    "id": 1042,
     "type": "intruso",
     "theme": "detective",
     "level": 5,
@@ -1246,6 +800,9 @@ export default [
     "clue": "El detective subrayó cinco palabras en un cuaderno. Cuatro comparten algo en su forma y una no.",
     "hint": "Fíjate en las letras que se repiten seguidas.",
     "data": [
+      {
+        "n": "Perro"
+      },
       {
         "n": "Millón"
       },
@@ -1256,74 +813,13 @@ export default [
         "n": "Ballena"
       },
       {
-        "n": "Perro"
-      },
-      {
         "n": "Calle"
       }
     ],
     "h": "1jjdibtnukw"
   },
   {
-    "id": 1066,
-    "type": "intruso",
-    "theme": "alien",
-    "level": 5,
-    "title": "Los cuerpos del cielo",
-    "clue": "Un astrónomo anotó cinco nombres en su cuaderno. Cuatro tienen algo en común y uno no.",
-    "hint": "Piensa en lo que es cada uno: no todos giran alrededor del Sol.",
-    "data": [
-      {
-        "n": "Júpiter"
-      },
-      {
-        "n": "Venus"
-      },
-      {
-        "n": "Marte"
-      },
-      {
-        "n": "Saturno"
-      },
-      {
-        "n": "Sirio"
-      }
-    ],
-    "h": "bpej6wijta"
-  },
-  {
-    "id": 1067,
-    "type": "anagrama",
-    "theme": "detective",
-    "level": 5,
-    "title": "Sobre rasgado",
-    "clue": "Alguien rasgó un sobre y mezcló las letras de la frase que contenía. Si las ordenas, sabrás qué escondía.",
-    "hint": "Son cinco palabras y la primera es EL.",
-    "data": {
-      "pool": "OONUPROLETEESSEBNASRLTLCTAE",
-      "lens": [
-        2,
-        8,
-        4,
-        5,
-        8
-      ]
-    },
-    "h": "2aeschch6op"
-  },
-  {
-    "id": 1068,
-    "type": "simbolos",
-    "theme": "egipcio",
-    "level": 5,
-    "title": "Jeroglíficos de la cámara",
-    "clue": "Una larga hilera de símbolos recorre la cámara secreta. Junto a la puerta, la tabla para leerlos.",
-    "hint": "Son siete palabras y la última es PAGINA.",
-    "data": "YN FBYHPVBA RFGNON RA YN CEVZREN CNTVAN",
-    "h": "lxfeq9tphp"
-  },
-  {
-    "id": 1069,
+    "id": 1043,
     "type": "teclado",
     "theme": "policial",
     "level": 5,
@@ -1334,14 +830,658 @@ export default [
     "h": "lr5avlo5f6"
   },
   {
-    "id": 1070,
-    "type": "espejo",
+    "id": 1044,
+    "type": "sinvocales",
+    "theme": "policial",
+    "level": 3,
+    "title": "El parte del turno",
+    "clue": "En el parte de guardia de la comisaría solo quedan consonantes: el café cayó justo sobre las vocales.",
+    "hint": "Son seis palabras y la última es PUESTO.",
+    "data": [
+      {
+        "c": "L",
+        "len": 2
+      },
+      {
+        "c": "VGLNT",
+        "len": 9
+      },
+      {
+        "c": "DRM",
+        "len": 6
+      },
+      {
+        "c": "N",
+        "len": 2
+      },
+      {
+        "c": "S",
+        "len": 2
+      },
+      {
+        "c": "PST",
+        "len": 6
+      }
+    ],
+    "h": "1oaizppx3dv"
+  },
+  {
+    "id": 1045,
+    "type": "intruso",
+    "theme": "egipcio",
+    "level": 3,
+    "title": "Los ríos del explorador",
+    "clue": "El explorador apuntó cinco ríos en su cuaderno. Cuatro comparten algo y uno no.",
+    "hint": "Piensa en el continente por el que pasa cada río.",
+    "data": [
+      {
+        "n": "Nilo"
+      },
+      {
+        "n": "Congo"
+      },
+      {
+        "n": "Níger"
+      },
+      {
+        "n": "Danubio"
+      },
+      {
+        "n": "Zambeze"
+      }
+    ],
+    "h": "1hj45ni2dcj"
+  },
+  {
+    "id": 1046,
+    "type": "morse",
+    "theme": "alien",
+    "level": 3,
+    "title": "Ecos desde la luna",
+    "clue": "Desde la superficie de la luna llegan pitidos largos y cortos cada pocos segundos. Alguien los ha anotado.",
+    "hint": "Son seis palabras y la última es PARED.",
+    "data": ".-.. .- / ... .- .-.. .. -.. .- / . ... - .- / - .-. .- ... / .-.. .- / .--. .- .-. . -..",
+    "h": "p07x42z100"
+  },
+  {
+    "id": 1047,
+    "type": "morse",
+    "theme": "detective",
+    "level": 3,
+    "title": "Golpes en la pared",
+    "clue": "El prisionero de la celda de al lado lleva toda la noche golpeando la pared. Cortos y largos.",
+    "hint": "Habla de un objeto y de dónde está escondido.",
+    "data": ".-.. .- / .-.. .-.. .- ...- . / . ... - .- / . -. / . .-.. / .-. . .-.. --- .---",
+    "h": "1cc3jrv555w"
+  },
+  {
+    "id": 1048,
+    "type": "cesar",
+    "theme": "egipcio",
+    "level": 4,
+    "title": "Papiro del faraón",
+    "clue": "Un papiro con un desplazamiento que nadie anotó. La frase tiene sentido completo cuando lo encuentras.",
+    "hint": "Cada letra se movió más de 10 puestos.",
+    "data": "PW QLCLZY RFLCOL PW DPNCPEZ",
+    "h": "17tnj62zeis"
+  },
+  {
+    "id": 1049,
+    "type": "criptico",
+    "theme": "detective",
+    "level": 4,
+    "title": "La nota sin remitente",
+    "clue": "Llega una nota de una sola línea, sin firma. Averigua qué dice y cómo está escrita.",
+    "data": {
+      "clue": "Se desordena el molusco de tinta y sale un agente secreto",
+      "lens": [
+        5
+      ],
+      "def": "un agente secreto",
+      "kind": "anagrama",
+      "indicator": "Se desordena",
+      "first": "E",
+      "explain": "LkHDjVBTRSBvbW9jIGFuZWRyb2VyIGVzIEEtSS1QLUUtUyA6c2FydGVsIHN1cyByYWxjemVtIGV1cSB5YWggZXVxIGVkIGFzaXZhIMK7YW5lZHJvc2VkIGVzwqsgeSAsYWlwZXMgYWwgc2UgwrthdG5pdCBlZCBvY3N1bG9tIGxFwqsgLsK7b3RlcmNlcyBldG5lZ2EgbnXCqyBzZSBuw7NpY2luaWZlZCBhTA==",
+      "pieces": [
+        "el molusco de tinta"
+      ]
+    },
+    "h": "e4z2ezywwj"
+  },
+  {
+    "id": 1050,
+    "type": "binario",
+    "theme": "detective",
+    "level": 5,
+    "title": "Pulsos del disco duro",
+    "clue": "El disco duro del sospechoso guardaba un archivo corto, solo ceros y unos.",
+    "hint": "Son tres palabras y la última es FALSO.",
+    "data": "10100 01111 00100 01111 / 00101 10011 / 00110 00001 01100 10011 01111",
+    "h": "rr3xlqa62q"
+  },
+  {
+    "id": 1051,
+    "type": "criptico",
+    "theme": "alien",
+    "level": 4,
+    "title": "Señal del cielo",
+    "clue": "Una señal baja del cielo, y alguien la mira desde la alfombra roja. La pista tiene dos caras.",
+    "data": {
+      "clue": "Brilla en el cielo y en la alfombra roja",
+      "lens": [
+        5
+      ],
+      "def": "Brilla en el cielo",
+      "def2": "en la alfombra roja",
+      "kind": "doble",
+      "first": "A",
+      "explain": "Lk9SVFNBIDphcmJhbGFwIGFtc2ltIGFsIGVkIHNvZGFjaWZpbmdpcyBzb2Qgbm9zIClhc29tYWYgYWxsZXJ0c2UgYW51KCBham9yIGFyYm1vZmxhIGFsIG5lIGFsbGlyYiBldXEgb2wgeSBvbGVpYyBsZSBuZSBhbGxpcmIgZXVxIG9sIDpuw7NpY2luaWZlZCBlbGJvZCBhbnUgc0U="
+    },
+    "h": "203gxypl89s"
+  },
+  {
+    "id": 1052,
+    "type": "intruso",
+    "theme": "policial",
+    "level": 5,
+    "title": "Solo una vocal",
+    "clue": "El inspector encontró seis palabras escritas en la pared. Una se comporta distinto que las demás.",
+    "hint": "Mira qué vocales usa cada palabra.",
+    "data": [
+      {
+        "n": "Campana"
+      },
+      {
+        "n": "Casa"
+      },
+      {
+        "n": "Saltar"
+      },
+      {
+        "n": "Barca"
+      },
+      {
+        "n": "Guitarra"
+      },
+      {
+        "n": "Manzana"
+      }
+    ],
+    "h": "b7tmc299f7"
+  },
+  {
+    "id": 1053,
+    "type": "criptico",
+    "theme": "policial",
+    "level": 4,
+    "title": "El informante",
+    "clue": "Un informante da una pista con dos caras. Piensa en lo que se llama igual.",
+    "data": {
+      "clue": "Donde reposas en la plaza y donde guardas los ahorros",
+      "lens": [
+        5
+      ],
+      "def": "Donde reposas en la plaza",
+      "def2": "donde guardas los ahorros",
+      "kind": "doble",
+      "first": "B",
+      "explain": "Lk9DTkFCIDphcmJhbGFwIGFtc2ltIGFsIGVkIHNvZGFjaWZpbmdpcyBzb2Qgbm9zIHNvcnJvaGEgc29sIHNhZHJhdWcgZWRub2QgcmFndWwgbGUgeSBhemFscCBhbCBuZSBzYXNvcGVyIGVkbm9kIHJhZ3VsIGxlIDpuw7NpY2luaWZlZCBlbGJvZCBhbnUgc0U="
+    },
+    "h": "1oym3hl0kgp"
+  },
+  {
+    "id": 1054,
+    "type": "intruso",
+    "theme": "egipcio",
+    "level": 5,
+    "title": "Notas escondidas",
+    "clue": "En el friso del templo hay seis palabras grabadas. Cinco esconden algo dentro y una no.",
+    "hint": "Busca algo escondido dentro de las palabras.",
+    "data": [
+      {
+        "n": "Cajón"
+      },
+      {
+        "n": "Remoto"
+      },
+      {
+        "n": "Dolor"
+      },
+      {
+        "n": "Lámina"
+      },
+      {
+        "n": "Famoso"
+      },
+      {
+        "n": "Soldado"
+      }
+    ],
+    "h": "39iq2h14ct"
+  },
+  {
+    "id": 1055,
+    "type": "criptico",
+    "theme": "policial",
+    "level": 4,
+    "title": "La carta lacrada",
+    "clue": "Una carta cerrada con lacre. La respuesta está más cerca de lo que parece.",
+    "data": {
+      "clue": "Se esconde en ese llorón la marca que cierra el sobre",
+      "lens": [
+        5
+      ],
+      "def": "la marca que cierra el sobre",
+      "kind": "escondida",
+      "indicator": "Se esconde en",
+      "first": "S",
+      "explain": "Lk9MTEVTIG5hbXJvZiAswrtuw7Nyb2xswqsgYSDCu2VzZcKrIGVkIG5henVyYyBldXEgLE8tTC1MLUUtUyBzYWRpdWdlcyBzYXJ0ZWwgc2FMIC5uw7NyT0xMIEVTZSA6b3R4ZXQgbGUgbmUgYWRpZG5vY3NlIMOhdHNlIGF0c2V1cHNlciBhbCBldXEgZWQgYXNpdmEgwrtuZSBlZG5vY3NlIGVTwqsgLsK7ZXJib3MgbGUgYXJyZWljIGV1cSBhY3JhbSBhbMKrIHNlIG7Ds2ljaW5pZmVkIGFM",
+      "pieces": [
+        "ese llorón"
+      ]
+    },
+    "h": "222ye1or5ss"
+  },
+  {
+    "id": 1056,
+    "type": "binario",
+    "theme": "egipcio",
+    "level": 5,
+    "title": "Jeroglífico electrónico",
+    "clue": "En la entrada de la tumba, una pantalla muestra una larga fila de ceros y unos.",
+    "hint": "Son tres palabras y la última es ARENA.",
+    "data": "00010 00001 01010 01111 / 01100 00001 / 00001 10010 00101 01110 00001",
+    "h": "1k60wpfmedu"
+  },
+  {
+    "id": 1057,
+    "type": "sinvocales",
     "theme": "alien",
     "level": 5,
-    "title": "Transmisión invertida",
-    "clue": "Una transmisión llega escrita al revés: el alfabeto está invertido, de la Z a la A.",
-    "hint": "Son siete palabras y la primera es TODOS.",
-    "data": "GLWLH NRVMGVM NVMLH VO KVIIL WVO EVXRML",
-    "h": "18fp6v4w0rg"
+    "title": "Transmisión cortada",
+    "clue": "La transmisión llegó muy dañada: solo se entienden las consonantes.",
+    "hint": "Son nueve palabras y la última es LEJANA.",
+    "data": [
+      {
+        "c": "L",
+        "len": 2
+      },
+      {
+        "c": "NTN",
+        "len": 6
+      },
+      {
+        "c": "CPT",
+        "len": 5
+      },
+      {
+        "c": "N",
+        "len": 3
+      },
+      {
+        "c": "VZ",
+        "len": 3
+      },
+      {
+        "c": "DSD",
+        "len": 5
+      },
+      {
+        "c": "N",
+        "len": 3
+      },
+      {
+        "c": "LN",
+        "len": 4
+      },
+      {
+        "c": "LJN",
+        "len": 6
+      }
+    ],
+    "h": "fkqbi3bj0l"
+  },
+  {
+    "id": 1058,
+    "type": "coartada",
+    "theme": "egipcio",
+    "level": 5,
+    "title": "Cuatro bajo la pirámide",
+    "clue": "Cuatro exploradores se separaron bajo la pirámide. Algo desapareció de la cripta.",
+    "hint": "Mira primero a quién le quedan menos sitios posibles.",
+    "data": {
+      "people": [
+        "Ana",
+        "Luis",
+        "Raúl",
+        "Sara"
+      ],
+      "places": [
+        "la cripta",
+        "el almacén",
+        "la azotea",
+        "la sala egipcia"
+      ],
+      "ordered": false,
+      "clues": [
+        "Ana estaba en el almacén o en la azotea.",
+        "Luis estaba en la sala egipcia.",
+        "Raúl no estaba en la azotea.",
+        "Raúl estaba en el almacén o en la azotea."
+      ],
+      "ask": 0
+    },
+    "h": "wv5lyx4y6v"
+  },
+  {
+    "id": 1059,
+    "type": "intruso",
+    "theme": "alien",
+    "level": 5,
+    "title": "Las cinco vocales",
+    "clue": "La nave tradujo seis palabras de la Tierra, pero una no cumple la regla de las demás.",
+    "hint": "Cuenta las vocales distintas de cada palabra.",
+    "data": [
+      {
+        "n": "Abuelito"
+      },
+      {
+        "n": "Arquitecto"
+      },
+      {
+        "n": "Carretera"
+      },
+      {
+        "n": "Educativo"
+      },
+      {
+        "n": "Eucalipto"
+      },
+      {
+        "n": "Murciélago"
+      }
+    ],
+    "h": "1hggghwc2rv"
+  },
+  {
+    "id": 1060,
+    "type": "criptico",
+    "theme": "detective",
+    "level": 4,
+    "title": "El contenido del equipaje",
+    "clue": "Un equipaje abandonado en la estación. Una pieza dentro de otra.",
+    "data": {
+      "clue": "Lo que llevas al hombro: pieza de bolera con la letra ese en su interior",
+      "lens": [
+        5
+      ],
+      "def": "Lo que llevas al hombro",
+      "kind": "contenedor",
+      "indicator": "en su interior",
+      "first": "B",
+      "explain": "Lk9TTE9CID0gTy1TLUxPQiA6b3J0bmVkIGV0ZW0gZXMgUyBhbCBldXEgZWQgYXNpdmEgwrtyb2lyZXRuaSB1cyBuZcKrIHkgLFMgYWwgc2Ugwrtlc2UgYXJ0ZWwgYWzCqyAsT0xPQiBsZSBzZSDCu2FyZWxvYiBlZCBhemVpUMKrIC7Cu29yYm1vaCBsYSBzYXZlbGwgZXVxIG9swqsgc2UgbsOzaWNpbmlmZWQgYUw=",
+      "pieces": [
+        "pieza de bolera",
+        "la letra ese"
+      ]
+    },
+    "h": "19raak9q8wq"
+  },
+  {
+    "id": 1061,
+    "type": "sinvocales",
+    "theme": "policial",
+    "level": 3,
+    "title": "Declaración borrosa",
+    "clue": "La declaración de un testigo salió de la impresora sin vocales.",
+    "hint": "Son siete palabras y la segunda es TESTIGO.",
+    "data": [
+      {
+        "c": "L",
+        "len": 2
+      },
+      {
+        "c": "TSTG",
+        "len": 7
+      },
+      {
+        "c": "CMB",
+        "len": 6
+      },
+      {
+        "c": "S",
+        "len": 2
+      },
+      {
+        "c": "VRSN",
+        "len": 7
+      },
+      {
+        "c": "DS",
+        "len": 3
+      },
+      {
+        "c": "VCS",
+        "len": 5
+      }
+    ],
+    "h": "twls8m14zx"
+  },
+  {
+    "id": 1062,
+    "type": "binario",
+    "theme": "policial",
+    "level": 4,
+    "title": "Cinta del interrogatorio",
+    "clue": "Alguien grabó en la cinta del interrogatorio una secuencia de ceros y unos.",
+    "hint": "Una sola palabra: es lo que presenta quien dice estar en otro sitio.",
+    "data": "00011 01111 00001 10010 10100 00001 00100 00001",
+    "h": "5ku4p11hcd"
+  },
+  {
+    "id": 1063,
+    "type": "coartada",
+    "theme": "policial",
+    "level": 5,
+    "title": "Cuatro sin coartada",
+    "clue": "Cuatro sospechosos juran no haber estado juntos. Algo desapareció de la bodega.",
+    "hint": "Anota cada pista en la tabla antes de sacar conclusiones.",
+    "data": {
+      "people": [
+        "Luis",
+        "Sara",
+        "Íñigo",
+        "Lucía"
+      ],
+      "places": [
+        "el garaje",
+        "la bodega",
+        "el jardín",
+        "la terraza"
+      ],
+      "ordered": false,
+      "clues": [
+        "Sara estaba en el garaje o en el jardín.",
+        "Luis no estaba en la terraza.",
+        "Sara no estaba en el jardín.",
+        "Íñigo estaba en el garaje o en el jardín."
+      ],
+      "ask": 1
+    },
+    "h": "piwluj3rwd"
+  },
+  {
+    "id": 1064,
+    "type": "binario",
+    "theme": "alien",
+    "level": 3,
+    "title": "Eco en la pantalla",
+    "clue": "La pantalla de la nave repite una fila de ceros y unos sin parar.",
+    "hint": "Una sola palabra: un conjunto enorme de estrellas.",
+    "data": "00111 00001 01100 00001 11000 01001 00001",
+    "h": "ss7x7y4shh"
+  },
+  {
+    "id": 1065,
+    "type": "coartada",
+    "theme": "egipcio",
+    "level": 4,
+    "title": "Tres en la excavación",
+    "clue": "Tres arqueólogos trabajaban en zonas distintas de la excavación cuando desapareció un amuleto del almacén.",
+    "hint": "Si solo queda un sitio posible para alguien, apúntalo con ✓.",
+    "data": {
+      "people": [
+        "Raúl",
+        "Sara",
+        "Jorge"
+      ],
+      "places": [
+        "la cripta",
+        "el almacén",
+        "la azotea"
+      ],
+      "ordered": false,
+      "clues": [
+        "Raúl no estaba en la azotea.",
+        "Raúl no estaba en el almacén.",
+        "Sara no estaba en el almacén."
+      ],
+      "ask": 1
+    },
+    "h": "1ddj5wr9b0q"
+  },
+  {
+    "id": 1066,
+    "type": "coartada",
+    "theme": "alien",
+    "level": 5,
+    "title": "Apagón en la base",
+    "clue": "Se apagó la base lunar. Cuatro astronautas estaban en zonas distintas. Las zonas van en orden desde la esclusa. El fallo vino del hangar.",
+    "hint": "Anota cada pista en la tabla: las zonas están en fila, así que el orden también cuenta.",
+    "data": {
+      "people": [
+        "Raúl",
+        "Elena",
+        "Jorge",
+        "Marta"
+      ],
+      "places": [
+        "el hangar",
+        "la cúpula",
+        "el comedor",
+        "la enfermería"
+      ],
+      "ordered": true,
+      "clues": [
+        "Raúl no estaba en la cúpula.",
+        "Elena estaba más cerca de la entrada que Raúl.",
+        "Marta estaba en el hangar o en el comedor.",
+        "Elena estaba más cerca de la entrada que Marta.",
+        "Jorge no estaba en la cúpula."
+      ],
+      "ask": 0
+    },
+    "h": "1ddj5wr9b0q"
+  },
+  {
+    "id": 1067,
+    "type": "binario",
+    "theme": "egipcio",
+    "level": 4,
+    "title": "Tablilla digital",
+    "clue": "Una tablilla de barro moderna tiene grabados ceros y unos en lugar de jeroglíficos.",
+    "hint": "Una sola palabra: es donde descansa una momia.",
+    "data": "10011 00001 10010 00011 01111 00110 00001 00111 01111",
+    "h": "c1pnffj6fj"
+  },
+  {
+    "id": 1068,
+    "type": "coartada",
+    "theme": "policial",
+    "level": 4,
+    "title": "Tres en el museo",
+    "clue": "Tres vigilantes cubrían zonas distintas del museo cuando se llevaron un cuadro del almacén.",
+    "hint": "Si solo queda un sitio posible para alguien, apúntalo con ✓.",
+    "data": {
+      "people": [
+        "Elena",
+        "Jorge",
+        "Lucía"
+      ],
+      "places": [
+        "la sala de pintura",
+        "el almacén",
+        "la azotea"
+      ],
+      "ordered": false,
+      "clues": [
+        "Elena no estaba en la sala de pintura.",
+        "Elena estaba en la sala de pintura o en la azotea.",
+        "Lucía no estaba en la sala de pintura."
+      ],
+      "ask": 1
+    },
+    "h": "yjgb2xnf9j"
+  },
+  {
+    "id": 1069,
+    "type": "coartada",
+    "theme": "detective",
+    "level": 5,
+    "title": "Cuatro en el casino",
+    "clue": "Cuatro empleados vigilaban zonas distintas del casino la noche en que abrieron la caja fuerte. Las zonas van en orden desde la entrada.",
+    "hint": "Anota cada pista en la tabla: las zonas están en fila, así que el orden también cuenta.",
+    "data": {
+      "people": [
+        "Luis",
+        "Ana",
+        "Marta",
+        "Raúl"
+      ],
+      "places": [
+        "la ruleta",
+        "la barra",
+        "el cajero",
+        "la caja fuerte"
+      ],
+      "ordered": true,
+      "clues": [
+        "Marta no estaba en la barra.",
+        "Luis estaba en la barra o en la caja fuerte.",
+        "Ana y Marta estaban en sitios contiguos, uno al lado del otro.",
+        "Raúl estaba en la barra o en el cajero."
+      ],
+      "ask": 3
+    },
+    "h": "piwluj3rwd"
+  },
+  {
+    "id": 1070,
+    "type": "coartada",
+    "theme": "alien",
+    "level": 4,
+    "title": "Tres en la nave",
+    "clue": "Tres tripulantes estaban cada uno en una zona de la nave cuando se abrió la puerta del hangar sin permiso.",
+    "hint": "Empieza descartando los sitios imposibles de cada uno.",
+    "data": {
+      "people": [
+        "Pablo",
+        "Sara",
+        "Íñigo"
+      ],
+      "places": [
+        "el puente",
+        "el laboratorio",
+        "el hangar"
+      ],
+      "ordered": false,
+      "clues": [
+        "Sara estaba en el puente o en el hangar.",
+        "Sara no estaba en el puente.",
+        "Íñigo no estaba en el laboratorio."
+      ],
+      "ask": 2
+    },
+    "h": "wv5lyx4y6v"
   }
 ]

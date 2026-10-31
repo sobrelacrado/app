@@ -171,6 +171,7 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-cripti mark, .dr-ayuda-cr mark { padding: 0 3px; border-radius: 3px; color: inherit; font-style: normal; }
 .dr-m-def { background: rgba(53, 120, 214, .28); box-shadow: inset 0 -2px 0 #3578d6; }
 .dr-m-aviso { background: rgba(224, 128, 32, .30); box-shadow: inset 0 -2px 0 #e08020; }
+.dr-m-pieza { background: rgba(60, 160, 90, .30); box-shadow: inset 0 -2px 0 #3ca05a; }
 .dr-ayuda-cr { margin: 8px 0; font-size: 14px; line-height: 1.5; }
 .dr-explica { margin: 14px 0 6px; padding: 10px 12px; text-align: left; border-left: 4px solid currentColor; background: rgba(0, 0, 0, .05); border-radius: 4px; }
 .dr-explica b { display: block; margin-bottom: 4px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; }
@@ -272,16 +273,6 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-acusar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 .dr-carta button.dr-sospechoso { flex: 1 1 40%; min-height: 44px; background: transparent; color: inherit; border: 2px solid currentColor; font-size: 14px; }
 .dr-carta button.dr-sospechoso.dr-sel { background: #1d1d1d; color: #f3eee2; }
-
-/* Escítala */
-.dr-cinta { display: flex; flex-wrap: wrap; gap: 3px; margin: 6px 0 10px; }
-.dr-cinta span { width: 24px; padding: 4px 0; text-align: center; font: 700 15px 'Space Mono', monospace; background: rgba(0, 0, 0, .1); border-radius: 4px; }
-.dr-grosor { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 8px 0; }
-.dr-grosor b { min-width: 100px; text-align: center; font-size: 18px; }
-.dr-grosor button { width: 46px; height: 46px; min-width: 0; padding: 0; border-radius: 50%; font-size: 26px; line-height: 1; }
-.dr-palo { display: grid; gap: 3px; width: fit-content; max-width: 100%; margin: 8px auto; padding: 10px; border-radius: 24px; background: linear-gradient(#6b4a2b, #8a6238 50%, #5a3d22); box-shadow: inset 0 0 10px rgba(0, 0, 0, .5); }
-.dr-palo span { min-width: 0; width: 28px; height: 30px; display: flex; align-items: center; justify-content: center; background: #f1dfb8; color: #2a1c0c; border-radius: 5px; font: 800 16px 'Space Mono', monospace; }
-.dr-lee { margin: 4px 0 10px; text-align: center; font: 700 16px 'Space Mono', monospace; letter-spacing: .1em; word-break: break-all; }
 
 /* Sopa de letras escondidas */
 .dr-sopa { display: grid; gap: 3px; margin: 10px 0; }
@@ -422,7 +413,7 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-carta button:disabled { box-shadow: none; }
 /* controles pequeños (fichas, casillas, estrellas…): redondeados pero sin sombra, para no recargar */
 .dr-carta button.dr-bin, .dr-carta button.dr-intruso, .dr-carta button.dr-marca, .dr-carta .dr-estrellas button, .dr-carta .dr-sosp button, .dr-carta .dr-sem-tabs button,
-.dr-carta .dr-grupos button, .dr-sopa button, .dr-grosor button, .dr-arch button.dr-dia, .dr-carta .dr-sosp-nuevo button { box-shadow: none; }
+.dr-carta .dr-grupos button, .dr-sopa button, .dr-arch button.dr-dia, .dr-carta .dr-sosp-nuevo button { box-shadow: none; }
 .dr-carta button.dr-bin, .dr-carta button.dr-intruso, .dr-carta button.dr-marca { border-radius: 8px; }
 @keyframes dr-entra { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 .dr-carta, .dr-archivo-aviso, .dr-reto { animation: dr-entra .3s ease-out backwards; }

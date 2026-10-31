@@ -3,14 +3,15 @@
 import { normalize } from './ciphers.js'
 
 export const KIND_NAME = {
-  anagrama: 'Anagrama', escondida: 'Palabra escondida', reves: 'Al revés', suma: 'Suma', contenedor: 'Contenedor', doble: 'Doble definición',
+  anagrama: 'Anagrama', escondida: 'Palabra escondida', reves: 'Al revés', suma: 'Suma', contenedor: 'Contenedor', quitar: 'Quitar letras', doble: 'Doble definición',
 }
 export const KIND_HELP = {
-  anagrama: 'Las letras de una palabra de la pista están mezcladas: reordénalas.',
+  anagrama: 'Las letras de una palabra (la pista puede nombrarla con otras palabras) están mezcladas: reordénalas.',
   escondida: 'La respuesta está escrita, seguida, dentro de la propia pista (puede cruzar de una palabra a otra).',
   reves: 'Una palabra que te describe la pista hay que leerla de atrás hacia delante.',
   suma: 'La respuesta se forma pegando dos o más trozos, uno detrás de otro.',
   contenedor: 'Una pieza se mete dentro de otra y entre las dos forman la respuesta.',
+  quitar: 'A una palabra se le quita un trozo y lo que queda es la respuesta.',
   doble: 'No hay juego de letras: la pista dice lo mismo dos veces, de dos maneras distintas.',
 }
 
@@ -70,7 +71,11 @@ export function validateCryptic(c) {
 
   switch (k.kind) {
     case 'anagrama':
-      if (!k.material || !has(body, k.material)) fail('El material no aparece en la pista')
+      if (parts.length) { // la palabra a mezclar viene nombrada con otras palabras (sinónimo)
+        if (parts.length !== 1) fail('Un anagrama con sinónimo necesita exactamente una pieza (parts)')
+        else if (word(parts[0]) === answer) fail('La pieza no puede ser ya la respuesta')
+        else if (sortLetters(parts[0].word) !== sortLetters(answer)) fail('Las letras de la pieza no forman la respuesta')
+      } else if (!k.material || !has(body, k.material)) fail('El material no aparece en la pista')
       else if (normalize(k.material) === answer) fail('El material no puede ser ya la respuesta')
       else if (sortLetters(k.material) !== sortLetters(answer)) fail('Las letras del material no forman la respuesta')
       break
@@ -92,6 +97,13 @@ export function validateCryptic(c) {
       const [out, inn] = [word(parts[0]), word(parts[1])]
       const ok = Array.from({ length: out.length - 1 }, (_, i) => out.slice(0, i + 1) + inn + out.slice(i + 1)).includes(answer)
       if (!ok) fail('Metiendo la pieza de dentro en la de fuera no se forma la respuesta')
+      break
+    }
+    case 'quitar': {
+      if (parts.length !== 2) { fail('Quitar letras necesita dos piezas: la palabra entera y el trozo que se quita'); break }
+      const [full, cut] = [word(parts[0]), word(parts[1])]
+      const ok = Array.from({ length: full.length - cut.length + 1 }, (_, i) => full.slice(0, i) + full.slice(i + cut.length)).some((r, i) => full.slice(i, i + cut.length) === cut && r === answer)
+      if (!ok) fail('Quitando el trozo a la palabra entera no se forma la respuesta')
       break
     }
     default:

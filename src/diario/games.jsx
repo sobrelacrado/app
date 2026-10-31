@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'react'
 import { KEYPAD, MORSE, atbash, caesarDecode, hashAnswer, keypadWords, normalize, pigpenGlyph, pigpenLetters, vigenereKeyFor } from './ciphers.js'
 import { KIND_HELP, KIND_NAME } from './criptico.js'
 import { GOLPES_SPEEDS, SQUARE, golpesSignals } from './golpes.js'
-import { MAX_ROWS, MIN_ROWS, escitalaGrid, escitalaRead } from './escitala.js'
 import { sopaLeftover, sopaLine, sopaRead } from './sopa.js'
 import { RULES } from './interrogatorio.js'
 import { BINARY_TABLE, codeWords } from './codigos.js'
@@ -12,7 +11,7 @@ import { SPEEDS, canVibrate, playMorse, playSignals } from './morseSound.js'
 export const TYPE_NAME = {
   cesar: 'Rueda de César', morse: 'Código Morse', teclado: 'Teclado antiguo', cerradura: 'Cerradura de 3 cifras',
   anagrama: 'Anagrama', acrostico: 'Mensaje escondido', simbolos: 'Alfabeto de símbolos', espejo: 'Alfabeto en espejo', criptico: 'Críptico',
-  vigenere: 'Cifrado Vigenère', golpes: 'Golpes en la pared', interrogatorio: 'El interrogatorio', escitala: 'Escítala', sopa: 'Sopa de letras escondidas',
+  vigenere: 'Cifrado Vigenère', golpes: 'Golpes en la pared', interrogatorio: 'El interrogatorio', sopa: 'Sopa de letras escondidas',
   numeros: 'Números a letras', rebus: 'Rebus de emojis', sinvocales: 'Texto sin vocales', intruso: 'El intruso', coartada: 'La coartada', binario: 'Binario a letras',
 }
 export const HOWTO = {
@@ -26,7 +25,6 @@ export const HOWTO = {
   criptico: 'Una sola pista que dice la respuesta DOS veces: una definición (siempre al principio o al final) y un juego con las letras, con un aviso que te dice qué hacer (mezclar, leer al revés, pegar, meter una pieza dentro de otra). Ejemplo: «Plato caliente: paso revuelto (4)». «Plato caliente» es la definición; «revuelto» es el aviso de que hay que mezclar las letras de «paso»; y la respuesta, de 4 letras, es SOPA. El número entre paréntesis son las letras de la respuesta. Las tildes no cuentan. Si te atascas, cada pista te da un poco más.',
   golpes: 'Cada letra son dos números: la fila y la columna de la tabla (la K se escribe con la C). Con 2·3 vas a la fila 2 y la columna 3: es la H. Los presos lo golpeaban en la pared: primero los golpes de la fila, una pausa, y los de la columna. Pulsa "Escuchar" para oírlo (o notarlo vibrar) y escribe el mensaje.',
   sopa: 'Es una sopa de letras con un truco: las letras que NO pertenecen a ninguna palabra, leídas de izquierda a derecha y de arriba abajo, forman el mensaje. Toca la primera letra de una palabra y luego la última: si es de la lista, se queda marcada. Las palabras pueden ir en horizontal, vertical o diagonal, y en los niveles difíciles también al revés. En el nivel más alto no hay lista: solo una definición de cada palabra y su número de letras. Cuando las encuentres todas, las letras sobrantes se encienden: léelas y escribe el mensaje.',
-  escitala: 'Los espartanos enrollaban una tira de cuero en un palo y escribían a lo largo: sin el palo del grosor justo, las letras no tenían sentido. La tira de arriba es el mensaje tal como llega. Con + y − eliges cuántas filas tiene el palo: la tira se enrolla rellenando columna a columna y el mensaje se lee por filas. Cuando el grosor es el correcto, el texto se lee con sentido. Escríbelo.',
   interrogatorio: 'Cada sospechoso hace una declaración, y la regla de arriba dice quién miente y quién dice la verdad. Prueba con cada uno: "¿y si él fuera el culpable?" ¿Cuadran las declaraciones con la regla? Solo uno encaja. Puedes apuntar quién crees que miente. Cuando lo sepas, toca al culpable y acúsalo.',
   vigenere: 'Es como el cifrado de César, pero el desplazamiento cambia en cada letra. Una palabra clave se repite debajo del mensaje (los espacios se saltan) y cada letra de la clave mueve la de arriba: la A no la mueve, la B la mueve 1 puesto, la C 2... Para descifrar hay que retroceder esos puestos. Toca el par de letras de una casilla y la tabla te dice qué letra real es. Ejemplo con la clave SOL: la H se cifra como Z (la S mueve 18 puestos). Si la clave no se da, la historia te describe la palabra: adivínala y escríbela para activar la ayuda.',
   numeros: 'Cada número es una letra del alfabeto. Con la tabla de arriba sabes qué letra es cada número: rellena las casillas. Los números separados por una barra son palabras distintas.',
@@ -375,18 +373,19 @@ function Marcada({ text, marks }) {
   return <>{out}</>
 }
 
-// hintStep: 0 sin ayudas · 1 subraya la definición · 2 dice el tipo de juego y señala el aviso · 3 da la primera letra.
+// hintStep: 0 sin ayudas · 1 subraya la definición · 2 dice el tipo de juego y señala el aviso · 3 señala el material y da la primera letra.
 function Criptico({ puzzle, onCheck, hintStep = 0 }) {
-  const { clue, lens, def, def2, kind, indicator, first } = puzzle.data
+  const { clue, lens, def, def2, kind, indicator, first, pieces = [] } = puzzle.data
   const marks = []
   if (hintStep >= 1) { marks.push({ text: def, cls: 'dr-m-def' }); if (def2) marks.push({ text: def2, cls: 'dr-m-def' }) }
   if (hintStep >= 2 && indicator) marks.push({ text: indicator, cls: 'dr-m-aviso' })
+  if (hintStep >= 3) pieces.forEach((t) => marks.push({ text: t, cls: 'dr-m-pieza' }))
   return (
     <>
       <p className="dr-cripti"><Marcada text={clue} marks={marks} /> <span className="dr-largo">({lens.join(',')})</span></p>
       {hintStep >= 1 && <p className="dr-ayuda-cr">Subrayado en <mark className="dr-m-def">azul</mark>: {def2 ? 'las dos definiciones' : 'la definición'}. La respuesta significa eso.</p>}
       {hintStep >= 2 && <p className="dr-ayuda-cr"><b>Juego de letras: {KIND_NAME[kind]}.</b> {KIND_HELP[kind]}{indicator ? <> El aviso está marcado en <mark className="dr-m-aviso">naranja</mark>.</> : null}</p>}
-      {hintStep >= 3 && <p className="dr-ayuda-cr">La respuesta empieza por <b>{first}</b>.</p>}
+      {hintStep >= 3 && <p className="dr-ayuda-cr">{pieces.length ? <>Con lo marcado en <mark className="dr-m-pieza">verde</mark> se arma la respuesta. </> : null}Empieza por <b>{first}</b>.</p>}
       <Casillas words={lens.map((n) => Array(n).fill(''))} onCheck={onCheck} />
     </>
   )
@@ -504,32 +503,6 @@ function Golpes({ puzzle, onCheck }) {
 }
 
 /* ---------- Escítala (tira enrollada en un palo) ---------- */
-function Escitala({ puzzle, onCheck }) {
-  const cipher = puzzle.data.cipher
-  const [rows, setRows] = useState(MIN_ROWS)
-  const grid = escitalaGrid(cipher, rows)
-  const cols = grid[0].length
-  return (
-    <>
-      <p className="dr-nota">La tira, tal como llega:</p>
-      <div className="dr-cinta" aria-label="Tira de letras">
-        {[...cipher].map((l, i) => <span key={i}>{l}</span>)}
-      </div>
-      <div className="dr-grosor">
-        <button type="button" onClick={() => setRows((r) => Math.max(MIN_ROWS, r - 1))} disabled={rows <= MIN_ROWS} aria-label="Menos filas">−</button>
-        <b>{rows} filas</b>
-        <button type="button" onClick={() => setRows((r) => Math.min(MAX_ROWS, r + 1))} disabled={rows >= MAX_ROWS} aria-label="Más filas">+</button>
-      </div>
-      <div className="dr-palo" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }} aria-label="La tira enrollada en el palo">
-        {grid.flat().map((l, i) => <span key={i}>{l || '·'}</span>)}
-      </div>
-      <p className="dr-nota">Así se lee, fila a fila:</p>
-      <p className="dr-lee">{escitalaRead(cipher, rows)}</p>
-      <CajaRespuesta onCheck={onCheck} label="El mensaje que lees" />
-    </>
-  )
-}
-
 /* ---------- Sopa de letras escondidas ---------- */
 const SOPA_COLORES = 10
 function Sopa({ puzzle, onCheck }) {
@@ -728,6 +701,6 @@ function Coartada({ puzzle, onCheck }) {
 }
 
 export const GAMES = {
-  cesar: Cesar, morse: Morse, teclado: Teclado, cerradura: Cerradura, anagrama: Anagrama, acrostico: Acrostico, simbolos: Simbolos, espejo: Espejo, criptico: Criptico, vigenere: Vigenere, golpes: Golpes, interrogatorio: Interrogatorio, escitala: Escitala, sopa: Sopa,
+  cesar: Cesar, morse: Morse, teclado: Teclado, cerradura: Cerradura, anagrama: Anagrama, acrostico: Acrostico, simbolos: Simbolos, espejo: Espejo, criptico: Criptico, vigenere: Vigenere, golpes: Golpes, interrogatorio: Interrogatorio, sopa: Sopa,
   numeros: Numeros, rebus: Rebus, sinvocales: SinVocales, intruso: Intruso, coartada: Coartada, binario: Binario,
 }

@@ -8,7 +8,7 @@ import {
 import { clueBody, hideText, parseLens, validateCryptic } from '../src/diario/criptico.js'
 import { golpesDecode, golpesEncode } from '../src/diario/golpes.js'
 import { sopaBuild } from './sopa-build.mjs'
-import { escitalaFits, escitalaRead, escitalaEncode } from '../src/diario/escitala.js'
+import { acrosticRead } from '../src/diario/acrostico.js'
 import { validateCase } from '../src/diario/interrogatorio.js'
 import { binarioDecode, binarioEncode, numerosDecode, numerosEncode, sinVocales } from '../src/diario/codigos.js'
 import { clueText, coartadaClues, coartadaSolve, validateCoartada } from '../src/diario/coartada.js'
@@ -74,15 +74,6 @@ const encode = {
     })
     return { size: p.size, grid: rows, words, secretLen: normalize(p.text).length }
   },
-  escitala: (p) => {
-    if (!/^[A-Z ]+$/.test(p.text)) throw new Error(`Escítala "${p.title}": solo A-Z y espacios`)
-    if (!Number.isInteger(p.rows) || p.rows < 3) throw new Error(`Escítala "${p.title}": falta rows (grosor correcto, 3 o más)`)
-    const cipher = escitalaEncode(p.text, p.rows)
-    if (escitalaRead(cipher, p.rows) !== normalize(p.text)) throw new Error(`Escítala "${p.title}": no se deshace bien`)
-    if (!escitalaFits(cipher).includes(p.rows)) throw new Error(`Escítala "${p.title}": el grosor correcto no se puede elegir`)
-    for (const r of escitalaFits(cipher)) if (r !== p.rows && escitalaRead(cipher, r) === normalize(p.text)) throw new Error(`Escítala "${p.title}": otro grosor también da el mensaje`)
-    return { cipher }
-  },
   interrogatorio: (p) => {
     const errs = validateCase(p)
     if (errs.length) throw new Error(`Interrogatorio "${p.title}": ${errs.join('; ')}`)
@@ -134,17 +125,22 @@ const encode = {
     return { cipher, len: p.key.length, kh: hashAnswer(p.key, 'sl-vigenere-clave'), ...(p.keyGiven ? { key: p.key } : {}) }
   },
   criptico: (p) => {
+    const pieces = (k) => (k.parts?.length ? k.parts.map((x) => x.from) : k.material ? [k.material] : []) // lo que se enseña en la pista del material
     const errs = validateCryptic(p)
     if (errs.length) throw new Error(`Críptico "${p.title}": ${errs.join('; ')}`)
     const k = p.cryptic
     return {
       clue: clueBody(k.clue), lens: parseLens(k.clue), def: k.def, ...(k.def2 ? { def2: k.def2 } : {}), kind: k.kind,
       ...(k.indicator ? { indicator: k.indicator } : {}), first: normalize(p.text)[0], explain: hideText(k.explain),
+      ...(pieces(k).length ? { pieces: pieces(k) } : {}),
     }
   },
   acrostico: (p) => {
-    const initials = p.lines.map((l) => normalize(l)[0]).join('')
-    if (initials !== normalize(p.text)) throw new Error(`Acróstico "${p.title}": las iniciales dan ${initials}, no ${p.text}`)
+    const read = acrosticRead(p.lines, p)
+    if (read !== normalize(p.text)) throw new Error(`Acróstico "${p.title}": con la regla ${p.rule ?? 'primera'}${p.reverse ? ' al revés' : ''} se lee ${read}, no ${p.text}`)
+    // Desde el nivel 3 no vale leer las iniciales de siempre: esa lectura tiene que dar otra cosa (el señuelo).
+    if (p.level >= 3 && (p.rule ?? 'primera') === 'primera' && !p.reverse) throw new Error(`Acróstico "${p.title}": desde el nivel 3 la regla no puede ser la de siempre (primeras letras, de arriba abajo)`)
+    if (p.level >= 3 && acrosticRead(p.lines) === normalize(p.text)) throw new Error(`Acróstico "${p.title}": las iniciales ya dan la respuesta`)
     return p.lines
   },
 }
@@ -165,7 +161,7 @@ const titles = new Set(), answers = new Set()
     if (answers.has(key)) throw new Error(`Acertijo ${n}: la respuesta "${p.text}" ya existe`)
     answers.add(key)
   }
-  if (['morse', 'teclado', 'espejo', 'simbolos', 'anagrama', 'vigenere', 'golpes', 'escitala', 'sopa', 'numeros', 'binario', 'sinvocales', 'rebus'].includes(p.type) && /[^A-Z ]/.test(p.text)) throw new Error(`Acertijo ${n}: ${p.type} solo admite A-Z y espacios`)
+  if (['morse', 'teclado', 'espejo', 'simbolos', 'anagrama', 'vigenere', 'golpes', 'sopa', 'numeros', 'binario', 'sinvocales', 'rebus'].includes(p.type) && /[^A-Z ]/.test(p.text)) throw new Error(`Acertijo ${n}: ${p.type} solo admite A-Z y espacios`)
   const words = p.text.split(' ')
   const count = /Son (\w+) palabras/.exec(p.hint ?? '')
   if (count && NUM[count[1]] !== words.length) throw new Error(`Acertijo ${n}: la pista dice ${count[1]} palabras y hay ${words.length}`)

@@ -9,7 +9,7 @@ import {
 import { golpesDecode } from '../src/diario/golpes.js'
 import { binarioDecode, numerosDecode } from '../src/diario/codigos.js'
 import { clueText, coartadaClues, coartadaSolve, validateCoartada } from '../src/diario/coartada.js'
-import { escitalaRead } from '../src/diario/escitala.js'
+import { acrosticRead } from '../src/diario/acrostico.js'
 import { bestStreak, calendar, diarioStats, mergeDays } from '../src/diario/stats.js'
 import PUZZLES from '../src/diario/puzzles.js'
 // El archivo con las soluciones en claro NO está en GitHub (el repositorio es público): solo en el PC de Alberto.
@@ -121,13 +121,6 @@ test('cada acertijo se resuelve con su solución (necesita el archivo fuente)', 
       else assert.ok(p.data.words.every((w) => w.w))
       assert.ok(!JSON.stringify(p.data).includes(normalize(s.text)), 'el mensaje no viaja en claro')
     }
-    if (s.type === 'escitala') {
-      assert.equal(s.level, 3)
-      assert.ok(i % 7 === 4, 'escítala en viernes (nivel 3)')
-      assert.equal(escitalaRead(p.data.cipher, s.rows), normalize(s.text), 'con el grosor correcto se lee el mensaje')
-      assert.ok(isCorrect(p, s.text))
-      assert.ok(!JSON.stringify(p.data).includes(normalize(s.text)), 'el mensaje no viaja en claro')
-    }
     if (s.type === 'interrogatorio') {
       assert.ok(isCorrect(p, s.text), 'la huella es la del culpable')
       assert.ok(p.data.statements.every((st) => Object.keys(st).sort().join() === 'by,says'), 'la lógica no viaja en la web')
@@ -137,7 +130,7 @@ test('cada acertijo se resuelve con su solución (necesita el archivo fuente)', 
     if (s.type === 'teclado') assert.ok(isCorrect(p, keypadDecode(p.data)))
     if (s.type === 'espejo') assert.ok(isCorrect(p, atbash(p.data)))
     if (s.type === 'simbolos') assert.ok(isCorrect(p, pigpenLetters(p.data)))
-    if (s.type === 'acrostico') assert.ok(isCorrect(p, p.data.map((l) => normalize(l)[0]).join('')))
+    if (s.type === 'acrostico') assert.ok(isCorrect(p, acrosticRead(p.data, s)))
     if (s.type === 'anagrama') {
       assert.equal([...p.data.pool].sort().join(''), [...normalize(s.text)].sort().join(''), 'mismas letras')
       assert.equal(p.data.lens.reduce((a, b) => a + b, 0), p.data.pool.length)
@@ -313,6 +306,10 @@ test('críptico: la comprobación acepta pistas correctas de cada tipo y rechaza
   ok('SOLDADO', { clue: 'Astro rey y cubo de juego forman un militar (7)', def: 'un militar', kind: 'suma', indicator: 'forman', parts: [{ word: 'SOL', from: 'Astro rey' }, { word: 'DADO', from: 'cubo de juego' }] })
   ok('SOMBRA', { clue: 'Lo que te sigue de cerca: sobra con eme dentro (6)', def: 'Lo que te sigue de cerca', kind: 'contenedor', indicator: 'dentro', parts: [{ word: 'SOBRA', from: 'sobra' }, { word: 'M', from: 'eme' }] })
   ok('LLAVE', { clue: 'Abre la puerta y cierra el agua (5)', def: 'Abre la puerta', def2: 'cierra el agua', kind: 'doble' })
+  ok('ESPIA', { clue: 'Se desordena el molusco de tinta y sale un agente secreto (5)', def: 'un agente secreto', kind: 'anagrama', indicator: 'Se desordena', parts: [{ word: 'SEPIA', from: 'el molusco de tinta' }] })
+  ok('ASTRO', { clue: 'Al viajero de las estrellas le quitas el marinero y queda un cuerpo celeste (5)', def: 'un cuerpo celeste', kind: 'quitar', indicator: 'le quitas', parts: [{ word: 'ASTRONAUTA', from: 'viajero de las estrellas' }, { word: 'NAUTA', from: 'el marinero' }] })
+  bad('ASTRO', { clue: 'Al viajero de las estrellas le quitas el marinero y queda un cuerpo celeste (5)', def: 'un cuerpo celeste', kind: 'quitar', indicator: 'le quitas', parts: [{ word: 'ASTRONAUTA', from: 'viajero de las estrellas' }, { word: 'TRIPU', from: 'el marinero' }] }, /Quitando el trozo/)
+  bad('ESPIA', { clue: 'Se desordena el molusco de tinta y sale un agente secreto (5)', def: 'un agente secreto', kind: 'anagrama', indicator: 'Se desordena', parts: [{ word: 'SEPIAS', from: 'el molusco de tinta' }] }, /no forman/)
   ok('EL SOL', { clue: 'Astro rey: los el revueltos (2,3)', def: 'Astro rey', kind: 'anagrama', material: 'los el', indicator: 'revueltos' })
   bad('SOPA', { clue: 'Plato caliente: paso revuelto (4)', def: 'Plato caliente', kind: 'anagrama', material: 'pase', indicator: 'revuelto' }, /no aparece|no forman/)
   bad('SOPA', { clue: 'Plato caliente: pasos revuelto (4)', def: 'Plato caliente', kind: 'anagrama', material: 'pasos', indicator: 'revuelto' }, /no forman/)
@@ -347,8 +344,8 @@ test('críptico: los crípticos de Alberto cuadran (solo en su PC, los archivos 
       total++
     }
   }
-  // en la lista final hay un críptico cada sábado
-  assert.equal(PUZZLES.filter((p) => p.type === 'criptico').length, total, 'todos los crípticos están en la lista')
+  // los crípticos que no caben en el calendario (como mucho uno cada dos sábados) pasan al banco de retos
+  assert.equal(PUZZLES.filter((p) => p.type === 'criptico').length + BANCO.filter((p) => p.type === 'criptico').length, total, 'todos los crípticos están en el calendario o en el banco')
 })
 
 // ---------- Morse con sonido ----------
@@ -603,21 +600,6 @@ test('Interrogatorio: todos los casos de la lista tienen una sola solución (nec
   assert.equal(PUZZLES.filter((p) => p.type === 'interrogatorio').length, IN.length, 'todos están en la lista')
 })
 
-// ---------- Escítala ----------
-test('Escítala: se cifra por columnas, se lee por filas y solo el grosor justo da el mensaje', async () => {
-  const { escitalaEncode, escitalaGrid, escitalaRead, escitalaFits } = await import('../src/diario/escitala.js')
-  const texto = 'EL TESORO ESTA EN EL POZO'
-  const cifrado = escitalaEncode(texto, 4)
-  assert.equal(cifrado, 'EOTLLRAPTOEOEENZSSEO')
-  assert.equal(escitalaRead(cifrado, 4), 'ELTESOROESTAENELPOZO')
-  assert.notEqual(escitalaRead(cifrado, 5), 'ELTESOROESTAENELPOZO')
-  assert.notEqual(escitalaRead(cifrado, 3), 'ELTESOROESTAENELPOZO')
-  assert.deepEqual(escitalaFits(cifrado), [2, 4, 5, 10])
-  assert.deepEqual(escitalaGrid(cifrado, 3).map((r) => r.length), [7, 7, 7]) // 20 letras en 3 filas: casillas vacías al final
-  assert.equal(escitalaGrid(cifrado, 3)[2][6], '')
-  assert.throws(() => escitalaEncode('HOLA', 3))
-})
-
 // ---------- Sopa de letras escondidas ----------
 test('Sopa: líneas rectas, lectura, apariciones y letras sobrantes', async () => {
   const { sopaLine, sopaRead, sopaOccurrences, sopaLeftover } = await import('../src/diario/sopa.js')
@@ -775,8 +757,7 @@ test('Banco: cada acertijo se resuelve con su solución y respeta las reglas de 
       if (p.data.mode === 'inverso') assert.ok(s.level >= 2)
     }
     if (s.type === 'rebus') { assert.ok(s.level <= 2, `${at}: rebus solo en niveles 1-2`); assert.equal(p.data.lens.reduce((a, b) => a + b, 0), normalize(s.text).length) }
-    if (s.type === 'escitala') { assert.equal(s.level, 3); assert.equal(escitalaRead(p.data.cipher, s.rows), normalize(s.text)) }
-    if (s.type === 'acrostico') assert.ok(isCorrect(p, p.data.map((l) => normalize(l)[0]).join('')))
+    if (s.type === 'acrostico') assert.ok(isCorrect(p, acrosticRead(p.data, s)))
     if (s.type === 'cerradura') { const c = lockCandidates(p.data); assert.equal(c.length, 1); assert.ok(isCorrect(p, c[0])) }
     if (s.type === 'anagrama') assert.equal([...p.data.pool].sort().join(''), [...normalize(s.text)].sort().join(''))
     if (s.type === 'sinvocales') assert.ok(p.data.every((w) => !/[AEIOU]/.test(w.c) && w.c.length > 0))
@@ -792,7 +773,7 @@ test('Banco: cada acertijo se resuelve con su solución y respeta las reglas de 
       assert.equal(coartadaSolve(s.people.length, clues).length, 1)
       assert.ok(!('solution' in p.data), 'la solución no viaja')
     }
-    assert.ok(!['vigenere', 'criptico', 'sopa', 'interrogatorio'].includes(s.type), `${at}: tipo no usado en el banco`)
+    assert.ok(!['vigenere', 'sopa', 'interrogatorio'].includes(s.type), `${at}: tipo no usado en el banco`)
   })
 })
 
@@ -833,4 +814,21 @@ test('Clasificación semanal: más puntos primero, empate por acertijos y luego 
   const y = weeklyRanking(members, scores, '2026-10-19', { uid: 'a', pts: 400, solved: 6, streak: 6 })
   assert.equal(y[0].name, 'Ana'); assert.equal(y[0].pts, 400)
   assert.deepEqual(weeklyRanking([], {}, '2026-10-19'), [])
+})
+
+test('acróstico: la regla elige la letra de cada línea y el sentido de lectura', () => {
+  const lines = ['Amanece en la ciudad', 'Bajo el puente, un viejo', 'Cierra los ojos hoy']
+  assert.equal(acrosticRead(lines), 'ABC')
+  assert.equal(acrosticRead(lines, { rule: 'segunda' }), 'MAI')
+  assert.equal(acrosticRead(lines, { rule: 'tercera' }), 'AJE')
+  assert.equal(acrosticRead(lines, { rule: 'ultima' }), 'DOY')
+  assert.equal(acrosticRead(lines, { reverse: true }), 'CBA')
+  assert.equal(acrosticRead(['¡Ñandú!', 'Óleo'], { rule: 'ultima' }), 'UO') // sin signos ni tildes
+  assert.throws(() => acrosticRead(lines, { rule: 'cuarta' }))
+})
+test('acróstico: desde el nivel 3 las iniciales de siempre no dan la respuesta', { skip: !BSRC && 'sin los archivos .src.mjs' }, () => {
+  for (const s of [...(SRC ?? []), ...(BSRC ?? [])].filter((x) => x.type === 'acrostico' && x.level >= 3)) {
+    assert.notEqual(acrosticRead(s.lines), normalize(s.text), `${s.title}: las iniciales no deben dar la respuesta`)
+    assert.equal(acrosticRead(s.lines, s), normalize(s.text), `${s.title}: la regla da la respuesta`)
+  }
 })
