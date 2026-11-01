@@ -24,6 +24,7 @@ const todos = [...raw, ...bancoRaw]
 const byTitle = new Map(todos.map((p) => [p.title, p]))
 if (byTitle.size !== todos.length) throw new Error('Hay títulos repetidos en los acertijos')
 
+// Circuito: cualquier día de la semana (su nivel es el tamaño del tablero: 3×3 = 1 ... 7×7 = 5). Entra desde el banco en todos los niveles.
 // Reglas de día de la semana por tipo (w: 0 lunes ... 6 domingo). Son las de tests/diario.test.js.
 const DIAS = {
   numeros: (w) => w <= 3, rebus: (w) => w <= 3, golpes: (w) => w === 1 || w === 2, binario: (w) => w >= 4, coartada: (w) => w >= 5,
@@ -40,20 +41,22 @@ const fijosT = new Set(fijos.map((p) => p.title))
 
 // Quién puede entrar en el calendario: los del calendario que quedan por jugar y, en los niveles 3-5, también los del banco.
 const calendarioPend = new Set(actual.slice(first))
-const candidatos = todos.filter((p) => !fijosT.has(p.title) && (calendarioPend.has(p.title) || raw.includes(p) || p.level >= 3))
+const candidatos = todos.filter((p) => !fijosT.has(p.title) && (calendarioPend.has(p.title) || raw.includes(p) || p.level >= 3 || p.type === 'circuito'))
 const huecos = []
 for (let i = first; i < L; i++) huecos.push(i)
 const huecosDeNivel = (n) => huecos.filter((i) => LEVELS[i % 7] === n)
 const grupos = [1, 2, 3, 4, 5].map((n) => ({
   n, huecos: huecosDeNivel(n),
-  pool: candidatos.filter((p) => p.level === n && (n >= 3 || calendarioPend.has(p.title) || raw.includes(p))),
+  pool: candidatos.filter((p) => p.level === n && (n >= 3 || p.type === 'circuito' || calendarioPend.has(p.title) || raw.includes(p))),
 }))
 for (const g of grupos) if (g.pool.length < g.huecos.length) throw new Error(`Nivel ${g.n}: ${g.pool.length} acertijos para ${g.huecos.length} huecos`)
-for (const g of grupos) if (g.n <= 2 && g.pool.length !== g.huecos.length) throw new Error(`Nivel ${g.n}: sobran o faltan acertijos (${g.pool.length} para ${g.huecos.length})`)
 
 const TIPOS = [...new Set(todos.map((p) => p.type))]
 const tid = (p) => TIPOS.indexOf(p.type)
 const CRIPTICO = TIPOS.indexOf('criptico')
+const CIRCUITO = TIPOS.indexOf('circuito')
+const OBJ_CIRCUITOS = 16 // circuitos que queremos en los días movibles (uno cada 10 días, más o menos)
+const fc = (c) => c.duro * 1000 + c.blando + c.falta * 40
 
 function coste(list) {
   let duro = 0, blando = 0
@@ -66,7 +69,8 @@ function coste(list) {
       else blando += d === 7 ? 3 : 1
     }
   }
-  return { duro, blando }
+  const nCirc = list.slice(first).filter((p) => tid(p) === CIRCUITO).length
+  return { duro, blando, falta: Math.max(0, OBJ_CIRCUITOS - nCirc) }
 }
 
 function inicial(r) {
@@ -100,14 +104,14 @@ function buscar(seed) {
   if (!est) return null
   const { list, sobran } = est
   let c = coste(list)
-  let f = c.duro * 1000 + c.blando
+  let f = fc(c)
   const ITER = 120000
   for (let it = 0; it < ITER; it++) {
     const T = 6 * (1 - it / ITER) + 0.05
     const i = huecos[Math.floor(r() * huecos.length)]
     const n = LEVELS[i % 7]
     let j = -1, u = -1
-    if (n >= 3 && sobran[n].length && r() < 0.4) { // cambiar por uno del banco
+    if (sobran[n].length && r() < 0.4) { // cambiar por uno del banco
       u = Math.floor(r() * sobran[n].length)
       if (!cabe(sobran[n][u], i % 7)) continue
       const tmp = list[i]; list[i] = sobran[n][u]; sobran[n][u] = tmp
@@ -118,13 +122,13 @@ function buscar(seed) {
       const tmp = list[i]; list[i] = list[j]; list[j] = tmp
     }
     const c2 = coste(list)
-    const f2 = c2.duro * 1000 + c2.blando
+    const f2 = fc(c2)
     if (f2 <= f || r() < Math.exp((f - f2) / T)) { f = f2; c = c2 } else if (u >= 0) {
       const tmp = list[i]; list[i] = sobran[n][u]; sobran[n][u] = tmp
     } else {
       const tmp = list[i]; list[i] = list[j]; list[j] = tmp
     }
-    if (c.duro === 0 && c.blando === 0) break
+    if (c.duro === 0 && c.blando === 0 && c.falta === 0) break
   }
   return { list, sobran, c, f }
 }
@@ -133,7 +137,7 @@ let mejor = null
 for (let seed = 1; seed <= 6; seed++) {
   const res = buscar(seed)
   if (!res) continue
-  console.log(`semilla ${seed}: repeticiones duras ${res.c.duro}, blandas ${res.c.blando}`)
+  console.log(`semilla ${seed}: repeticiones duras ${res.c.duro}, blandas ${res.c.blando}, circuitos que faltan ${res.c.falta}`)
   if (res.c.duro === 0 && (!mejor || res.f < mejor.f)) mejor = res
 }
 if (!mejor) throw new Error('No se encontró un orden válido')

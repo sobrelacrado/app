@@ -832,3 +832,50 @@ test('acróstico: desde el nivel 3 las iniciales de siempre no dan la respuesta'
     assert.equal(acrosticRead(s.lines, s), normalize(s.text), `${s.title}: la regla da la respuesta`)
   }
 })
+
+// ---------- Circuito (1/11/2026) ----------
+test('Circuito: girar una pieza cuatro veces la deja igual y la energía solo pasa por cables que se tocan', async () => {
+  const { N, E, S, W, rotar, forma, energia, resuelto } = await import('../src/diario/circuito.js')
+  assert.equal(rotar(N, 1), E)
+  assert.equal(rotar(N, 2), S)
+  assert.equal(rotar(N, 3), W)
+  for (let m = 1; m < 16; m++) assert.equal(rotar(m, 4), m)
+  assert.equal(forma(N | S), 'recta')
+  assert.equal(forma(N | E), 'esquina')
+  assert.equal(forma(N | E | S), 'te')
+  // batería (punta a la derecha) + recta + punta a la izquierda
+  assert.ok(resuelto([E, E | W, W], 3, 1, 0))
+  assert.ok(!resuelto([E, N | S, W], 3, 1, 0), 'una recta de lado no conecta')
+  assert.equal(energia([E, E | W, W], 3, 1, 0).on.size, 3)
+  assert.ok(!resuelto([E, E | W, E | W], 3, 1, 0), 'un cable que sale del tablero es una salida suelta')
+})
+
+test('Circuito: el generador da tableros con una sola solución, distintos de la solución, y se repite con la misma semilla', async () => {
+  const { aTexto, generar, resuelto, soluciones } = await import('../src/diario/circuito.js')
+  for (const [n, bucles] of [[3, 0], [4, 0], [5, 1], [6, 2], [7, 3]]) {
+    const g = generar(n, n, bucles, 7)
+    assert.ok(resuelto(g.solucion, n, n, g.fuente))
+    assert.notEqual(aTexto(g.revuelto), aTexto(g.solucion))
+    const sols = soluciones(g.revuelto, n, n, g.fuente, 2)
+    assert.equal(sols.length, 1, `${n}×${n}: una sola solución`)
+    assert.equal(aTexto(sols[0]), aTexto(g.solucion))
+    assert.equal(aTexto(generar(n, n, bucles, 7).solucion), aTexto(g.solucion), 'misma semilla, mismo tablero')
+  }
+})
+
+test('Circuito: cada acertijo publicado tiene nivel = tamaño - 2, una única solución y esa solución es la que comprueba la huella', async () => {
+  const { aTexto, deTexto, soluciones } = await import('../src/diario/circuito.js')
+  const todos = [...PUZZLES, ...BANCO].filter((p) => p.type === 'circuito')
+  if (!todos.length) return
+  for (const p of todos) {
+    const { w, h, src, cells } = p.data
+    assert.equal(w, h)
+    assert.equal(p.level, w - 2, `${p.title}: nivel = tamaño - 2`)
+    assert.deepEqual(Object.keys(p.data).sort(), ['cells', 'h', 'src', 'w'], 'solo viaja el tablero revuelto')
+    const sols = soluciones(deTexto(cells), w, h, src, 2)
+    assert.equal(sols.length, 1, `${p.title}: una sola solución`)
+    assert.ok(isCorrect(p, aTexto(sols[0])), `${p.title}: la huella es la de la solución`)
+    assert.ok(!isCorrect(p, cells), `${p.title}: el tablero revuelto no es la solución`)
+  }
+  assert.ok(PUZZLES.some((p) => p.type === 'circuito'), 'hay circuitos en el calendario')
+})

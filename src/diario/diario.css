@@ -274,6 +274,38 @@ body { background: var(--mesa); min-height: 100vh; }
 .dr-carta button.dr-sospechoso { flex: 1 1 40%; min-height: 44px; background: transparent; color: inherit; border: 2px solid currentColor; font-size: 14px; }
 .dr-carta button.dr-sospechoso.dr-sel { background: #1d1d1d; color: #f3eee2; }
 
+/* Circuito */
+.dr-circuito { display: block; width: 100%; max-width: 440px; margin: 12px auto; touch-action: manipulation; user-select: none; -webkit-tap-highlight-color: transparent; }
+.dr-circuito g[role='button'] { cursor: pointer; outline: none; }
+.dr-circuito g[role='button']:focus-visible .dr-c-fondo { stroke: #d9a441; stroke-width: 3; }
+.dr-c-fondo { fill: rgba(0, 0, 0, .13); stroke: rgba(0, 0, 0, .25); stroke-width: 1; transition: fill .3s; }
+.dr-vivo .dr-c-fondo { fill: rgba(242, 177, 52, .22); }
+.dr-c-giro { transition: transform .18s ease-out; transform-origin: 30px 30px; }
+.dr-c-tubo { stroke: #2a2620; stroke-width: 13; stroke-linecap: butt; } /* extremos rectos: el tubo se ve abierto y continúa en el de la pieza de al lado */
+.dr-c-junta { fill: #2a2620; }
+.dr-c-cable { stroke: #8a8172; stroke-width: 7; stroke-linecap: butt; transition: stroke .25s; }
+.dr-vivo .dr-c-cable { stroke: #f7c548; }
+.dr-vivo .dr-c-tubo { stroke: #8a6516; } /* el tubo se tiñe de dorado: da la sensación de brillo sin efectos pesados */
+.dr-c-nodo { fill: #8a8172; transition: fill .25s; }
+.dr-vivo .dr-c-nodo { fill: #f7c548; }
+.dr-c-bombilla { fill: #6f685b; stroke: #2a2620; stroke-width: 3; transition: fill .3s; }
+.dr-c-halo { fill: #ffe27a; opacity: 0; transition: opacity .3s; pointer-events: none; }
+.dr-vivo .dr-c-halo { opacity: .45; }
+.dr-vivo .dr-c-bombilla { fill: #ffe27a; }
+.dr-c-bateria rect { fill: #3a8f4f; stroke: #1d1d1d; stroke-width: 2; }
+.dr-c-bateria text { fill: #fff; font: 800 22px 'Space Mono', monospace; }
+.dr-cerrado .dr-c-fondo { fill: rgba(242, 177, 52, .3); }
+[data-modo='oscuro'] .dr-c-fondo { fill: rgba(255, 255, 255, .06); stroke: rgba(255, 255, 255, .14); }
+[data-modo='oscuro'] .dr-vivo .dr-c-fondo { fill: rgba(242, 177, 52, .2); }
+[data-modo='oscuro'] .dr-c-tubo { stroke: #050505; }
+[data-modo='oscuro'] .dr-c-cable { stroke: #5f584b; }
+[data-modo='oscuro'] .dr-vivo .dr-c-cable { stroke: #f7c548; }
+[data-modo='oscuro'] .dr-vivo .dr-c-tubo { stroke: #7a5812; }
+[data-modo='oscuro'] .dr-c-junta { fill: #050505; }
+[data-modo='oscuro'] .dr-c-nodo { fill: #5f584b; }
+[data-modo='oscuro'] .dr-vivo .dr-c-nodo { fill: #f7c548; }
+@media (prefers-reduced-motion: reduce) { .dr-c-giro { transition: none; } }
+
 /* Sopa de letras escondidas */
 .dr-sopa { display: grid; gap: 3px; margin: 10px 0; }
 .dr-sopa button { aspect-ratio: 1; min-width: 0; min-height: 0; padding: 0; font: 800 17px 'Space Mono', monospace; border-radius: 6px; background: rgba(0, 0, 0, .1); color: inherit; border: 0; }

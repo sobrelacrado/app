@@ -1,5 +1,6 @@
 // Los minijuegos del Diario: cada tipo de código tiene su propia forma de resolverse.
 import { useEffect, useRef, useState } from 'react'
+import { aTexto, bits, deTexto, energia, resuelto, rotar } from './circuito.js'
 import { KEYPAD, MORSE, atbash, caesarDecode, hashAnswer, keypadWords, normalize, pigpenGlyph, pigpenLetters, vigenereKeyFor } from './ciphers.js'
 import { KIND_HELP, KIND_NAME } from './criptico.js'
 import { GOLPES_SPEEDS, SQUARE, golpesSignals } from './golpes.js'
@@ -10,7 +11,7 @@ import { SPEEDS, canVibrate, playMorse, playSignals } from './morseSound.js'
 
 export const TYPE_NAME = {
   cesar: 'Rueda de César', morse: 'Código Morse', teclado: 'Teclado antiguo', cerradura: 'Cerradura de 3 cifras',
-  anagrama: 'Anagrama', acrostico: 'Mensaje escondido', simbolos: 'Alfabeto de símbolos', espejo: 'Alfabeto en espejo', criptico: 'Críptico',
+  anagrama: 'Anagrama', acrostico: 'Mensaje escondido', circuito: 'Circuito', simbolos: 'Alfabeto de símbolos', espejo: 'Alfabeto en espejo', criptico: 'Críptico',
   vigenere: 'Cifrado Vigenère', golpes: 'Golpes en la pared', interrogatorio: 'El interrogatorio', sopa: 'Sopa de letras escondidas',
   numeros: 'Números a letras', rebus: 'Rebus de emojis', sinvocales: 'Texto sin vocales', intruso: 'El intruso', coartada: 'La coartada', binario: 'Binario a letras',
 }
@@ -20,6 +21,7 @@ export const HOWTO = {
   teclado: 'Es un móvil de los de antes: para escribir una C se pulsaba 3 veces la tecla 2, para una F, 3 veces la 3... Cada grupo es una letra: rellena las casillas.',
   cerradura: 'El código tiene 3 cifras distintas. Cada intento anotado dice cuántas cifras son correctas y están en su sitio (●) y cuántas son correctas pero están en otro sitio (○). Descartar también vale: si un intento no tiene ninguna correcta, ninguna de sus cifras está en el código. Deduce el código y ponlo en la cerradura.',
   anagrama: 'Las letras de la frase están mezcladas. Toca una letra para colocarla en el siguiente hueco; toca un hueco ocupado para quitarla. Los huecos separados son palabras distintas.',
+  circuito: 'Una batería y un montón de piezas de cable. Toca una pieza para girarla un cuarto de vuelta. Tienes que dejarlas todas de forma que la corriente llegue a cada una y no quede ningún cable suelto: las bombillas se encienden cuando les llega la electricidad. Cuando el circuito esté cerrado, el reto está resuelto.',
   acrostico: 'Lo importante no es lo que dice el texto, sino cómo está escrito. Descubre el mensaje que esconde y escríbelo.',
   simbolos: 'Cada letra se ha cambiado por un dibujo. Usa la clave de abajo para saber qué letra es cada dibujo y rellena las casillas.',
   criptico: 'Una sola pista que dice la respuesta DOS veces: una definición (siempre al principio o al final) y un juego con las letras, con un aviso que te dice qué hacer (mezclar, leer al revés, pegar, meter una pieza dentro de otra). Ejemplo: «Plato caliente: paso revuelto (4)». «Plato caliente» es la definición; «revuelto» es el aviso de que hay que mezclar las letras de «paso»; y la respuesta, de 4 letras, es SOPA. El número entre paréntesis son las letras de la respuesta. Las tildes no cuentan. Si te atascas, cada pista te da un poco más.',
@@ -503,6 +505,49 @@ function Golpes({ puzzle, onCheck }) {
 }
 
 /* ---------- Escítala (tira enrollada en un palo) ---------- */
+/* ---------- Circuito ---------- */
+const CELDA = 60
+const LADOS = [[30, 0], [60, 30], [30, 60], [0, 30]] // punto medio de cada lado: arriba, derecha, abajo, izquierda
+function Circuito({ puzzle, onCheck }) {
+  const { w, h, src, cells } = puzzle.data
+  const base = useRef(deTexto(cells)).current
+  const [giros, setGiros] = useState(() => base.map(() => 0))
+  const hecho = useRef(false)
+  const masks = base.map((m, i) => rotar(m, giros[i]))
+  const { on } = energia(masks, w, h, src)
+  const ok = resuelto(masks, w, h, src)
+  useEffect(() => {
+    if (ok && !hecho.current) { hecho.current = true; onCheck(aTexto(masks)) }
+  })
+  const girar = (i) => { if (!hecho.current) setGiros((g) => g.map((v, k) => (k === i ? v + 1 : v))) }
+  return (
+    <>
+      <svg className={`dr-circuito ${ok ? 'dr-cerrado' : ''}`} viewBox={`0 0 ${w * CELDA} ${h * CELDA}`} role="group" aria-label="Tablero del circuito">
+        {base.map((m, i) => {
+          const x = i % w, y = (i / w) | 0
+          const vivo = on.has(i)
+          const punta = bits(m) === 1 && i !== src
+          return (
+            <g key={i} transform={`translate(${x * CELDA} ${y * CELDA})`} className={vivo ? 'dr-vivo' : ''} role="button" tabIndex={0}
+              aria-label={`Pieza ${y + 1}, ${x + 1}${vivo ? ', con corriente' : ''}`} onClick={() => girar(i)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); girar(i) } }}>
+              <rect className="dr-c-fondo" x="2" y="2" width={CELDA - 4} height={CELDA - 4} rx="9" />
+              <g className="dr-c-giro" style={{ transform: `rotate(${giros[i] * 90}deg)` }}>
+                {[0, 1, 2, 3].filter((d) => m & (1 << d)).map((d) => <line key={d} className="dr-c-tubo" x1="30" y1="30" x2={LADOS[d][0]} y2={LADOS[d][1]} />)}
+                {[0, 1, 2, 3].filter((d) => m & (1 << d)).map((d) => <line key={'c' + d} className="dr-c-cable" x1="30" y1="30" x2={LADOS[d][0]} y2={LADOS[d][1]} />)}
+                {punta && <><circle className="dr-c-halo" cx="30" cy="30" r="21" /><circle className="dr-c-bombilla" cx="30" cy="30" r="12" /></>}
+                {i === src && <g className="dr-c-bateria"><rect x="14" y="16" width="32" height="28" rx="5" /><text x="30" y="37" textAnchor="middle">+</text></g>}
+              </g>
+              {!punta && i !== src && <><circle className="dr-c-junta" cx="30" cy="30" r="6.5" /><circle className="dr-c-nodo" cx="30" cy="30" r="3.5" /></>}
+            </g>
+          )
+        })}
+      </svg>
+      <p className="dr-nota" role="status">{ok ? '¡Circuito cerrado!' : `Piezas con corriente: ${on.size} de ${w * h}`}</p>
+    </>
+  )
+}
+
 /* ---------- Sopa de letras escondidas ---------- */
 const SOPA_COLORES = 10
 function Sopa({ puzzle, onCheck }) {
@@ -701,6 +746,6 @@ function Coartada({ puzzle, onCheck }) {
 }
 
 export const GAMES = {
-  cesar: Cesar, morse: Morse, teclado: Teclado, cerradura: Cerradura, anagrama: Anagrama, acrostico: Acrostico, simbolos: Simbolos, espejo: Espejo, criptico: Criptico, vigenere: Vigenere, golpes: Golpes, interrogatorio: Interrogatorio, sopa: Sopa,
+  cesar: Cesar, morse: Morse, teclado: Teclado, cerradura: Cerradura, anagrama: Anagrama, acrostico: Acrostico, circuito: Circuito, simbolos: Simbolos, espejo: Espejo, criptico: Criptico, vigenere: Vigenere, golpes: Golpes, interrogatorio: Interrogatorio, sopa: Sopa,
   numeros: Numeros, rebus: Rebus, sinvocales: SinVocales, intruso: Intruso, coartada: Coartada, binario: Binario,
 }

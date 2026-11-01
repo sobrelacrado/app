@@ -21,7 +21,7 @@ const seedOf = (n) => (BANCO ? calendario.length + n : n) // mismas pistas de co
 const TYPE_NAME = { // mismos nombres que games.jsx (Node no puede importar archivos .jsx)
   cesar: 'Rueda de César', morse: 'Código Morse', teclado: 'Teclado antiguo', cerradura: 'Cerradura de 3 cifras', anagrama: 'Anagrama',
   acrostico: 'Mensaje escondido', simbolos: 'Alfabeto de símbolos', espejo: 'Alfabeto en espejo', criptico: 'Críptico', vigenere: 'Cifrado Vigenère', golpes: 'Golpes en la pared', interrogatorio: 'El interrogatorio', sopa: 'Sopa de letras escondidas',
-  numeros: 'Números a letras', rebus: 'Rebus de emojis', sinvocales: 'Texto sin vocales', intruso: 'El intruso', coartada: 'La coartada', binario: 'Binario a letras',
+  numeros: 'Números a letras', rebus: 'Rebus de emojis', sinvocales: 'Texto sin vocales', intruso: 'El intruso', coartada: 'La coartada', binario: 'Binario a letras', circuito: 'Circuito',
 }
 const DIAS = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo']
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
@@ -47,6 +47,8 @@ for (let n = from; n <= Math.min(to, src.length); n++) {
     ? `<p><b>Pista:</b> ${esc(p.hint)}</p><p class="cripti">${sinVocales(p.text).map((w) => w.c + ' (' + w.len + ')').join('  ')}</p>`
     : p.type === 'coartada'
     ? `<p><b>Pista:</b> ${esc(p.hint)}</p>${p.ordered ? '<p>Salas en orden: ' + p.places.map(esc).join(' → ') + '</p>' : ''}<ul>${coartadaClues(p.people.length, p.solution, !!p.ordered, seedOf(n)).map((c) => '<li>' + esc(clueText(c, p.people, p.places)) + '</li>').join('')}</ul><p><b>Solución completa:</b> ${p.people.map((q, k) => esc(q) + ' → ' + esc(p.places[p.solution[k]])).join(' · ')}</p>`
+    : p.type === 'circuito'
+    ? `<p><b>Pista:</b> ${esc(p.hint)}</p><p>Tablero ${p.w}×${p.h}, batería en la pieza ${p.src}.</p>`
     : p.type === 'criptico'
     ? `<p class="cripti">${esc(p.cryptic.clue)}</p><p><b>Tipo de juego:</b> ${esc(KIND_NAME[p.cryptic.kind])}</p><p><b>Cómo se resuelve:</b> ${esc(p.cryptic.explain)}</p>`
     : `<p><b>Pista:</b> ${esc(p.hint)}</p>${p.lines ? `<ul>${p.lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ul>` : ''}`

@@ -11,6 +11,7 @@ import { sopaBuild } from './sopa-build.mjs'
 import { acrosticRead } from '../src/diario/acrostico.js'
 import { validateCase } from '../src/diario/interrogatorio.js'
 import { binarioDecode, binarioEncode, numerosDecode, numerosEncode, sinVocales } from '../src/diario/codigos.js'
+import { aTexto, deTexto, resuelto, soluciones } from '../src/diario/circuito.js'
 import { clueText, coartadaClues, coartadaSolve, validateCoartada } from '../src/diario/coartada.js'
 
 // Cerradura: elige intentos al azar (siempre los mismos para el mismo acertijo) hasta que solo quede un código posible.
@@ -134,6 +135,16 @@ const encode = {
       ...(k.indicator ? { indicator: k.indicator } : {}), first: normalize(p.text)[0], explain: hideText(k.explain),
       ...(pieces(k).length ? { pieces: pieces(k) } : {}),
     }
+  },
+  circuito: (p) => {
+    const { w, h, src, cells } = p
+    if (!(w >= 3 && w <= 7 && h === w && p.level === w - 2)) throw new Error(`Circuito "${p.title}": el tamaño debe ser n×n y el nivel n-2 (3×3 = nivel 1 ... 7×7 = nivel 5)`)
+    if (!/^[0-9A-F]+$/.test(p.text) || p.text.length !== w * h || !/^[0-9A-F]+$/.test(cells) || cells.length !== w * h) throw new Error(`Circuito "${p.title}": solución y tablero deben ser ${w * h} cifras hexadecimales`)
+    if (cells === p.text) throw new Error(`Circuito "${p.title}": el tablero ya viene resuelto`)
+    if (!resuelto(deTexto(p.text), w, h, src)) throw new Error(`Circuito "${p.title}": la solución no cierra el circuito`)
+    const sols = soluciones(deTexto(cells), w, h, src, 2)
+    if (sols.length !== 1 || aTexto(sols[0]) !== p.text) throw new Error(`Circuito "${p.title}": el tablero no tiene una única solución`)
+    return { w, h, src, cells }
   },
   acrostico: (p) => {
     const read = acrosticRead(p.lines, p)

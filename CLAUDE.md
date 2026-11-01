@@ -158,3 +158,10 @@ App web instalable (PWA) para gestionar partidas de casos de misterio imprimible
 - Acróstico (`src/diario/acrostico.js`): desde el nivel 3 el mensaje no está en las primeras letras de siempre. Campos de la fuente: `rule` ('primera' | 'segunda' | 'tercera' | 'ultima') y `reverse` (leer de abajo arriba); `make-puzzles` los comprueba y rechaza que las iniciales den la respuesta. Un solo truco por acertijo y la palabra tiene que poder deducirse de la historia (MENTIRA, no ALIBI). La regla no viaja en la web.
 - Crípticos reescritos en el estilo de criptico.ar (la definición describe, las piezas se nombran con sinónimos; el texto de entrada no revela el tipo). Tipos: anagrama (también con sinónimo), escondida, reves, suma, contenedor, doble y quitar (sin uso por ahora). La 3.ª pista de pago marca en verde el material y da la primera letra.
 - Retos nuevos de otros tipos para dar variedad (decididos, pendientes de construir): Circuito (girar piezas de cable hasta iluminar todo; el tamaño da el nivel), Conexiones (16 palabras en 4 grupos), ¿Qué sigue? (series con patrón) y un día de Sellos pequeño en el calendario. Zip y Tango quedan para una segunda ronda.
+
+## Circuito (publicado el 1/11/2026)
+- Juego de girar piezas de cable: `src/diario/circuito.js` (lógica pura) y componente `Circuito` en `games.jsx`. Nivel = tamaño del tablero (3×3 = 1 ... 7×7 = 5); bucles: ninguno en niveles 1-2, luego 1, 2 y 3.
+- Los tableros los fabrica `node scripts/gen-circuitos.mjs` → `src/diario/banco-05.src.mjs` (no va a GitHub). 40 en total (8 por nivel). `make-puzzles.mjs` comprueba que cada tablero tenga UNA sola solución.
+- `super-shuffle.mjs` mete 16 circuitos en el calendario (cualquier día de la semana, de cualquier nivel); los demás quedan en el banco. Se lanzó con `node scripts/super-shuffle.mjs 22` (desde el 2/11/2026).
+- Por añadir (decididos): Conexiones, ¿Qué sigue?, un día de Sellos. Cuando estén, repetir el super shuffle desde el primer día sin jugar.
+- Al añadir un tipo nuevo hay que meterlo también en la lista de tipos de `firestore.rules` (dos sitios) y desplegar las reglas.
