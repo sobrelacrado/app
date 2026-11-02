@@ -24,6 +24,9 @@ function applyTheme(game) {
 // En el hotel el inicio y la acusación solo enseñan el reloj y el resumen: sin botón que lleve a otra página.
 let HOTEL = false
 const nextOf = (step) => (HOTEL ? null : step.url)
+// Caso 5: en la pantalla del reloj del QR de inicio, botón al vídeo de instrucciones (pestaña nueva; el reloj no se para)
+const INSTRUCTIONS_URL = 'https://sobrelacrado.github.io/c5/instrucciones/'
+const videoOf = (step) => (HOTEL && step.type === 'start' ? INSTRUCTIONS_URL : null)
 
 function show(html) { app.className = 'hoja'; app.removeAttribute('style'); document.body.removeAttribute('style'); app.innerHTML = `<div class="logo">${BRAND}</div>${html}` }
 function esc(s) { return String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`) }
@@ -70,7 +73,7 @@ const SKY_SVG = `
   </svg>`
 
 // `next` = dirección a la que lleva el botón (o null). El reloj sale de la hora de inicio guardada, nunca de un contador propio.
-function timeScreen({ game, run, title, next }) {
+function timeScreen({ game, run, title, next, video = null }) {
   const limitMin = game.timeLimitMinutes ?? 240
   const ended = run.endedMs != null
   app.className = 'hoja cuenta'
@@ -84,7 +87,8 @@ function timeScreen({ game, run, title, next }) {
     <p class="cuenta-bonus" id="cb" hidden></p>
     <p class="cuenta-aviso" id="ca" role="status" aria-live="polite" hidden></p>
     ${ended && BRAND !== 'SOBRE LACRADO' ? '<div class="sl-sello" aria-hidden="true">SL</div>' : ''}
-    ${next ? `<a class="boton cuenta-boton" href="${esc(next)}">${t.continue}</a>` : ''}`
+    ${next ? `<a class="boton cuenta-boton" href="${esc(next)}">${t.continue}</a>` : ''}
+    ${video ? `<a class="boton cuenta-boton" href="${esc(video)}" target="_blank" rel="noopener">${t.watchInstructions}</a>` : ''}`
   const $ = (id) => document.getElementById(id)
   const given = []
   const firstSeen = remainingSec(run.startMs, limitMin, Date.now())
@@ -254,7 +258,7 @@ function askContinue({ game, step, runId }) {
   document.getElementById('keep').onclick = async () => {
     const info = await readRun(runId)
     if (!info) return askAlias(game, step)
-    timeScreen({ game, run: info, title: info.endedMs ? t.finishedTitle : t.started, next: nextOf(step) })
+    timeScreen({ game, run: info, title: info.endedMs ? t.finishedTitle : t.started, next: nextOf(step), video: videoOf(step) })
   }
   document.getElementById('fresh').onclick = () => {
     show(`
@@ -294,7 +298,7 @@ function askAlias(game, step) {
     } catch { /* se sigue igualmente */ }
     if (game.countdown === true) {
       const info = await readRun(newRef.id).catch(() => null)
-      if (info) return timeScreen({ game, run: info, title: t.started, next: nextOf(step) })
+      if (info) return timeScreen({ game, run: info, title: t.started, next: nextOf(step), video: videoOf(step) })
     }
     started(step)
   }
