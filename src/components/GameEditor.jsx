@@ -223,7 +223,7 @@ export default function GameEditor({ gameId, onBack, onQr }) {
             type="button" className="suave"
             onClick={() => {
               if (isNew) setName(HOTEL.name)
-              setLimit(String(HOTEL.timeLimitMinutes)); setRequireAlias(true); setPlayAfterTime(true); setCountdown(true)
+              setLimit(String(HOTEL.timeLimitMinutes)); setTheme(HOTEL.theme); setRequireAlias(true); setPlayAfterTime(true); setCountdown(true)
               setSteps(fromTemplate(HOTEL.steps))
             }}
           >

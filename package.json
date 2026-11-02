@@ -15,10 +15,13 @@
   },
   "dependencies": {
     "@fontsource/architects-daughter": "^5.3.0",
+    "@fontsource/bowlby-one": "^5.3.0",
     "@fontsource/cinzel": "^5.3.0",
     "@fontsource/courier-prime": "^5.3.0",
+    "@fontsource/gaegu": "^5.3.0",
     "@fontsource/ibm-plex-mono": "^5.3.0",
     "@fontsource/ibm-plex-sans-condensed": "^5.3.0",
+    "@fontsource/josefin-sans": "^5.3.0",
     "@fontsource/space-mono": "^5.3.0",
     "@fontsource/special-elite": "^5.3.0",
     "qrcode": "^1.5.4",

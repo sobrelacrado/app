@@ -13,7 +13,15 @@ const MAX_AFTER_MS = 12 * 3600000 // en juegos que dejan seguir tras agotar el t
 const safeGet = (k) => { try { return localStorage.getItem(k) } catch { return null } }
 const safeSet = (k, v) => { try { localStorage.setItem(k, v) } catch { /* sin almacenamiento */ } }
 
-function show(html) { app.className = 'hoja'; app.removeAttribute('style'); document.body.removeAttribute('style'); app.innerHTML = `<div class="logo">SOBRE LACRADO</div>${html}` }
+// Aspecto por juego: de momento solo el hotel (caso 5) cambia la página del jugador; los demás juegos se ven como siempre.
+let BRAND = 'SOBRE LACRADO'
+function applyTheme(game) {
+  if (game.theme !== 'hotel') return
+  document.body.classList.add('tema-hotel')
+  BRAND = 'GRAN HOTEL MIRAMAR'
+}
+
+function show(html) { app.className = 'hoja'; app.removeAttribute('style'); document.body.removeAttribute('style'); app.innerHTML = `<div class="logo">${BRAND}</div>${html}` }
 function esc(s) { return String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`) }
 
 function redirect(url) {
@@ -63,13 +71,14 @@ function timeScreen({ game, run, title, next }) {
   const ended = run.endedMs != null
   app.className = 'hoja cuenta'
   app.innerHTML = `
-    <div class="logo">SOBRE LACRADO</div>
+    <div class="logo">${BRAND}</div>
     ${SKY_SVG}
     ${title ? `<h1>${esc(title)}</h1>` : ''}
     <p class="cuenta-equipo">${esc(run.alias || '')}</p>
     <div class="cuenta-reloj" id="cr" role="timer"></div>
     <p class="cuenta-texto" id="ct"></p>
     <p class="cuenta-aviso" id="ca" role="status" aria-live="polite" hidden></p>
+    ${ended && BRAND !== 'SOBRE LACRADO' ? '<div class="sl-sello" aria-hidden="true">SL</div>' : ''}
     ${next ? `<a class="boton cuenta-boton" href="${esc(next)}">${t.continue}</a>` : ''}`
   const $ = (id) => document.getElementById(id)
   const given = []
@@ -117,6 +126,7 @@ function timeScreen({ game, run, title, next }) {
 async function timePage() {
   const gameSnap = await getDoc(doc(db, 'games', gameId))
   if (!gameSnap.exists() || gameSnap.data().countdown !== true) return show(`<p>${t.invalid}</p>`)
+  applyTheme(gameSnap.data())
   const id = safeGet(RUN_KEY)
   const run = id ? await readRun(id).catch(() => null) : null
   if (!run) return show(`<p>${t.notStarted}</p>`)
@@ -135,6 +145,7 @@ async function main() {
   }
   const game = gameSnap.data()
   const step = stepSnap.data()
+  applyTheme(game)
 
   // Juego desactivado: el QR sigue llevando al contenido, pero no se registra nada.
   if (game.active === false) return redirect(step.url)

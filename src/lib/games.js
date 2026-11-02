@@ -57,6 +57,7 @@ export const CASE3 = {
 export const HOTEL = {
   name: 'Caso 5 · La noche del Miramar',
   timeLimitMinutes: 90,
+  theme: 'hotel',
   requireAlias: true,
   playAfterTime: true,
   countdown: true,
@@ -65,6 +66,9 @@ export const HOTEL = {
     { label: 'La acusación · 06:00', type: 'solution', url: '' },
     { label: 'Final secreto', type: 'normal', url: `${C3}/c5/final/` },
     { label: 'Tutorial de los sobres', type: 'normal', url: '' },
+    { label: 'Pista 1 · orientación', type: 'clue', url: `${C3}/docs/c5/pista1.pdf` },
+    { label: 'Pista 2 · dónde mirar', type: 'clue', url: `${C3}/docs/c5/pista2.pdf` },
+    { label: 'Solución', type: 'normal', url: `${C3}/docs/c5/solucion.pdf` }, // «normal» y no «solution»: solution cierra la partida y esa función es de La acusación
     { label: 'Centralita (página interactiva)', type: 'optional', url: `${C3}/c5/centralita/` },
     { label: 'Radio (página interactiva)', type: 'optional', url: `${C3}/c5/radio/` },
     { label: 'Plano (página interactiva)', type: 'optional', url: `${C3}/c5/plano/` },
