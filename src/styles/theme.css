@@ -183,6 +183,9 @@ select { font: inherit; padding: 4px 6px; background: var(--campo); border: 1px 
 .tarjeta-qr svg { width: 100%; max-width: 130px; height: auto; display: block; margin: 0 auto; }
 .tarjeta-qr figcaption { display: flex; flex-direction: column; margin: 4px 0; }
 .tarjeta-qr figcaption b { font-family: var(--titulo); font-weight: 400; font-size: 16px; letter-spacing: 1px; text-transform: uppercase; }
+.acciones-qr { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.acciones-qr .boton { background: transparent; color: var(--tinta); border: 1px solid var(--linea); box-shadow: 0 1px 3px rgba(0, 0, 0, .16); display: block; text-align: center; text-decoration: none; font-size: 12px; padding: 8px 6px; }
+.acciones-qr .desactivado { opacity: .45; }
 .tarjeta-qr figcaption small { font-size: 10px; color: var(--gris); }
 
 @media print {

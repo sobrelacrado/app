@@ -73,6 +73,14 @@ export default function QrSheet({ gameId, onBack }) {
                   >
                     {t.downloadSvg}
                   </button>
+                  <div className="acciones-qr no-imprimir">
+                    {/* Destino guardado: no pasa por la app, no registra escaneo */}
+                    {s.url
+                      ? <a className="boton suave" href={s.url} target="_blank" rel="noopener noreferrer">{t.openDestination}</a>
+                      : <span className="boton suave desactivado" aria-disabled="true">{t.openDestination}</span>}
+                    {/* Como si lo escaneara un jugador: pasa por la app (inicia partida / registra el paso) */}
+                    <a className="boton suave" href={url} target="_blank" rel="noopener noreferrer">{t.testQr}</a>
+                  </div>
                 </figure>
               )
             })}
