@@ -163,3 +163,27 @@ test('piezas opcionales: cuenta partidas que las usaron más los escaneos suelto
   assert.deepEqual({ inRuns: uso[0].inRuns, loose: uso[0].loose, total: uso[0].total }, { inRuns: 1, loose: 2, total: 3 })
   assert.ok(!stuckBySteps(rows).some((e) => e.type === 'optional'))
 })
+
+test('juegos con cuenta atrás: equipos a tiempo, sin terminar a tiempo y bonus posible', () => {
+  const g = { h: { name: 'Hotel', timeLimitMinutes: 90, countdown: true, playAfterTime: true } }
+  const steps = { h: [{ id: 'v0', label: 'Inicio', type: 'start' }, { id: 'sol', label: 'Acusación', type: 'solution' }] }
+  const rs = [
+    { id: 'A', gameId: 'h', alias: 'a', startedAt: T0, endedAt: at(40) }, // sobran 50 min → +10 (tope)
+    { id: 'B', gameId: 'h', alias: 'b', startedAt: T0, endedAt: at(85) }, // sobran 5 min → +1
+    { id: 'C', gameId: 'h', alias: 'c', startedAt: T0, endedAt: at(100) }, // terminada tarde
+    { id: 'D', gameId: 'h', alias: 'd', startedAt: T0, endedAt: null }, // agotada
+  ]
+  const rows = buildRows({ runs: rs, scansByRun: {}, stepsByGame: steps, games: g, now: NOW })
+  const by = Object.fromEntries(rows.map((r) => [r.id, r]))
+  assert.deepEqual([by.A.bonus, by.B.bonus, by.C.bonus, by.D.bonus], [10, 1, null, null])
+  assert.deepEqual([by.A.late, by.B.late, by.C.late, by.D.late], [false, false, true, false])
+  const [s] = summaryByGame(rows)
+  assert.equal(s.countdown, true)
+  assert.equal(s.onTime, 2)
+  assert.equal(s.notOnTime, 2)
+  assert.equal(s.avgBonus, 5.5)
+  // un juego sin cuenta atrás no lleva bonus
+  const normal = buildRows({ runs: [{ id: 'N', gameId: 'g', alias: '', startedAt: T0, endedAt: at(40) }], scansByRun: {}, stepsByGame, games, now: NOW })
+  assert.equal(normal[0].bonus, null)
+  assert.equal(summaryByGame(normal)[0].countdown, false)
+})

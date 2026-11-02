@@ -5,6 +5,7 @@ import { clearStatsCache } from '../lib/loadStats.js'
 import { deleteRun } from '../lib/games.js'
 import { themeOf } from '../lib/themes.js'
 import { IDLE_MIN, fmtClock, fmtDateTime, fmtDuration, runStatus, sortSteps, timeLeft } from '../lib/runs.js'
+import { bonusPoints } from '../lib/countdown.js'
 
 const STAMP = {
   open: ['curso', 'statusOpen'],
@@ -45,6 +46,9 @@ export default function RunCard({ run, game, steps = [], scans = [], now, index 
   const idleMin = last ? Math.floor((now - last.at.getTime()) / 60000) : Math.floor((now - run.startedAt.getTime()) / 60000)
   const clueCount = scans.filter((s) => stepById[s.stepId]?.type === 'clue').length
   const stuck = status.kind === 'open' && idleMin >= IDLE_MIN
+  // Juegos con cuenta atrás: bonus de tiempo posible si terminó a tiempo (el equipo lo aplica solo en los finales que lo permiten)
+  const bonus = game?.countdown && status.kind === 'finished' && !status.late
+    ? bonusPoints(Math.floor(((game.timeLimitMinutes ?? 240) * 60000 - status.ms) / 1000)) : null
 
   return (
     <div
@@ -82,6 +86,7 @@ export default function RunCard({ run, game, steps = [], scans = [], now, index 
           <div className="meta">
             {t.started} {fmtDateTime(run.startedAt, lang)} · {clueCount} {t.clues}
           </div>
+          {bonus !== null && <div className="meta">{t.bonusPossible}: +{bonus}</div>}
           {status.kind === 'open' && (
             <div className="meta">
               {lastLabel ? `${t.lastStep}: ${lastLabel} · ${t.ago(idleMin)}` : `${t.noScansYet} · ${t.ago(idleMin)}`}

@@ -36,11 +36,12 @@ export default function Stats() {
   const weeks = useMemo(() => weeklyMedian(filtered), [filtered])
   const stuck = useMemo(() => stuckBySteps(filtered).filter((s) => s.reached > 0), [filtered])
   const multiGame = summary.length > 1
+  const hasBonus = filtered.some((r) => r.countdown)
 
   const sorted = useMemo(() => {
     const val = (r) => ({
       startedAt: r.startedAt.getTime(), alias: r.alias.toLowerCase(), game: r.gameName.toLowerCase(),
-      status: r.status, ms: r.ms ?? -1, steps: r.scans.length, clues: r.clueCount,
+      status: r.status, ms: r.ms ?? -1, steps: r.scans.length, clues: r.clueCount, bonus: r.bonus ?? -1,
     })[sort.key]
     return [...filtered].sort((a, b) => (val(a) > val(b) ? 1 : val(a) < val(b) ? -1 : 0) * sort.dir)
   }, [filtered, sort])
@@ -96,6 +97,13 @@ export default function Stats() {
                 <div><b>{s.completionPct === null ? '—' : `${s.completionPct}%`}</b><small>{t.completion}</small></div>
                 <div><b>{minutes(s.medianMs)}</b><small>{t.median}</small></div>
               </div>
+              {s.countdown && (
+                <div className="cifras">
+                  <div><b>{s.onTime}</b><small>{t.onTime}</small></div>
+                  <div><b>{s.notOnTime}</b><small>{t.notOnTime}</small></div>
+                  <div><b>{s.avgBonus === null ? '—' : `+${s.avgBonus.toFixed(1)}`}</b><small>{t.avgBonus}</small></div>
+                </div>
+              )}
               {moreFigures && (
                 <div className="cifras">
                   <div><b>{s.timeout}</b><small>{t.timedOut2}</small></div>
@@ -178,12 +186,13 @@ export default function Stats() {
             <table className="tabla">
               <thead><tr>
                 {th('startedAt', t.date)}{th('alias', t.alias)}{th('game', t.game)}
-                {th('status', t.status)}{th('ms', t.time)}{th('steps', t.steps)}{th('clues', t.clues)}
+                {th('status', t.status)}{th('ms', t.time)}{th('steps', t.steps)}{th('clues', t.clues)}{hasBonus && th('bonus', t.bonusPossible)}
               </tr></thead>
               <tbody>{sorted.map((r) => (
                 <tr key={r.id}>
                   <td>{fmtDateTime(r.startedAt, lang)}</td><td>{r.alias || t.noName}</td><td>{r.gameName}</td>
-                  <td>{t[STATUS_KEY[r.status]]}</td><td>{minutes(r.ms)}</td><td>{r.scans.length}</td><td>{r.clueCount}</td>
+                  <td>{r.late ? t.statusLate : t[STATUS_KEY[r.status]]}</td><td>{minutes(r.ms)}</td><td>{r.scans.length}</td><td>{r.clueCount}</td>
+                  {hasBonus && <td>{!r.countdown ? '' : r.bonus === null ? '—' : `+${r.bonus}`}</td>}
                 </tr>
               ))}</tbody>
             </table>

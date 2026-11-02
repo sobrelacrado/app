@@ -1,5 +1,6 @@
 // Cálculos de estadísticas. Funciones puras (sin Firebase) para poder probarlas con casos conocidos.
 import { IDLE_MIN, runStatus } from './runs.js'
+import { bonusPoints } from './countdown.js'
 
 export const IDLE_MS = IDLE_MIN * 60000
 const DAY_MS = 86400000
@@ -29,6 +30,11 @@ export function buildRows({ runs, scansByRun, stepsByGame, games, now }) {
         secondsFromStart: Math.round((sc.at.getTime() - start) / 1000),
       }))
       .sort((a, b) => a.at - b.at)
+    const limitMs = (game?.timeLimitMinutes ?? 240) * 60000
+    const countdown = game?.countdown === true
+    // Terminada pasado el límite (solo en juegos que dejan seguir jugando) y bonus de tiempo posible (solo juegos con cuenta atrás, terminadas a tiempo)
+    const late = status.kind === 'finished' && !!status.late
+    const bonus = countdown && status.kind === 'finished' && !late ? bonusPoints(Math.floor((limitMs - status.ms) / 1000)) : null
     return {
       id: run.id,
       gameId: run.gameId,
@@ -38,7 +44,10 @@ export function buildRows({ runs, scansByRun, stepsByGame, games, now }) {
       endedAt: run.endedAt,
       status: status.kind, // open | finished | timeout
       ms: status.kind === 'open' ? null : status.ms,
-      limitMs: (game?.timeLimitMinutes ?? 240) * 60000,
+      limitMs,
+      countdown,
+      late,
+      bonus,
       scans,
       clueCount: scans.filter((s) => s.type === 'clue').length,
     }
@@ -64,6 +73,7 @@ export function summaryByGame(rows) {
       const timeout = rs.filter((r) => r.status === 'timeout')
       const times = finished.map((r) => r.ms)
       const closed = finished.length + timeout.length
+      const onTimeRuns = finished.filter((r) => !r.late)
       return {
         gameId,
         name,
@@ -76,6 +86,11 @@ export function summaryByGame(rows) {
         meanMs: mean(times),
         bestMs: times.length ? Math.min(...times) : null,
         avgClues: rs.length ? mean(rs.map((r) => r.clueCount)) : null,
+        // Juegos con cuenta atrás: cuántos equipos terminan a tiempo y bonus medio posible
+        countdown: rs.some((r) => r.countdown),
+        onTime: onTimeRuns.length,
+        notOnTime: finished.length - onTimeRuns.length + timeout.length,
+        avgBonus: mean(onTimeRuns.filter((r) => r.bonus !== null).map((r) => r.bonus)),
       }
     })
     .sort((a, b) => b.started - a.started)
