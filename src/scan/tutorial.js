@@ -13,16 +13,15 @@ const panel = (col, row) => `<g class="pan"><rect x="${X0 + col * PANEL_W}" y="$
 const fila = (cls, row) => `<g class="${cls}"><g class="L">${panel(0, row)}</g><g class="R">${panel(1, row)}</g></g>`
 
 const HOJA = `
-<svg class="tut-svg" viewBox="45 0 120 120" aria-hidden="true" focusable="false">
+<svg class="tut-svg" viewBox="52 2 96 110" aria-hidden="true" focusable="false">
   <g class="hoja">
     ${fila('T1', 0)}
     ${fila('T2', 1)}
     <g class="B">${fila('B1', 2)}${fila('B2', 3)}</g>
+    <path class="fold f1" d="M100 6V114"/>
+    <path class="fold f2" d="M${X0 - 6} 59.5H${X0 + 76}"/>
+    <path class="fold f3" d="M${X0 - 6} 34.75H${X0 + 76}"/>
   </g>
-  <path class="fold f1" d="M100 6V114"/>
-  <path class="fold f2" d="M${X0 - 6} 59.5H${X0 + 76}"/>
-  <path class="fold f3" d="M${X0 - 6} 34.75H${X0 + 76}"/>
-  <g class="zig" transform="translate(139 20)"><path d="M2 2H24Q28 2 28 6T24 10H4Q0 10 0 14T4 18H26"/></g>
 </svg>`
 
 // Sobre: A4 con el dibujo girado; aquí se ve derecho. Frente 120×84; lengüeta arriba, solapas a los lados y solapa de abajo.
