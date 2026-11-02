@@ -38,7 +38,7 @@ export default function RunCard({ run, game, steps = [], scans = [], now, index 
   const ring = timeLeft(run, game, now)
   const [stampClass, stampKey] = STAMP[status.kind]
   const stepById = Object.fromEntries(steps.map((s) => [s.id, s]))
-  const playable = sortSteps(steps.filter((s) => s.active !== false))
+  const playable = sortSteps(steps.filter((s) => s.active !== false && s.type !== 'optional'))
   const scanned = new Set(scans.map((s) => s.stepId))
   const last = scans[scans.length - 1]
   const lastLabel = last ? stepById[last.stepId]?.label ?? last.stepId : null
@@ -56,7 +56,7 @@ export default function RunCard({ run, game, steps = [], scans = [], now, index 
       <div className="cabecera">
         <div className="datos">
           <span className="alias">{run.alias || t.noName}</span>
-          <span className="meta">{scans.length}/{playable.length || '?'} {t.steps}</span>
+          <span className="meta">{scans.filter((s) => stepById[s.stepId]?.type !== 'optional').length}/{playable.length || '?'} {t.steps}</span>
         </div>
         <Ring fraction={ring.fraction} tone={ring.tone} label={fmtDuration(status.ms)} />
       </div>
@@ -72,7 +72,7 @@ export default function RunCard({ run, game, steps = [], scans = [], now, index 
       )}
       {(status.kind !== 'open' || stuck) && (
         <div className="fila meta">
-          {status.kind !== 'open' && <span className={`sello ${stampClass}`}>{t[stampKey]}</span>}
+          {status.kind !== 'open' && <span className={`sello ${stampClass}`}>{status.late ? t.statusLate : t[stampKey]}</span>}
           {stuck && <span className="aviso">{t.idle}</span>}
         </div>
       )}

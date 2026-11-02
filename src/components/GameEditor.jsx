@@ -5,10 +5,10 @@ import { useT } from '../i18n.js'
 import Ayuda from './Ayuda.jsx'
 import { newGameId, newStepId } from '../lib/ids.js'
 import { THEMES, DEFAULT_THEME, themeOf } from '../lib/themes.js'
-import { CASE2, CASE3, EXPEDIENTE_TEMPLATE, STEP_TYPES, countGameRuns, deleteGame, saveGame, scanUrl, validateGame } from '../lib/games.js'
+import { CASE2, CASE3, EXPEDIENTE_TEMPLATE, HOTEL, STEP_TYPES, countGameRuns, deleteGame, saveGame, scanUrl, validateGame } from '../lib/games.js'
 import { clearStatsCache } from '../lib/loadStats.js'
 
-const TYPE_KEY = { start: 'typeStart', clue: 'typeClue', normal: 'typeNormal', solution: 'typeSolution' }
+const TYPE_KEY = { start: 'typeStart', clue: 'typeClue', normal: 'typeNormal', solution: 'typeSolution', optional: 'typeOptional' }
 const blankStep = () => ({ id: newStepId(), label: '', type: 'normal', url: '', active: true, saved: false })
 const fromTemplate = (steps) => steps.map((s) => ({ ...blankStep(), ...s }))
 
@@ -30,6 +30,9 @@ export default function GameEditor({ gameId, onBack, onQr }) {
   const [limit, setLimit] = useState('240')
   const [active, setActive] = useState(true)
   const [theme, setTheme] = useState(DEFAULT_THEME)
+  const [requireAlias, setRequireAlias] = useState(false)
+  const [playAfterTime, setPlayAfterTime] = useState(false)
+  const [countdown, setCountdown] = useState(false)
   const [steps, setSteps] = useState([])
   const [errors, setErrors] = useState([])
   const [status, setStatus] = useState('idle') // idle | saving | saved | failed
@@ -48,6 +51,9 @@ export default function GameEditor({ gameId, onBack, onQr }) {
       setLimit(String(data.timeLimitMinutes ?? 240))
       setActive(data.active !== false)
       setTheme(themeOf(data))
+      setRequireAlias(data.requireAlias === true)
+      setPlayAfterTime(data.playAfterTime === true)
+      setCountdown(data.countdown === true)
       setSteps(
         s.docs
           .map((d) => ({ id: d.id, ...d.data(), saved: true }))
@@ -99,7 +105,7 @@ export default function GameEditor({ gameId, onBack, onQr }) {
     }
     setStatus('saving')
     try {
-      await saveGame(db, { id, isNew, name, timeLimitMinutes: limit, active, theme, steps })
+      await saveGame(db, { id, isNew, name, timeLimitMinutes: limit, active, theme, steps, requireAlias, playAfterTime, countdown })
       setSteps((list) => list.map((s) => ({ ...s, saved: true })))
       setIsNew(false)
       setStatus('saved')
@@ -182,6 +188,22 @@ export default function GameEditor({ gameId, onBack, onQr }) {
         </div>
       </div>
 
+      <div className="campo">
+        <span>{t.gOptions}</span>
+        {[
+          ['requireAlias', requireAlias, setRequireAlias, t.gRequireAlias, t.gRequireAliasHelp],
+          ['countdown', countdown, setCountdown, t.gCountdown, t.gCountdownHelp],
+          ['playAfterTime', playAfterTime, setPlayAfterTime, t.gPlayAfter, t.gPlayAfterHelp],
+        ].map(([k, value, set, label, help]) => (
+          <div className="casilla" key={k}>
+            <label className="casilla">
+              <input type="checkbox" checked={value} onChange={(e) => set(e.target.checked)} /> {label}
+            </label>
+            <Ayuda>{help}</Ayuda>
+          </div>
+        ))}
+      </div>
+
       <h2>{t.gSteps} <Ayuda>{t.gStepsHelp}</Ayuda></h2>
 
       {!steps.length && (
@@ -196,6 +218,16 @@ export default function GameEditor({ gameId, onBack, onQr }) {
             }}
           >
             {t.tplCase3}
+          </button>
+          <button
+            type="button" className="suave"
+            onClick={() => {
+              if (isNew) setName(HOTEL.name)
+              setLimit(String(HOTEL.timeLimitMinutes)); setRequireAlias(true); setPlayAfterTime(true); setCountdown(true)
+              setSteps(fromTemplate(HOTEL.steps))
+            }}
+          >
+            {t.tplHotel}
           </button>
           {isNew && (
             <button

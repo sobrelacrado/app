@@ -3,12 +3,12 @@ import { useT } from '../i18n.js'
 import { useStatsData } from '../lib/loadStats.js'
 import { download, runsCsv, scansCsv } from '../lib/csv.js'
 import { fmtClock, fmtDateTime, fmtDuration } from '../lib/runs.js'
-import { buildRows, filterRows, perDay, stuckBySteps, summaryByGame, weeklyMedian } from '../lib/stats.js'
+import { buildRows, filterRows, optionalUsage, perDay, stuckBySteps, summaryByGame, weeklyMedian } from '../lib/stats.js'
 import { themeOf } from '../lib/themes.js'
 import { BarsPerDay, WeeklyLine } from './Charts.jsx'
 
 const PERIODS = [[7, 'days7'], [30, 'days30'], [90, 'days90'], [null, 'allTime']]
-const TYPE_KEY = { start: 'typeStart', clue: 'typeClue', normal: 'typeNormal', solution: 'typeSolution' }
+const TYPE_KEY = { start: 'typeStart', clue: 'typeClue', normal: 'typeNormal', solution: 'typeSolution', optional: 'typeOptional' }
 const STATUS_KEY = { open: 'statusOpen', finished: 'statusFinished', timeout: 'statusTimeout' }
 
 const minutes = (ms) => (ms === null ? '—' : fmtDuration(ms))
@@ -27,6 +27,10 @@ export default function Stats() {
     [data],
   )
   const filtered = useMemo(() => filterRows(rows, { gameId }), [rows, gameId])
+  const optional = useMemo(
+    () => (data ? optionalUsage({ rows: filtered, stepsByGame: data.stepsByGame, games: data.games, looseScans: (data.looseScans ?? []).filter((l) => !gameId || l.gameId === gameId) }) : []),
+    [data, filtered, gameId],
+  )
   const summary = useMemo(() => summaryByGame(filtered), [filtered])
   const dayData = useMemo(() => perDay(filtered, Date.now()), [filtered])
   const weeks = useMemo(() => weeklyMedian(filtered), [filtered])
@@ -156,6 +160,19 @@ export default function Stats() {
           </div>
 
           </div></details>
+          {optional.length > 0 && (
+            <details className="capa"><summary>{t.optionalTitle}</summary><div className="capa-cuerpo">
+              <p className="nota">{t.optionalHelp}</p>
+              <div className="tabla-scroll">
+                <table className="tabla">
+                  <thead><tr><th>{t.game}</th><th>{t.step}</th><th>{t.optionalInRuns}</th><th>{t.optionalLoose}</th><th>{t.optionalTotal}</th></tr></thead>
+                  <tbody>{optional.map((o) => (
+                    <tr key={o.key}><td>{o.gameName}</td><td>{o.label}</td><td>{o.inRuns}</td><td>{o.loose}</td><td><b>{o.total}</b></td></tr>
+                  ))}</tbody>
+                </table>
+              </div>
+            </div></details>
+          )}
           <details className="capa"><summary>{t.runsTitle}</summary><div className="capa-cuerpo">
           <div className="tabla-scroll">
             <table className="tabla">

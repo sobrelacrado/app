@@ -1,0 +1,11 @@
+/* Pantalla de cuenta atrás de los jugadores (juegos con `countdown`): el cielo va de la noche al amanecer; los colores los pone scan.js. */
+main.hoja.cuenta { background: transparent; border: 0; box-shadow: none; color: inherit; max-width: 420px; }
+main.hoja.cuenta .logo { border-bottom-color: currentColor; }
+main.hoja.cuenta h1 { font-size: 1.1rem; letter-spacing: 2px; }
+.cuenta-cielo { display: block; width: 100%; height: auto; margin: 0 0 8px; border-radius: 8px; }
+.cuenta-equipo { margin: 4px 0 0; font-size: 1.05rem; letter-spacing: 1px; opacity: .9; min-height: 1.2em; }
+.cuenta-reloj { margin: 12px 0 6px; font-family: var(--titulo); font-weight: 700; font-variant-numeric: tabular-nums; font-size: clamp(3.2rem, 22vw, 5.5rem); line-height: 1.05; }
+.cuenta-reloj.amanece { font-size: clamp(2.2rem, 13vw, 3.4rem); }
+.cuenta-texto { margin: 0 0 14px; font-size: 1rem; line-height: 1.4; }
+.cuenta-aviso { margin: 10px 0; padding: 10px 12px; font-weight: 700; border: 2px solid currentColor; border-radius: 6px; }
+main.hoja.cuenta a.boton.cuenta-boton { background: transparent; color: inherit; border: 2px solid currentColor; text-decoration: none; }

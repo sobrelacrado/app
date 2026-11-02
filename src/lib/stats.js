@@ -129,7 +129,8 @@ export function weeklyMedian(rows) {
 export function stuckBySteps(rows) {
   const map = new Map()
   for (const r of rows) {
-    r.scans.forEach((cur, i) => {
+    const scans = r.scans.filter((s) => s.type !== 'optional') // las páginas opcionales no son un punto donde atascarse
+    scans.forEach((cur, i) => {
       const key = `${r.gameId}|${cur.stepId}`
       if (!map.has(key)) {
         map.set(key, {
@@ -139,7 +140,7 @@ export function stuckBySteps(rows) {
       }
       const e = map.get(key)
       e.reached++
-      const next = r.scans[i + 1]
+      const next = scans[i + 1]
       let gap = null
       if (next) gap = next.at - cur.at
       else if (r.status === 'timeout') {
@@ -155,6 +156,19 @@ export function stuckBySteps(rows) {
   return [...map.values()]
     .map(({ waits, ...e }) => ({ ...e, avgWaitMs: mean(waits) }))
     .sort((a, b) => b.stuck - a.stuck || b.abandoned - a.abandoned || b.reached - a.reached)
+}
+
+// Uso de los pasos "opcional": cuántas partidas los escanearon y cuántos escaneos sueltos hubo (una vez por móvil).
+export function optionalUsage({ rows, stepsByGame, games, looseScans = [] }) {
+  const out = []
+  for (const [gameId, steps] of Object.entries(stepsByGame)) {
+    for (const s of steps.filter((x) => x.type === 'optional' && x.active !== false)) {
+      const inRuns = rows.filter((r) => r.gameId === gameId && r.scans.some((sc) => sc.stepId === s.id)).length
+      const loose = looseScans.filter((l) => l.gameId === gameId && l.stepId === s.id).length
+      out.push({ key: `${gameId}|${s.id}`, gameId, gameName: games[gameId]?.name ?? gameId, label: s.label, order: s.order ?? 999, inRuns, loose, total: inRuns + loose })
+    }
+  }
+  return out.sort((a, b) => a.gameName.localeCompare(b.gameName) || a.order - b.order)
 }
 
 export { DAY_MS }

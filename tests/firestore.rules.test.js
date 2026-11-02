@@ -684,3 +684,62 @@ test('Chat: solo el creador nombra moderadores, y deben ser miembros', async () 
   await assertFails(getDocs(collection(persona('intruso'), 'groups/K7M2QX/mods')))
   await assertSucceeds(deleteDoc(doc(persona('bea'), 'groups/K7M2QX/mods/bea'))) // puede renunciar
 })
+
+
+// ---------- Seguir jugando tras agotar el tiempo (juegos con playAfterTime) y escaneos sueltos ----------
+const seedLargo = async (extraGame = {}) => {
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    const db = ctx.firestore()
+    await setDoc(doc(db, 'games/hotel'), { name: 'Hotel', active: true, timeLimitMinutes: 90, playAfterTime: true, ...extraGame })
+    await setDoc(doc(db, 'games/hotel/steps/p'), { type: 'clue', active: true })
+    await setDoc(doc(db, 'games/hotel/steps/sol'), { type: 'solution', active: true })
+    await setDoc(doc(db, 'games/hotel/steps/radio'), { type: 'optional', active: true, label: 'Radio', url: 'https://x/radio' })
+    await setDoc(doc(db, 'games/hotel/steps/radioOff'), { type: 'optional', active: false, label: 'Radio apagada', url: 'https://x/r' })
+    await setDoc(doc(db, 'runs/rh'), {
+      gameId: 'hotel', alias: '', endedAt: null,
+      startedAt: Timestamp.fromMillis(Date.now() - 100 * 60 * 1000), // ya pasaron los 90 min
+    })
+  })
+}
+test('playAfterTime: pasado el límite se sigue registrando y se puede cerrar con la solución', async () => {
+  await seedLargo()
+  await assertSucceeds(setDoc(doc(player(), 'runs/rh/scans/p'), { scannedAt: serverTimestamp() }))
+  const db = player()
+  const b = writeBatch(db)
+  b.set(doc(db, 'runs/rh/scans/sol'), { scannedAt: serverTimestamp() })
+  b.update(doc(db, 'runs/rh'), { endedAt: serverTimestamp(), endStepId: 'sol' })
+  await assertSucceeds(b.commit())
+})
+test('playAfterTime: a las 12 h la partida se da por abandonada', async () => {
+  await seedLargo()
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    await setDoc(doc(ctx.firestore(), 'runs/rh'), {
+      gameId: 'hotel', alias: '', endedAt: null, startedAt: Timestamp.fromMillis(Date.now() - 13 * 3600 * 1000),
+    })
+  })
+  await assertFails(setDoc(doc(player(), 'runs/rh/scans/p'), { scannedAt: serverTimestamp() }))
+})
+test('sin playAfterTime el límite sigue mandando', async () => {
+  await seedLargo({ playAfterTime: false })
+  await assertFails(setDoc(doc(player(), 'runs/rh/scans/p'), { scannedAt: serverTimestamp() }))
+})
+test('escaneo suelto: se crea solo para un paso opcional activo de un juego activo, con la hora del servidor y sin más campos', async () => {
+  await seedLargo()
+  const suelto = (data) => setDoc(doc(collection(player(), 'escaneosSueltos')), data)
+  await assertSucceeds(suelto({ gameId: 'hotel', stepId: 'radio', scannedAt: serverTimestamp() }))
+  await assertFails(suelto({ gameId: 'hotel', stepId: 'p', scannedAt: serverTimestamp() })) // no es opcional
+  await assertFails(suelto({ gameId: 'hotel', stepId: 'radioOff', scannedAt: serverTimestamp() })) // paso desactivado
+  await assertFails(suelto({ gameId: 'hotel', stepId: 'radio', scannedAt: Timestamp.fromMillis(1) })) // hora falsa
+  await assertFails(suelto({ gameId: 'hotel', stepId: 'radio', scannedAt: serverTimestamp(), alias: 'x' })) // campo de más
+  await assertFails(suelto({ gameId: 'g2', stepId: 'radio', scannedAt: serverTimestamp() })) // juego desactivado
+})
+test('escaneo suelto: nadie salvo el administrador lo lee, lo cambia o lo borra', async () => {
+  await seedLargo()
+  await assertSucceeds(setDoc(doc(player(), 'escaneosSueltos/e1'), { gameId: 'hotel', stepId: 'radio', scannedAt: serverTimestamp() }))
+  await assertFails(getDoc(doc(player(), 'escaneosSueltos/e1')))
+  await assertFails(getDocs(collection(other(), 'escaneosSueltos')))
+  await assertFails(deleteDoc(doc(player(), 'escaneosSueltos/e1')))
+  await assertFails(updateDoc(doc(player(), 'escaneosSueltos/e1'), { stepId: 'p' }))
+  assert.equal((await assertSucceeds(getDocs(collection(admin(), 'escaneosSueltos')))).size, 1)
+  await assertSucceeds(deleteDoc(doc(admin(), 'escaneosSueltos/e1')))
+})

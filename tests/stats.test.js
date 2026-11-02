@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { buildRows, filterRows, median, perDay, stuckBySteps, summaryByGame, weeklyMedian } from '../src/lib/stats.js'
+import { buildRows, filterRows, median, optionalUsage, perDay, stuckBySteps, summaryByGame, weeklyMedian } from '../src/lib/stats.js'
 import { runsCsv, scansCsv } from '../src/lib/csv.js'
 
 const MIN = 60000
@@ -147,4 +147,19 @@ test('CSV de escaneos: una fila por escaneo con segundos desde el inicio', () =>
   assert.equal(lines.length, 1 + 3 + 3 + 2 + 2)
   const sol = lines.find((l) => l.includes('Rojo') && l.includes('Solución'))
   assert.ok(sol.endsWith(';3000;50:00'))
+})
+
+
+test('piezas opcionales: cuenta partidas que las usaron más los escaneos sueltos, y las opcionales no cuentan como atasco', () => {
+  const steps = { g: [...stepsByGame.g, { id: 'radio', label: 'Radio', type: 'optional', active: true, order: 5 }, { id: 'viejo', label: 'Viejo', type: 'optional', active: false }] }
+  const rs = [
+    { id: 'A', gameId: 'g', alias: 'a', startedAt: T0, endedAt: at(50) },
+    { id: 'B', gameId: 'g', alias: 'b', startedAt: T0, endedAt: at(60) },
+  ]
+  const scansByRun = { A: [scan('v0', 0), scan('radio', 10), scan('sol', 50)], B: [scan('v0', 0), scan('sol', 60)] }
+  const rows = buildRows({ runs: rs, scansByRun, stepsByGame: steps, games, now: NOW })
+  const uso = optionalUsage({ rows, stepsByGame: steps, games, looseScans: [{ gameId: 'g', stepId: 'radio' }, { gameId: 'g', stepId: 'radio' }] })
+  assert.equal(uso.length, 1, 'el paso desactivado no sale')
+  assert.deepEqual({ inRuns: uso[0].inRuns, loose: uso[0].loose, total: uso[0].total }, { inRuns: 1, loose: 2, total: 3 })
+  assert.ok(!stuckBySteps(rows).some((e) => e.type === 'optional'))
 })

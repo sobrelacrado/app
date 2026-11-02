@@ -23,6 +23,19 @@ service cloud.firestore {
       }
     }
 
+    // ---------- Escaneos sueltos (QR de pasos "opcional" escaneados sin partida empezada) ----------
+    // Solo cuentan visitas: nada que identifique a nadie. Cualquiera puede crear uno; solo el administrador los lee o borra.
+    match /escaneosSueltos/{id} {
+      allow read, update, delete: if isAdmin();
+      allow create: if request.resource.data.keys().hasOnly(['gameId', 'stepId', 'scannedAt'])
+        && request.resource.data.gameId is string
+        && request.resource.data.stepId is string
+        && request.resource.data.scannedAt == request.time
+        && get(/databases/$(database)/documents/games/$(request.resource.data.gameId)).data.active == true
+        && get(/databases/$(database)/documents/games/$(request.resource.data.gameId)/steps/$(request.resource.data.stepId)).data.active == true
+        && get(/databases/$(database)/documents/games/$(request.resource.data.gameId)/steps/$(request.resource.data.stepId)).data.type == 'optional';
+    }
+
     // ---------- Partidas ----------
     match /runs/{runId} {
       // Se puede leer una partida solo conociendo su id (lo guarda el móvil del grupo).
@@ -57,7 +70,8 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/games/$(request.resource.data.gameId)).data.active == true
       );
 
-      // El jugador solo puede cerrar su partida, una vez, escaneando una solución.
+      // El jugador solo puede cerrar su partida, una vez, escaneando una solución. Si el juego tiene `playAfterTime`, se puede seguir jugando
+      // pasado el límite (hasta 12 h desde el inicio); si no, solo dentro del límite.
       function isRunClosing(runId) {
         let run = resource.data;
         let game = get(/databases/$(database)/documents/games/$(run.gameId)).data;
@@ -65,7 +79,7 @@ service cloud.firestore {
         return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['endedAt', 'endStepId'])
           && run.endedAt == null
           && request.resource.data.endedAt == request.time
-          && request.time < run.startedAt + duration.value(game.timeLimitMinutes, 'm')
+          && request.time < run.startedAt + duration.value(game.get('playAfterTime', false) == true ? 720 : game.timeLimitMinutes, 'm')
           && endStep is string
           && get(/databases/$(database)/documents/games/$(run.gameId)/steps/$(endStep)).data.type == 'solution'
           && existsAfter(/databases/$(database)/documents/runs/$(runId)/scans/$(endStep));
@@ -94,7 +108,7 @@ service cloud.firestore {
           let step = get(/databases/$(database)/documents/games/$(run.gameId)/steps/$(stepId)).data;
           return run.endedAt == null
             && step.active == true
-            && request.time < run.startedAt + duration.value(game.timeLimitMinutes, 'm');
+            && request.time < run.startedAt + duration.value(game.get('playAfterTime', false) == true ? 720 : game.timeLimitMinutes, 'm');
         }
       }
     }
@@ -184,7 +198,7 @@ service cloud.firestore {
           && d.hint is bool
           && d.tries is int && d.tries >= 0 && d.tries <= 999
           && d.ms is int && d.ms >= 0 && d.ms <= 86400000
-          && d.type in ['cesar', 'morse', 'teclado', 'cerradura', 'anagrama', 'acrostico', 'simbolos', 'espejo', 'criptico', 'vigenere', 'golpes', 'interrogatorio', 'escitala', 'sopa', 'numeros', 'rebus', 'sinvocales', 'intruso', 'coartada', 'binario', 'circuito']
+          && d.type in ['cesar', 'morse', 'teclado', 'cerradura', 'anagrama', 'acrostico', 'simbolos', 'espejo', 'criptico', 'vigenere', 'golpes', 'interrogatorio', 'escitala', 'sopa', 'numeros', 'rebus', 'sinvocales', 'intruso', 'coartada', 'binario', 'circuito', 'conexiones']
           && d.level is int && d.level >= 1 && d.level <= 5
           && (!('n' in d) || d.n is int)
           && (!('late' in d) || d.late is bool)
@@ -209,7 +223,7 @@ service cloud.firestore {
           && d.hint is bool
           && d.tries is int && d.tries >= 0 && d.tries <= 999
           && d.ms is int && d.ms >= 0 && d.ms <= 86400000
-          && d.type in ['cesar', 'morse', 'teclado', 'cerradura', 'anagrama', 'acrostico', 'simbolos', 'espejo', 'criptico', 'vigenere', 'golpes', 'interrogatorio', 'escitala', 'sopa', 'numeros', 'rebus', 'sinvocales', 'intruso', 'coartada', 'binario', 'circuito']
+          && d.type in ['cesar', 'morse', 'teclado', 'cerradura', 'anagrama', 'acrostico', 'simbolos', 'espejo', 'criptico', 'vigenere', 'golpes', 'interrogatorio', 'escitala', 'sopa', 'numeros', 'rebus', 'sinvocales', 'intruso', 'coartada', 'binario', 'circuito', 'conexiones']
           && d.level is int && d.level >= 1 && d.level <= 5
           && d.at == request.time;
       }

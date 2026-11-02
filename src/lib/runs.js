@@ -6,7 +6,8 @@ export const IDLE_MIN = 20 // minutos sin escanear para marcar "sin actividad"
 export function runStatus(run, game, now) {
   const limit = (game?.timeLimitMinutes ?? DEFAULT_LIMIT_MIN) * 60000
   const start = run.startedAt.getTime()
-  if (run.endedAt) return { kind: 'finished', ms: run.endedAt.getTime() - start }
+  // `late`: terminada pasado el límite (solo posible en juegos que dejan seguir jugando tras agotar el tiempo).
+  if (run.endedAt) return { kind: 'finished', ms: run.endedAt.getTime() - start, late: run.endedAt.getTime() - start > limit }
   if (now >= start + limit) return { kind: 'timeout', ms: limit }
   return { kind: 'open', ms: now - start }
 }

@@ -2,7 +2,7 @@ import { collection, doc, getCountFromServer, getDocs, query, serverTimestamp, w
 import { THEMES, DEFAULT_THEME } from './themes.js'
 
 export const PUBLIC_BASE = 'https://app-sobre-lacrado.web.app'
-export const STEP_TYPES = ['start', 'normal', 'clue', 'solution']
+export const STEP_TYPES = ['start', 'normal', 'clue', 'solution', 'optional']
 export const scanUrl = (gameId, stepId) => `${PUBLIC_BASE}/s/${gameId}/${stepId}`
 
 // Plantilla de los expedientes: V0 inicio, V1-V6 grabaciones, Pistas y Solución.
@@ -49,6 +49,26 @@ export const CASE3 = {
     { label: 'ESCENA · Placas del agente', type: 'normal', url: `${C3}/escenas/caja14/` },
     { label: 'Pistas', type: 'clue', url: `${C3}/docs/caja14/pistas.pdf` },
     { label: 'Solución', type: 'solution', url: `${C3}/docs/caja14/solucion.pdf` },
+  ],
+}
+
+// Caso 5 (La noche del Miramar): 90 minutos con cuenta atrás visible, alias obligatorio y se puede seguir jugando al agotarse el tiempo.
+// Las direcciones de inicio, acusación y tutorial se rellenan al crear el juego (las pone Alberto); el final secreto vive en el puente.
+export const HOTEL = {
+  name: 'Caso 5 · La noche del Miramar',
+  timeLimitMinutes: 90,
+  requireAlias: true,
+  playAfterTime: true,
+  countdown: true,
+  steps: [
+    { label: 'Inicio · instrucciones', type: 'start', url: '' },
+    { label: 'La acusación · 06:00', type: 'solution', url: '' },
+    { label: 'Final secreto', type: 'normal', url: `${C3}/c5/final/` },
+    { label: 'Tutorial de los sobres', type: 'normal', url: '' },
+    { label: 'Centralita (página interactiva)', type: 'optional', url: `${C3}/c5/centralita/` },
+    { label: 'Radio (página interactiva)', type: 'optional', url: `${C3}/c5/radio/` },
+    { label: 'Plano (página interactiva)', type: 'optional', url: `${C3}/c5/plano/` },
+    { label: 'Audios (página interactiva)', type: 'optional', url: `${C3}/c5/audios/` },
   ],
 }
 
@@ -115,14 +135,15 @@ export async function deleteGame(db, gameId) {
   const runs = await getDocs(query(collection(db, 'runs'), where('gameId', '==', gameId)))
   for (const r of runs.docs) await deleteRun(db, r.id)
   const steps = await getDocs(collection(db, 'games', gameId, 'steps'))
-  await deleteRefs(db, [...steps.docs.map((d) => d.ref), doc(db, 'games', gameId)])
+  const loose = await getDocs(query(collection(db, 'escaneosSueltos'), where('gameId', '==', gameId)))
+  await deleteRefs(db, [...loose.docs.map((d) => d.ref), ...steps.docs.map((d) => d.ref), doc(db, 'games', gameId)])
   return runs.size
 }
 
 // Guarda juego y pasos en un solo lote. Nunca borra: los pasos guardados se desactivan, no se eliminan.
-export async function saveGame(db, { id, isNew, name, timeLimitMinutes, active, theme, steps }) {
+export async function saveGame(db, { id, isNew, name, timeLimitMinutes, active, theme, steps, requireAlias = false, playAfterTime = false, countdown = false }) {
   const batch = writeBatch(db)
-  const game = { name: name.trim(), active, timeLimitMinutes: Number(timeLimitMinutes), theme: THEMES.includes(theme) ? theme : DEFAULT_THEME }
+  const game = { name: name.trim(), active, timeLimitMinutes: Number(timeLimitMinutes), theme: THEMES.includes(theme) ? theme : DEFAULT_THEME, requireAlias: !!requireAlias, playAfterTime: !!playAfterTime, countdown: !!countdown }
   batch.set(doc(db, 'games', id), isNew ? { ...game, createdAt: serverTimestamp() } : game, { merge: true })
   steps.forEach((s, i) => {
     batch.set(

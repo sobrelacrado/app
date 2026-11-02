@@ -22,9 +22,14 @@ async function loadStats(days) {
     .filter((r) => r.startedAt)
   const games = Object.fromEntries(gamesSnap.docs.map((d) => [d.id, d.data()]))
 
+  // Escaneos sueltos de las páginas opcionales (sin partida empezada), del mismo periodo.
+  const looseConstraints = days ? [where('scannedAt', '>=', Timestamp.fromMillis(Date.now() - days * DAY_MS))] : []
+  const looseSnap = await getDocs(query(collection(db, 'escaneosSueltos'), ...looseConstraints)).catch(() => null)
+  const looseScans = looseSnap ? looseSnap.docs.map((d) => ({ gameId: d.data().gameId, stepId: d.data().stepId })) : []
+
   const stepsByGame = {}
   await Promise.all(
-    [...new Set(runs.map((r) => r.gameId))].map(async (gameId) => {
+    [...new Set([...runs.map((r) => r.gameId), ...looseScans.map((l) => l.gameId)])].map(async (gameId) => {
       const snap = await getDocs(collection(db, 'games', gameId, 'steps'))
       stepsByGame[gameId] = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
     }),
@@ -41,7 +46,7 @@ async function loadStats(days) {
       }),
     )
   }
-  return { runs, games, stepsByGame, scansByRun, truncated: runs.length >= MAX_RUNS }
+  return { runs, games, stepsByGame, scansByRun, looseScans, truncated: runs.length >= MAX_RUNS }
 }
 
 export function useStatsData(days) {
