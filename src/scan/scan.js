@@ -122,6 +122,15 @@ function timeScreen({ game, run, title, next }) {
   if (!ended) setInterval(paint, 1000)
 }
 
+// Página `/s/<juego>/tutorial`: tutorial animado de plegado de los sobres. No lee ni escribe la partida (el reloj sigue como esté).
+async function tutorialRoute() {
+  const gameSnap = await getDoc(doc(db, 'games', gameId))
+  if (!gameSnap.exists()) return show(`<p>${t.invalid}</p>`)
+  applyTheme(gameSnap.data())
+  const { tutorialPage } = await import('./tutorial.js')
+  tutorialPage({ app, brand: BRAND, t })
+}
+
 // Página `/s/<juego>/tiempo`: la cuenta atrás sola, para abrirla cuando se quiera.
 async function timePage() {
   const gameSnap = await getDoc(doc(db, 'games', gameId))
@@ -136,6 +145,7 @@ async function timePage() {
 async function main() {
   if (!gameId || !stepId) return show(`<p>${t.invalid}</p>`)
   if (stepId === 'tiempo') return timePage()
+  if (stepId === 'tutorial') return tutorialRoute()
   const [gameSnap, stepSnap] = await Promise.all([
     getDoc(doc(db, 'games', gameId)),
     getDoc(doc(db, 'games', gameId, 'steps', stepId)),
