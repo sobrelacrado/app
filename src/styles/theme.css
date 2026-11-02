@@ -598,7 +598,7 @@ body.tema-hotel main .scan-opciones small { font-weight: 600; }
 body.tema-hotel main.hoja.cuenta { background: transparent; border: 0; box-shadow: none; overflow: visible; }
 body.tema-hotel main.hoja.cuenta .logo { margin: 0 0 12px; border-radius: 999px; }
 body.tema-hotel main.hoja.cuenta h1, body.tema-hotel main.hoja.cuenta p { color: inherit; }
-body.tema-hotel main.hoja.cuenta a.boton.cuenta-boton { background: #fff1e2; color: #14213d; border: 3px solid #14213d; }
+body.tema-hotel main.hoja.cuenta a.boton.cuenta-boton { background: #fff1e2; color: #14213d; border: 3px solid #14213d; display: block; box-sizing: border-box; width: 100%; margin-top: 14px; padding: 13px 16px; border-radius: 28px; text-align: center; line-height: 1.25; }
 .sl-sello {
   width: 74px; height: 74px; margin: 10px auto 4px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
   background: radial-gradient(circle at 35% 30%, #e0424e, #b3202a 65%); border: 3px solid #7d1119; color: #fff1e2;
