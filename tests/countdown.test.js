@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { alertsDue, fmtClock, remainingSec, sky } from '../src/lib/countdown.js'
+import { alertsDue, bonusPoints, fmtClock, remainingSec, sky } from '../src/lib/countdown.js'
 import { runStatus } from '../src/lib/runs.js'
 
 const T0 = Date.UTC(2026, 10, 2, 20, 0, 0)
@@ -57,4 +57,15 @@ test('escena: al empezar la luna está alta y el sol escondido; al final la luna
   assert.ok(fin.sun.y < 70, 'sol a la vista')
   assert.equal(fin.stars, 0)
   assert.ok(scene(0.5).moon.y > ini.moon.y, 'la luna va bajando')
+})
+
+test('bonus de tiempo: 1 punto por cada 3 minutos completos que sobran, máximo 10', () => {
+  assert.equal(bonusPoints(0), 0)
+  assert.equal(bonusPoints(-50), 0)
+  assert.equal(bonusPoints(179), 0)
+  assert.equal(bonusPoints(180), 1)
+  assert.equal(bonusPoints(3600), 10)
+  assert.equal(bonusPoints(1799), 9)
+  assert.equal(bonusPoints(540), 3)
+  assert.equal(bonusPoints(5400), 10)
 })

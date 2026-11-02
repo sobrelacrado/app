@@ -1,7 +1,7 @@
 import { addDoc, doc, getDoc, setDoc, collection, serverTimestamp, writeBatch } from 'firebase/firestore'
 import { db } from '../firebase.js'
 import { t } from './texts.js'
-import { alertsDue, fmtClock, remainingSec, scene, sky } from '../lib/countdown.js'
+import { alertsDue, bonusPoints, fmtClock, remainingSec, scene, sky } from '../lib/countdown.js'
 import '../styles/theme.css'
 import './scan.css'
 
@@ -19,7 +19,11 @@ function applyTheme(game) {
   if (game.theme !== 'hotel') return
   document.body.classList.add('tema-hotel')
   BRAND = 'GRAN HOTEL MIRAMAR'
+  HOTEL = true
 }
+// En el hotel el inicio y la acusación solo enseñan el reloj y el resumen: sin botón que lleve a otra página.
+let HOTEL = false
+const nextOf = (step) => (HOTEL ? null : step.url)
 
 function show(html) { app.className = 'hoja'; app.removeAttribute('style'); document.body.removeAttribute('style'); app.innerHTML = `<div class="logo">${BRAND}</div>${html}` }
 function esc(s) { return String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`) }
@@ -77,6 +81,7 @@ function timeScreen({ game, run, title, next }) {
     <p class="cuenta-equipo">${esc(run.alias || '')}</p>
     <div class="cuenta-reloj" id="cr" role="timer"></div>
     <p class="cuenta-texto" id="ct"></p>
+    <p class="cuenta-bonus" id="cb" hidden></p>
     <p class="cuenta-aviso" id="ca" role="status" aria-live="polite" hidden></p>
     ${ended && BRAND !== 'SOBRE LACRADO' ? '<div class="sl-sello" aria-hidden="true">SL</div>' : ''}
     ${next ? `<a class="boton cuenta-boton" href="${esc(next)}">${t.continue}</a>` : ''}`
@@ -100,6 +105,10 @@ function timeScreen({ game, run, title, next }) {
     if (ended) {
       $('cr').textContent = fmtClock(Math.floor((run.endedMs - run.startMs) / 1000))
       $('ct').textContent = rem >= 0 ? `${t.usedTime} · ${t.leftOver} ${fmtClock(rem)}` : `${t.usedTime} · ${t.lateEnd}`
+      if (HOTEL) {
+        $('cb').hidden = false
+        $('cb').textContent = `${t.bonusMsg(bonusPoints(rem))} ${t.bonusNote}`
+      }
       return
     }
     $('cr').classList.toggle('amanece', rem <= 0)
@@ -202,7 +211,7 @@ async function main() {
   // Cuenta atrás: al escanear la solución (la acusación) se enseña el tiempo con el reloj parado.
   if (countdown && step.type === 'solution') {
     const done = await readRun(runId)
-    if (done) return timeScreen({ game, run: done, title: t.finishedTitle, next: step.url })
+    if (done) return timeScreen({ game, run: done, title: t.finishedTitle, next: nextOf(step) })
   }
   redirect(step.url)
 }
@@ -245,7 +254,7 @@ function askContinue({ game, step, runId }) {
   document.getElementById('keep').onclick = async () => {
     const info = await readRun(runId)
     if (!info) return askAlias(game, step)
-    timeScreen({ game, run: info, title: info.endedMs ? t.finishedTitle : t.started, next: step.url })
+    timeScreen({ game, run: info, title: info.endedMs ? t.finishedTitle : t.started, next: nextOf(step) })
   }
   document.getElementById('fresh').onclick = () => {
     show(`
@@ -285,7 +294,7 @@ function askAlias(game, step) {
     } catch { /* se sigue igualmente */ }
     if (game.countdown === true) {
       const info = await readRun(newRef.id).catch(() => null)
-      if (info) return timeScreen({ game, run: info, title: t.started, next: step.url })
+      if (info) return timeScreen({ game, run: info, title: t.started, next: nextOf(step) })
     }
     started(step)
   }

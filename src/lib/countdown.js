@@ -52,3 +52,6 @@ export function scene(progress) {
     stars: Math.round(clamp01(1 - p * 1.5) * 100) / 100,
   }
 }
+
+// Bonus de tiempo del caso 5: +1 punto por cada 3 minutos completos que sobran, máximo 10 (solo cuenta en los finales 1 y 2: eso lo aplican los jugadores en papel).
+export const bonusPoints = (remainingSec) => (remainingSec > 0 ? Math.min(10, Math.floor(remainingSec / 180)) : 0)
