@@ -42,11 +42,11 @@ main.hoja.tutorial .tut-tab.activa { background: #1b7f8e; color: #fff1e2; }
 .tut-svg .ins path { fill: none; stroke: #14213d; stroke-width: .7; }
 .tut-svg .frente rect { fill: #fff1e2; stroke: #14213d; stroke-width: 1.6; }
 .tut-svg .frente text { fill: #14213d; font-family: 'Bowlby One', sans-serif; }
-.tut-svg .gh { font-size: 5.5px; letter-spacing: 1.5px; }
-.tut-svg .t1 { font-size: 15px; }
-.tut-svg .t2 { font-size: 22px; fill: #f2685b !important; }
-.tut-svg .sello { fill: #b3202a; stroke: #7d1119; stroke-width: 1.4; }
-.tut-svg .frente .sl { fill: #fff1e2; font-size: 11px; }
+.tut-svg .gh { font-size: 5px; letter-spacing: 1.2px; }
+.tut-svg .t1 { font-size: 11px; }
+.tut-svg .t2 { font-size: 17px; fill: #f2685b !important; }
+.tut-svg .lacre { fill: #b3202a; stroke: #7d1119; stroke-width: 1.4; }
+.tut-svg .frente .sl { fill: #fff1e2; font-size: 8.5px; }
 .tut-svg .lat, .tut-svg .inf, .tut-svg .tab, .tut-svg .ins { transition: transform .9s ease-in-out, opacity .25s ease-in .7s; }
 .tut-svg .izq { transform-origin: 40px 90px; }
 .tut-svg .der { transform-origin: 160px 90px; }

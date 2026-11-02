@@ -35,10 +35,10 @@ const SOBRE = `
   <g class="ins"><rect x="80" y="2" width="40" height="28" rx="2"/><path d="M85 10h30M85 16h24M85 22h28"/></g>
   <g class="frente">
     <rect x="40" y="52" width="120" height="84" rx="3"/>
-    <text class="gh" x="52" y="70">GRAN HOTEL MIRAMAR</text>
-    <text class="t1" x="52" y="96">Vestíbulo</text>
-    <text class="t2" x="52" y="118">21:30</text>
-    <circle class="sello" cx="138" cy="106" r="14"/><text class="sl" x="138" y="111" text-anchor="middle">SL</text>
+    <text class="gh" x="52" y="68">GRAN HOTEL MIRAMAR</text>
+    <text class="t1" x="52" y="92">Vestíbulo</text>
+    <text class="t2" x="52" y="116">21:30</text>
+    <circle class="lacre" cx="140" cy="114" r="11"/><text class="sl" x="140" y="118" text-anchor="middle">SL</text>
   </g>
   <path class="fold g1" d="M40 52V136M160 52V136"/>
   <path class="fold g2" d="M40 136H160"/>
