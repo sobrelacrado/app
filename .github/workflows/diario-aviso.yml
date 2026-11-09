@@ -3,9 +3,10 @@
 name: Aviso diario
 
 on:
-  schedule:
-    - cron: '0 6 * * *'
-    - cron: '0 7 * * *'
+  # PAUSADO mientras el Diario esta cerrado por mantenimiento. Para reanudar: quitar el # de las 3 lineas siguientes.
+  # schedule:
+  #   - cron: '0 6 * * *'
+  #   - cron: '0 7 * * *'
   workflow_dispatch:
     inputs:
       forzar:
